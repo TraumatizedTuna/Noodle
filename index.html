@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="Assets/reset.css">
+        <link rel="stylesheet" href="Assets/style.css">
+        <link rel="stylesheet" href="Assets/nodeTransform.css">
+        <link rel="stylesheet" href="Assets/ports.css">
+        <link rel="stylesheet" href="Assets/menus.css">
+        
+
+        
+        <!-- import external stuff -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+        
+        <link href='https://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Raleway:300' rel='stylesheet' type='text/css'>
+        
+        <!-- Local scripts -->
+        <script src="Scripts/htmlElements.js"></script>
+        
+        <script src="Scripts/nodes.js"></script>
+        <script src="Scripts/nodeTransform.js"></script>
+        <script src="Scripts/wires.js"></script>
+        <script src="Scripts/ports.js"></script>
+        
+        <script src="Scripts/events.js"></script>
+        <script src="Scripts/active.js"></script>
+        
+        <script src="Scripts/wireEvents.js"></script>
+        
+        <script src="Scripts/nodeExec.js"></script>
+        
+        <script src="Scripts/menus.js"></script>
+        
+        <script src="Scripts/tools.js"></script>
+        
+    </head>
+    
+    <body>
+        <div class="mainContainer" id="mainCont">
+            <svg id="wireBoard" width="100%"></svg>
+            <div id="nodeCanvas"></div>
+            
+            <a class="hoverSelect">Slack: </a><input type="number" value="5" onchange="updateWireStyle()" id="slack" class="hoverSelect">
+            <a class="hoverSelect">Handle length: </a><input type="number" value="0.5" onchange="updateWireStyle()" id="hanLen" class="hoverSelect">
+            
+            
+        </div>
+        
+        
+        <script>
+            
+            var mainCont = document.getElementById("mainCont");
+            var nodeBoard = document.getElementById("nodeCanvas");
+            var wireBoard = document.getElementById("wireBoard"); //TODO: wireBoard should be auto generated
+
+            
+            //nodeCanv(document.getElementById("nodeCanvas"));
+            var nodeId = 0;
+            var portId = 0;
+            var wireId = 0;  //TODO: BigInt  -  aaaaaa
+            
+            
+            
+            var idForest = {};
+            var wireIds = {};
+            var portIds = {};
+            
+            var addCore = {
+                name: "Add",
+                color: "yellow",
+                inPorts: [
+                    {name: "term0", type: "num", wires: [], value: 2.1},
+                    {name: "term1", type: "num", wires: [], value: 3.14}
+                ],
+                inVals: [0, 0],
+                outPorts: [
+                    {name: "sum", type: "num", wires: []}
+                ],
+                outVals: [0],
+                func: function(node){
+                     node.core.outPorts[0].value = node.core.inPorts[0].value + node.core.inPorts[0].value;
+                }
+            };
+            
+            var valueCore = {
+                name: "Value",
+                color: "blue",
+                inPorts: [],
+                outPorts: [{name: "value", type: "num", wires: [], value: 0}],
+                outVals: [3],
+                func: function(node){
+                    node.core.outPorts[0].value = 3;
+                }
+            }
+            
+            
+            var forest = [
+                addNode(valueCore, ""),
+                addNode(addCore, "")
+            ];
+            
+            var wires = [];
+            
+            addWire(forest[0].core.outPorts[0], forest[1].core.inPorts[0]);
+            
+            
+            /*
+            forest[0].core.outPorts = [{wires: [wires[0]], value: 3}];
+            
+            forest[1].core.inPorts = [{name: "Term", wires: [wires[0]], value: 0}, {name: "Term", wires: [], value: 1}];
+            forest[1].core.outPorts = [{name: "Sum", wires: [], value: 0}];
+            
+            
+            wires[0].node0 = forest[0];
+            wires[0].port0 = forest[0].core.outPorts[0];
+            wires[0].node1 = forest[1];
+            wires[0].port1 = forest[1].core.inPorts[0];
+            
+            
+            setNodeHtml(forest[0]);
+            renderNode(forest[0], nodeBoard);
+            
+            setNodeHtml(forest[1]);
+            renderNode(forest[1], nodeBoard);
+            
+            
+            
+            
+            add2IdForest(forest[0]);
+            add2IdForest(forest[1]);
+            
+            
+            
+            renderWire(wires[0]);
+            */
+            
+            
+            function updateWireStyle(){
+                slack = document.getElementById("slack").value;
+                hanLen = document.getElementById("hanLen").value;
+                updateWire(wires[0])
+            }
+            
+            
+            
+            
+            
+            execNode(forest[0]);
+            
+            
+
+            
+            
+            
+            
+            
+        </script>
+
+        
+        
+    </body>
+</html>

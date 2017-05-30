@@ -1,0 +1,14 @@
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\bin\Debug\Browser.exe.config
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\bin\Debug\Browser.exe
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\bin\Debug\Browser.pdb
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\obj\Debug\Browser.csprojResolveAssemblyReference.cache
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\obj\Debug\MainWindow.g.cs
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\obj\Debug\App.g.cs
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\obj\Debug\Browser_MarkupCompile.cache
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\obj\Debug\Browser_MarkupCompile.lref
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\obj\Debug\MainWindow.baml
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\obj\Debug\Browser.g.resources
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\obj\Debug\Browser.Properties.Resources.resources
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\obj\Debug\Browser.csproj.GenerateResource.Cache
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\obj\Debug\Browser.exe
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\obj\Debug\Browser.pdb
