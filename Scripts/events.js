@@ -101,6 +101,6 @@ window.onkeydown = function(e){
     }
     
     if(e.shiftKey && e.keyCode == 65){ //Shift + A
-        addAirMenu('apa', {x: e.pageX, y: e.pageY});
+        addAirMenu(newNodeMenuContent, {x: e.pageX, y: e.pageY});
     }
 }

@@ -47,7 +47,7 @@ function renderWires(ports){
 
 
 function renderWire(wire){
-    wireBoard.innerHTML += '<path class="wire" id="w' + wireId + '" d="M10 10 C 20 20, 40 20, 50 10" stroke="black" stroke-width="3px" fill="transparent"/>'
+    wireBoard.insertAdjacentHTML('beforeend', '<path class="wire" id="w' + wireId + '" d="M10 10 C 20 20, 40 20, 50 10" stroke="black" stroke-width="3px" fill="transparent"/>');
     wire.id = 'w' + wireId;
     add2WireIds(wire);
     wireId++;

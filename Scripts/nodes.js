@@ -49,7 +49,7 @@ function setNodeHtml(node){
 
 function renderNode(node, container){
     
-    container.innerHTML += node.html; //This appears to be where old attributes disappear, which I guess makes sense
+    container.insertAdjacentHTML('beforeend', node.html);
     
     add2IdForest(node);
     
