@@ -70,6 +70,7 @@ document.onmousemove = function(e){
     /*for(var i = 0; i < selected.tools.length; i++){
         selected.tools[i](e);
     }*/
+    mousePos = {x: e.pageX, y: e.pageY};
     if(active.mousemoveTool != null)
         active.mousemoveTool(e);
 }
@@ -101,6 +102,6 @@ window.onkeydown = function(e){
     }
     
     if(e.shiftKey && e.keyCode == 65){ //Shift + A
-        addAirMenu(newNodeMenuContent, {x: e.pageX, y: e.pageY});
+        addAirMenu(newNodeMenuContent, mousePos);
     }
 }

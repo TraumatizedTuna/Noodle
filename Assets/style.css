@@ -54,6 +54,8 @@ body{
     border-color: aliceblue;
     overflow: visible;
     
+    z-index: 3;
+    
     position: absolute;
     float: left;
     margin: 2px;

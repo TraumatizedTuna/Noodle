@@ -1,5 +1,23 @@
 .airMenu{
-    width: 500px;
-    height: 400px;
-    background-color: aqua;
+    background-color: rgba(0, 26, 31, 0.28);
+    border-radius: 4px;
+    
+    position: absolute;
+    
+    z-index: 3;
+
+}
+
+.menuRow{
+    border-bottom-style: solid;
+    border-width: 1px;
+    border-color: aliceblue;
+    
+    color: #ffffff;
+    
+    cursor: default;
+}
+
+.menuRow:hover{
+    background-color: rgba(231, 244, 255, 0.55);
 }
