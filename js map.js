@@ -11,8 +11,17 @@ nodes.js {
 	addNode(core, label)						//Adds new node, sets it up properly and renders it
 	setNodeHtml(node)							//Gives node proper html code, doesn't render it
 	renderNode(node, container)					//Puts node in container based on node.html
+	disconnectNode(node)						//Cuts all wires connected to node
 	add2IdForest(node)							//Adds node to id list for nodes  - TODO: Rename
 	getNode(nodeEl)								//Gets js node from html node nodeEl
+}
+
+ports.js {
+	portCode(ports, classes, node)
+	addToPortIds(port)
+	getPort(portEl)
+	cutPort(port)								//Cuts all wires connected to port
+	forEachPort(core, func)						//Runs func with each port on core
 }
 
 wires.js {

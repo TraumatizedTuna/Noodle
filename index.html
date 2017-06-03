@@ -46,7 +46,6 @@
             <a class="hoverSelect">Slack: </a><input type="number" value="5" onchange="updateWireStyle()" id="slack" class="hoverSelect">
             <a class="hoverSelect">Handle length: </a><input type="number" value="0.5" onchange="updateWireStyle()" id="hanLen" class="hoverSelect">
             
-            
         </div>
         
         
@@ -72,12 +71,12 @@
                 name: "Add",
                 color: "yellow",
                 inPorts: [
-                    {name: "term0", type: "num", wires: [], value: 2.1},
-                    {name: "term1", type: "num", wires: [], value: 3.14}
+                    {name: "term0", type: "num", isIn: true, wires: [], value: 2.1},
+                    {name: "term1", type: "num", isIn: true, wires: [], value: 3.14}
                 ],
                 inVals: [0, 0],
                 outPorts: [
-                    {name: "sum", type: "num", wires: []}
+                    {name: "sum", type: "num", isIn: false, wires: []}
                 ],
                 outVals: [0],
                 func: function(node){
@@ -89,7 +88,7 @@
                 name: "Value",
                 color: "blue",
                 inPorts: [],
-                outPorts: [{name: "value", type: "num", wires: [], value: 0}],
+                outPorts: [{name: "value", type: "num", isIn: false, wires: [], value: 0}],
                 outVals: [3],
                 func: function(node){
                     node.core.outPorts[0].value = 3;

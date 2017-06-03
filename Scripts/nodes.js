@@ -63,6 +63,10 @@ function renderNode(node, container){
 }
 
 
+function disconnectNode(node){
+    forEachPort(node.core, cutPort);
+}
+
 
 function add2IdForest(node){
     eval('idForest.' + node.id + '=node;');

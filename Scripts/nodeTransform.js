@@ -17,8 +17,9 @@ var borderSensorFunc = function(){
 
 var nodeClose = function(){
     //TODO: Remove js object
-    var nodeId = this.parentElement.parentElement.parentElement.id;
-    $("#" + nodeId).remove();
+    var nodeEl = getParentNodeEl(this);
+    disconnectNode(getNode(nodeEl));
+    nodeEl.remove();
 }
 
 var topBarFunc = function(e){

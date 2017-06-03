@@ -76,7 +76,7 @@ function updateWire(wire){
 }
 
 function wireBetween(p0, p1, wire){
-    var r = 8; //TODO: Make this work for other socket sizes
+    var r = $('.socket').width() / 2 + parseInt($('.socket').css('borderWidth'), 10); //8; //TODO: Make this work for other socket sizes
     getEl(wire).attributes.d.value = autoBez(p0.x + r, p0.y + r, p1.x + r, p1.y + r, hanLen, slack);
     
 }
@@ -91,8 +91,8 @@ function cutWire(wire){ //Generalize so wires and nodes are removed by same func
 
         wire.port0.wires.splice(wire.p0Ind, 1);
         wire.port1.wires.splice(wire.p1Ind, 1);
-        refreshWirePortInds(wire.port0.wires, "port0");
-        refreshWirePortInds(wire.port1.wires, "port1");
+        refreshWirePortInds(wire.port0.wires, 0);
+        refreshWirePortInds(wire.port1.wires, 1);
 
         wire = undefined;
     }
@@ -105,7 +105,7 @@ function removeWireEl(wireEl){
 
 function refreshWirePortInds(wires, portType){
     for(var i = 0; i < wires.length; i++){
-        eval('wires[i].' + portType + '=i');
+        eval('wires[i].p' + portType + 'ind=i');
     }
 }
 
@@ -134,4 +134,9 @@ function add2WireIds(wire){
 
 function getWire(html){
     return eval('wireIds.' + html.id);
+}
+
+function forEachWire(port, func){
+    for(var i = 0; i < port.wires.length; i++)
+        func(port.wires[i]);
 }

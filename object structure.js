@@ -12,4 +12,4 @@ nodeCore {
 	function func
 }
 
-port { string name, string type, var value, node parentNode, wire[] wires, string id }
+port { string name, string type, bool isIn, var value, node parentNode, wire[] wires, string id }
