@@ -34,6 +34,7 @@ function connectWire(p0, p1, wire){
     }
     
     updateWire(wire);
+    execNode(wire.port0.parentNode);
 }
 
 function renderWires(ports){
@@ -47,10 +48,10 @@ function renderWires(ports){
 
 
 function renderWire(wire){
+    var wireId = firstFreeId(freeIds.wire);
     wireBoard.insertAdjacentHTML('beforeend', '<path class="wire" id="w' + wireId + '" d="M10 10 C 20 20, 40 20, 50 10" stroke="black" stroke-width="3px" fill="transparent"/>');
     wire.id = 'w' + wireId;
     add2WireIds(wire);
-    wireId++;
 }
 
 function updateWires(ports){
@@ -93,8 +94,9 @@ function cutWire(wire){ //Generalize so wires and nodes are removed by same func
         wire.port1.wires.splice(wire.p1Ind, 1);
         refreshWirePortInds(wire.port0.wires, 0);
         refreshWirePortInds(wire.port1.wires, 1);
-
-        wire = undefined;
+        
+        freeId(freeIds.wire, parseInt(wire.id.substr(1), 10), true);
+//        wire = undefined;
     }
 }
 

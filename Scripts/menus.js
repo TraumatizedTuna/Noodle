@@ -1,5 +1,5 @@
 function addAirMenu(content, position){
-    var cont = document.getElementById("mainCont");
+    var cont = document.getElementById("mainCont0");
     cont.insertAdjacentHTML('beforeend', '<div class="menu airMenu" id="airMenu"></div>');
     var menuEl = document.getElementById("airMenu");
     menuEl.style.left = position.x - 8 + "px";
@@ -20,12 +20,12 @@ function addAirMenu(content, position){
 var newNodeMenuContent = [
     {
         label: "add", func: function(){
-            addNode(addCore, "");
+            addNode(addCore, "", mousePos);
         }
     },
     {
         label: "value", func: function(){
-            addNode(valueCore, "");
+            addNode(valueCore, "", mousePos);
         }
     }
 ];

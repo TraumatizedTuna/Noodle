@@ -1,0 +1,8 @@
+.textInput{
+    position: absolute;
+    
+    padding: 3px;
+    min-height: 8px;
+    
+    background-color: #cc9aff;
+}

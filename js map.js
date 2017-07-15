@@ -16,12 +16,19 @@ nodes.js {
 	getNode(nodeEl)								//Gets js node from html node nodeEl
 }
 
+nodeTransform.js {
+	borderSensorFunc()			//Makes sure that a node will be scaled on mousemove
+	nodeClose()					//Deletes a node
+	topBarFunc(e)				//Makes sure that a node will be moved on mousemove
+}
+
 ports.js {
 	portCode(ports, classes, node)
 	addToPortIds(port)
 	getPort(portEl)
 	cutPort(port)								//Cuts all wires connected to port
 	forEachPort(core, func)						//Runs func with each port on core
+	renderPortVal(port)
 }
 
 wires.js {
@@ -38,6 +45,38 @@ wires.js {
 	autoBez(x0, y0, x1, y1, ctrlDist, slack)	//Returns svg code for wire curve
 	add2WireIds(wire)							//Adds wire id to id index of wires
 	getWire(html)								//Returns js object of wire html
+}
+
+wireEvents.js {
+	setSockEv()									//Makes sure that a new wire will be pulled on mousemove and connected or deleted on mouseup
+}
+
+menus.js {
+	addAirMenu(content, position)				//Renders menu with one element of content per row. Menu disappears on mouseleave
+}
+
+events.js {
+	toolBox {									//Contains tool functions for mousemove events
+		scale(e)									//Scales active.nodeEl
+		move(e)										//Moves active.nodeEl
+		pullWire(e)									//Pulls new wire from active.socketEl
+	}
+	mousemove {									//Contains functions for the mousemove event
+		setActiveTool								//Sets active mousemove tool
+	}
+	document.onmousemove(e)						//Updates mousePos and runs active.mousemoveTool unless it's null
+	defMouseup()								//Default mouseup function, clears mousemove tool function
+	window.onkeydown(e)							//Takes care of hotkeys
+}
+
+active.js {
+	active										//Contains active elements and objects
+	selected									//Contains selected elements and objects
+	hovered										//Contains hovered elements and objects
+	mousePos									//Current mouse position, updated in every mousemove event. Note that it's set to {x: 0, y: 0} before first mousemove
+	freeIds										//Contains lists of free ids for different kinds of elements
+	firstFreeId(ids)							//Removes lowest available id from ids and returns it
+	freeId(ids, id, safe)						//Adjusts ids so id will be included
 }
 
 nodeExec.js {

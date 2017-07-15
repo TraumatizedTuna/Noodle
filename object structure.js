@@ -9,7 +9,10 @@ nodeCore {
 	array inVals,
 	port[] outPorts,
 	array outVals,
-	function func
+	function func,
+	object data,
+	function[] resetFuncs,
+	string htmlContent
 }
 
-port { string name, string type, bool isIn, var value, node parentNode, wire[] wires, string id }
+port { string name, string type, bool isIn, var value, string valId, node parentNode, wire[] wires, string id }

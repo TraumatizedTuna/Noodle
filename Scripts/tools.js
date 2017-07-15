@@ -28,3 +28,16 @@ function getParentNodeEl(el){
     while(!hasClass(el = el.parentElement, 'node'));
     return el;
 }
+
+function getFile(path){
+    var fileData;
+    $.ajax({
+        async: false,
+        type: 'GET',
+        url: path,
+        success: function(data) {
+            fileData = data;
+        }
+    });
+    return fileData;
+}

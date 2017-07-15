@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="Assets/nodeTransform.css">
         <link rel="stylesheet" href="Assets/ports.css">
         <link rel="stylesheet" href="Assets/menus.css">
+        <link rel="stylesheet" href="Assets/input.css">
         
 
         
@@ -19,6 +20,8 @@
         
         <!-- Local scripts -->
         <script src="Scripts/htmlElements.js"></script>
+        
+        <script src="Scripts/input.js"></script>
         
         <script src="Scripts/nodes.js"></script>
         <script src="Scripts/nodeTransform.js"></script>
@@ -39,27 +42,26 @@
     </head>
     
     <body>
-        <div class="mainContainer" id="mainCont">
-            <svg id="wireBoard" width="100%"></svg>
+        <div class="mainContainer" id="mainCont0">
+            <svg id="wireBoard0" width="100%"></svg>
             <div id="nodeCanvas"></div>
             
             <a class="hoverSelect">Slack: </a><input type="number" value="5" onchange="updateWireStyle()" id="slack" class="hoverSelect">
             <a class="hoverSelect">Handle length: </a><input type="number" value="0.5" onchange="updateWireStyle()" id="hanLen" class="hoverSelect">
+            
+            <div class="dataBox textDb" id="db0"><input type="text" class="textDbInput"> </div>
             
         </div>
         
         
         <script>
             
-            var mainCont = document.getElementById("mainCont");
+            var mainCont = document.getElementById("mainCont0");
             var nodeBoard = document.getElementById("nodeCanvas");
-            var wireBoard = document.getElementById("wireBoard"); //TODO: wireBoard should be auto generated
+            var wireBoard = document.getElementById("wireBoard0"); //TODO: wireBoard should be auto generated
 
             
             //nodeCanv(document.getElementById("nodeCanvas"));
-            var nodeId = 0;
-            var portId = 0;
-            var wireId = 0;  //TODO: BigInt  -  aaaaaa
             
             
             
@@ -81,7 +83,8 @@
                 outVals: [0],
                 func: function(node){
                      node.core.outPorts[0].value = node.core.inPorts[0].value + node.core.inPorts[0].value;
-                }
+                },
+                resetFuncs: []
             };
             
             var valueCore = {
@@ -92,13 +95,56 @@
                 outVals: [3],
                 func: function(node){
                     node.core.outPorts[0].value = 3;
-                }
+                },
+                resetFuncs: [],
+                htmlContent: getFile('Html/valueNode.html')
+            }
+            
+            var textCore = {
+                name: "Text",
+                color: "Grey",
+                inPorts: [],
+                outPorts: [{name: "value", type: "text", isIn: false, wires: [], value: ''}],
+                func: function(node){
+                    var core = node.core;
+                    //core.data.text = core.inPorts[0].value;
+                    core.outPorts[0].value = core.data.text;
+                },
+                data: {
+                    text: "",
+                    updateOutPort: function(core){
+                        core.outPorts[0].value = core.data.text;
+                    }
+                },
+                resetFuncs: [function(){
+                   $('.textDbInput').change(defTextDbInputChange); 
+                }],
+                htmlContent: '<input type="text" class="textDbInput">'
+            }
+            
+            var evalCore = {
+                name: "Eval",
+                color: "Green",
+                inPorts: [{name: 'code', type: "text", isIn: true, wires: [], value: ''}],
+                outPorts: [],
+                func: function(node){
+                    var core = node.core;
+                    eval(core.inPorts[0].value);
+                },
+                data: {
+                    code: '',
+                },
+                resetFuncs: [],
+                htmlContent: ''
             }
             
             
+            
             var forest = [
-                addNode(valueCore, ""),
-                addNode(addCore, "")
+                addNode(valueCore, '', {x: 0, y: 0}),
+                addNode(addCore, '', {x: 500, y: 0}),
+                addNode(textCore, '', {x: 40, y: 200}),
+                addNode(evalCore, '', {x: 100, y: 500})
             ];
             
             var wires = [];
@@ -159,6 +205,6 @@
         </script>
 
         
-        
     </body>
+    
 </html>

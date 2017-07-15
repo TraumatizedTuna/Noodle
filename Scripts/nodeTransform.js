@@ -18,7 +18,13 @@ var borderSensorFunc = function(){
 var nodeClose = function(){
     //TODO: Remove js object
     var nodeEl = getParentNodeEl(this);
-    disconnectNode(getNode(nodeEl));
+    //disconnectNode(getNode(nodeEl));
+    
+    var node = getNode(nodeEl);
+    forEachPort(node.core, forgetPort);
+    freeId(freeIds.node, parseInt(node.id.substr(1), 10), true);
+    forest.splice(forest.indexOf(node), 1);
+    
     nodeEl.remove();
 }
 

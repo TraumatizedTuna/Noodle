@@ -39,7 +39,10 @@
 
 .cornerSensor:hover{
     border-color: rgba(255, 255, 255, 0.4);
-    
+}
+
+.noScale .cornerSensor{
+    visibility: hidden;
 }
 
 .bsl{ cursor: ew-resize; }
