@@ -8,9 +8,8 @@ tools.js {
 
 nodes.js {
 	nodeCanv(el)								//Sets up el to be node canvas  - TODO: Allow multiple node canvases and find a better name
-	addNode(core, label)						//Adds new node, sets it up properly and renders it
-	setNodeHtml(node)							//Gives node proper html code, doesn't render it
-	renderNode(node, container)					//Puts node in container based on node.html
+	addNode(core, label, pos)						//Adds new node, sets it up properly and renders it
+	renderNode(node, container)					//Renders node in container
 	disconnectNode(node)						//Cuts all wires connected to node
 	add2IdForest(node)							//Adds node to id list for nodes  - TODO: Rename
 	getNode(nodeEl)								//Gets js node from html node nodeEl
@@ -41,7 +40,7 @@ wires.js {
 	updateWire(wire)							//Updates wire html using wireBetween
 	wireBetween(p0, p1, wire)					//Updates wire html so it goes between positions p0 and p1
 	cutWire(wire)								//Does its best to convince you that wire never existed
-	removeWireEl(wireEl)						//Helps cutWire remove html element
+	removeWireEl(wire)							//Helps cutWire remove html element
 	autoBez(x0, y0, x1, y1, ctrlDist, slack)	//Returns svg code for wire curve
 	add2WireIds(wire)							//Adds wire id to id index of wires
 	getWire(html)								//Returns js object of wire html

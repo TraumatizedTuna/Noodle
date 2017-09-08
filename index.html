@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        
+
         <meta charset="utf-8">
         <link rel="stylesheet" href="Assets/reset.css">
         <link rel="stylesheet" href="Assets/style.css">
@@ -9,202 +9,235 @@
         <link rel="stylesheet" href="Assets/ports.css">
         <link rel="stylesheet" href="Assets/menus.css">
         <link rel="stylesheet" href="Assets/input.css">
-        
 
-        
+
+
         <!-- import external stuff -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-        
+
         <link href='https://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
         <link href='https://fonts.googleapis.com/css?family=Raleway:300' rel='stylesheet' type='text/css'>
-        
+
         <!-- Local scripts -->
+        <script src="Scripts/noodle.js"></script>
+
         <script src="Scripts/htmlElements.js"></script>
-        
+
         <script src="Scripts/input.js"></script>
-        
-        <script src="Scripts/nodes.js"></script>
-        <script src="Scripts/nodeTransform.js"></script>
-        <script src="Scripts/wires.js"></script>
-        <script src="Scripts/ports.js"></script>
-        
+
         <script src="Scripts/events.js"></script>
         <script src="Scripts/active.js"></script>
         
-        <script src="Scripts/wireEvents.js"></script>
-        
-        <script src="Scripts/nodeExec.js"></script>
-        
-        <script src="Scripts/menus.js"></script>
-        
-        <script src="Scripts/tools.js"></script>
-        
+        <script src="Scripts/coodle.js"></script>
+
     </head>
-    
+
     <body>
         <div class="mainContainer" id="mainCont0">
             <svg id="wireBoard0" width="100%"></svg>
             <div id="nodeCanvas"></div>
-            
+
             <a class="hoverSelect">Slack: </a><input type="number" value="5" onchange="updateWireStyle()" id="slack" class="hoverSelect">
             <a class="hoverSelect">Handle length: </a><input type="number" value="0.5" onchange="updateWireStyle()" id="hanLen" class="hoverSelect">
-            
+
             <div class="dataBox textDb" id="db0"><input type="text" class="textDbInput"> </div>
-            
+
         </div>
-        
-        
+
+
         <script>
-            
+
             var mainCont = document.getElementById("mainCont0");
             var nodeBoard = document.getElementById("nodeCanvas");
             var wireBoard = document.getElementById("wireBoard0"); //TODO: wireBoard should be auto generated
 
-            
+
             //nodeCanv(document.getElementById("nodeCanvas"));
-            
-            
-            
-            var idForest = {};
-            var wireIds = {};
-            var portIds = {};
-            
-            var addCore = {
-                name: "Add",
-                color: "yellow",
-                inPorts: [
-                    {name: "term0", type: "num", isIn: true, wires: [], value: 2.1},
-                    {name: "term1", type: "num", isIn: true, wires: [], value: 3.14}
-                ],
-                inVals: [0, 0],
-                outPorts: [
-                    {name: "sum", type: "num", isIn: false, wires: []}
-                ],
-                outVals: [0],
-                func: function(node){
-                     node.core.outPorts[0].value = node.core.inPorts[0].value + node.core.inPorts[0].value;
+
+
+
+
+            var coreList = [
+
+                {
+                    name: "Add",
+                    color: "yellow",
+                    inPorts: [
+                        {type: 'port', name: "term0", portType: "num", isIn: true, wires: [], value: 2.1},
+                        {type: 'port', name: "term1", portType: "num", isIn: true, wires: [], value: 3.14}
+                    ],
+                    inVals: [0, 0],
+                    outPorts: [
+                        {type: 'port', name: "sum", portType: "num", isIn: false, wires: []}
+                    ],
+                    outVals: [0],
+                    func: function(node){
+                        node.core.outPorts[0].value = node.core.inPorts[0].value + node.core.inPorts[0].value;
+                    },
+                    resetFuncs: []
                 },
-                resetFuncs: []
-            };
-            
-            var valueCore = {
-                name: "Value",
-                color: "blue",
-                inPorts: [],
-                outPorts: [{name: "value", type: "num", isIn: false, wires: [], value: 0}],
-                outVals: [3],
-                func: function(node){
-                    node.core.outPorts[0].value = 3;
+
+                {
+                    name: "Value",
+                    color: "blue",
+                    inPorts: [],
+                    outPorts: [{type: 'port', name: "value", portType: "num", isIn: false, wires: [], value: 0}],
+                    outVals: [3],
+                    func: function(node){
+                        node.core.outPorts[0].value = 3;
+                    },
+                    resetFuncs: [],
+                    htmlContent: noodle.misc.files.getFile('Html/valueNode.html')
                 },
-                resetFuncs: [],
-                htmlContent: getFile('Html/valueNode.html')
-            }
-            
-            var textCore = {
-                name: "Text",
-                color: "Grey",
-                inPorts: [],
-                outPorts: [{name: "value", type: "text", isIn: false, wires: [], value: ''}],
-                func: function(node){
-                    var core = node.core;
-                    //core.data.text = core.inPorts[0].value;
-                    core.outPorts[0].value = core.data.text;
-                },
-                data: {
-                    text: "",
-                    updateOutPort: function(core){
+
+                {
+                    name: "Text",
+                    color: "Grey",
+                    inPorts: [],
+                    outPorts: [{type: 'port', name: "value", portType: "text", isIn: false, wires: [], value: ''}],
+                    func: function(node){
+                        var core = node.core;
+                        //core.data.text = core.inPorts[0].value;
                         core.outPorts[0].value = core.data.text;
-                    }
+                    },
+                    data: {
+                        text: "",
+                        updateOutPort: function(core){
+                            core.outPorts[0].value = core.data.text;
+                        }
+                    },
+                    resetFuncs: [function(){
+                        $('.textDbInput').change(defTextDbInputChange); 
+                    }],
+                    htmlContent: '<input type="text" class="textDbInput">'
                 },
-                resetFuncs: [function(){
-                   $('.textDbInput').change(defTextDbInputChange); 
-                }],
-                htmlContent: '<input type="text" class="textDbInput">'
-            }
-            
-            var evalCore = {
-                name: "Eval",
-                color: "Green",
-                inPorts: [{name: 'code', type: "text", isIn: true, wires: [], value: ''}],
-                outPorts: [],
-                func: function(node){
-                    var core = node.core;
-                    eval(core.inPorts[0].value);
+
+                {
+                    name: "Eval",
+                    color: "Green",
+                    inPorts: [{type: 'port', name: 'code', portType: "text", isIn: true, wires: [], value: ''}],
+                    outPorts: [],
+                    func: function(node){
+                        var core = node.core;
+                        eval(core.inPorts[0].value);
+                    },
+                    data: {
+                        code: '',
+                    },
+                    resetFuncs: [],
+                    htmlContent: ''
                 },
-                data: {
-                    code: '',
+
+                {
+                    name: "BrowserCode",
+                    color: "Grey",
+                    inPorts: [],
+                    outPorts: [{type: 'port', name: 'function', portType: "js", isIn: false, wires: [], value: null}],
+                    func: function(node){
+                        var core = node.core;
+
+                    },
+                    data: {
+                        code: null,
+                    },
+                    resetFuncs: [
+                        function(node){
+                            noodle.tools.html.firstByClass(node.html, 'btn').onclick = function(){
+                                var nodeEl = noodle.tools.html.getParentNodeEl(this);
+                                var node = noodle.node.getObj(nodeEl);
+                                
+                                node.core.data.code = noodle.userFunc;
+                            }
+                        }
+                    ],
+                    htmlContent: '<button class="btn">Get code</button>'
                 },
-                resetFuncs: [],
-                htmlContent: ''
-            }
-            
-            
-            
-            var forest = [
-                addNode(valueCore, '', {x: 0, y: 0}),
-                addNode(addCore, '', {x: 500, y: 0}),
-                addNode(textCore, '', {x: 40, y: 200}),
-                addNode(evalCore, '', {x: 100, y: 500})
+
+
+
+                {
+                    name: "Dummy",
+                    color: "White",
+                    inPorts: [{type: 'port', name: 'in', portType: "text", isIn: true, wires: [], value: ''}],
+                    outPorts: [{type: 'port', name: "out", portType: "text", isIn: false, wires: [], value: ''}],
+                    func: function(node){
+                        var core = node.core;
+                        if(core.inPorts[core.inPorts.length-1].wires.length != 0){ //If last port is connected
+                            noodle.ports.addToPorts(node, core.inPorts, {name: 'in', portType: "text", isIn: true, wires: [], value: ''});
+                        }
+                        if(core.outPorts[core.outPorts.length-1].wires.length != 0){
+                            noodle.ports.addToPorts(node, core.outPorts, {name: 'out', portType: "text", isIn: false, wires: [], value: ''});
+                        }
+                        
+                    },
+                    data: {
+                        code: '',
+                    },
+                    resetFuncs: [function(node){
+                        node.core.func(node);
+                    }],
+                    htmlContent: '<input type="text" class="textDbInput" style="width: 100%">'
+                }
             ];
-            
+            var coreObj = noodle.misc.arrays.listToObj(coreList);
+
+            var startTime = 0;
+            var calcTime = 0;
+            startTime = new Date().getTime();
+            var forest = [
+                noodle.node.add(coreObj.Value, '', {x: 0, y: 0}, noodle),
+                noodle.node.add(coreObj.Add, '', {x: 500, y: 0}, noodle),
+                noodle.node.add(coreObj.Text, '', {x: 40, y: 200}, noodle),
+                noodle.node.add(coreObj.Eval, '', {x: 100, y: 500}, noodle)
+            ];
+            calcTime = new Date().getTime() - startTime;
+            console.log('Render time: ' + calcTime);
+
             var wires = [];
-            
-            addWire(forest[0].core.outPorts[0], forest[1].core.inPorts[0]);
-            
-            
+
+            noodle.port.connect(forest[0].core.outPorts[0], forest[1].core.inPorts[0]);
+
+
             /*
             forest[0].core.outPorts = [{wires: [wires[0]], value: 3}];
-            
+
             forest[1].core.inPorts = [{name: "Term", wires: [wires[0]], value: 0}, {name: "Term", wires: [], value: 1}];
             forest[1].core.outPorts = [{name: "Sum", wires: [], value: 0}];
-            
-            
+
+
             wires[0].node0 = forest[0];
             wires[0].port0 = forest[0].core.outPorts[0];
             wires[0].node1 = forest[1];
             wires[0].port1 = forest[1].core.inPorts[0];
-            
-            
+
+
             setNodeHtml(forest[0]);
             renderNode(forest[0], nodeBoard);
-            
+
             setNodeHtml(forest[1]);
             renderNode(forest[1], nodeBoard);
-            
-            
-            
-            
+
+
+
+
             add2IdForest(forest[0]);
             add2IdForest(forest[1]);
-            
-            
-            
+
+
+
             renderWire(wires[0]);
             */
-            
-            
-            function updateWireStyle(){
-                slack = document.getElementById("slack").value;
-                hanLen = document.getElementById("hanLen").value;
-                updateWire(wires[0])
-            }
-            
-            
-            
-            
-            
-            execNode(forest[0]);
-            
-            
 
-            
-            
-            
-            
-            
+
+            function updateWireStyle(){
+                noodle.wires.slack = document.getElementById("slack").value;
+                noodle.wires.hanLen = document.getElementById("hanLen").value;
+                noodle.wires.update(wires[0]);
+            }
+
         </script>
 
-        
+
     </body>
-    
+
 </html>

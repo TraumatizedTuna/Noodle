@@ -10,7 +10,7 @@
 
 var defTextDbInputChange = function(e){
     var tbEl = e.target;
-    var node = getNode(getParentNodeEl(tbEl));
+    var node = noodle.nodes.getObj(noodle.tools.html.getParentNodeEl(tbEl));
     node.core.data.text = tbEl.value;
-    execNode(node);
+    noodle.nodes.execute(node);
 }
