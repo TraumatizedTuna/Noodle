@@ -20,7 +20,7 @@ toolBox = {
                 oldWidth = 25;
             }
             
-            var width = oldWidth - 100*(e.pageX - 1*trimEnd(active.nodeEl.style.left, 2))/parRect.width;
+            var width = oldWidth - 100*(e.pageX - 1*noodle.misc.string.trimEnd(active.nodeEl.style.left, 2))/parRect.width;
             
             active.nodeEl.style.width = width + '%';
             active.nodeEl.style.left = e.pageX + 'px';
@@ -30,15 +30,15 @@ toolBox = {
             var height = 100 * (e.pageY - nodeRect.top) / parRect.width;
             active.nodeEl.style.height = height + 'vw';
         }
-        noodle.ports.updateWires(noodle.nodes.getObj(active.nodeEl).core.inPorts);
-        noodle.ports.updateWires(noodle.nodes.getObj(active.nodeEl).core.outPorts);
+        noodle.port.updateWires(noodle.node.getObj(active.nodeEl, noodle).core.inPorts);
+        noodle.port.updateWires(noodle.node.getObj(active.nodeEl, noodle).core.outPorts);
     },
     move: function(e){
         active.nodeEl.style.left = e.pageX + noodle.graphics.transformable.offsetX + "px";
         active.nodeEl.style.top = e.pageY + noodle.graphics.transformable.offsetY + "px";
         //TODO: Update wires
-        noodle.ports.updateWires(noodle.nodes.getObj(active.nodeEl).core.inPorts);
-        noodle.ports.updateWires(noodle.nodes.getObj(active.nodeEl).core.outPorts);
+        noodle.port.updateWires(noodle.node.getObj(active.nodeEl, noodle).core.inPorts);
+        noodle.port.updateWires(noodle.node.getObj(active.nodeEl, noodle).core.outPorts);
     },
     pullWire: function(e){
         var sockEl = active.socketEl;
@@ -46,11 +46,11 @@ toolBox = {
         var p0 = { x: e.pageX, y: e.pageY};
         var p1 = noodle.misc.html.getElPos(sockEl, 1);
         
-        if(noodle.misc.html.hasClass(sockEl, "input")){
-            noodle.wires.wireBetween(p0, p1, active.pullWire);
+        if(!noodle.misc.html.hasClass(sockEl, "input")){
+            [p0, p1] = [p1, p0];
         }
-        else
-            noodle.wires.wireBetween(p1, p0, active.pullWire);
+        
+        noodle.wire.wireBetween(p0, p1, active.pullWire);
     }
 };
 
@@ -89,9 +89,9 @@ window.onkeydown = function(e){
         //setActiveTool(toolBox.cut)
         mainCont.style.cursor = "crosshair";
         
-        $('.wire').mouseover(function(e){
+        $('.wire').unbind().mouseover(function(e){
             if(e.which == 1)
-                noodle.wires.cut(noodle.wires.getObj(e.target));
+                noodle.wire.cut(noodle.wire.getObj(e.target, noodle));
         });
         
         window.onkeyup = function(e){
@@ -108,7 +108,7 @@ window.onkeydown = function(e){
             var core = coreList[i];
             newNodeMenuContent.push({
                 label: core.name,
-                func: eval('var f = function(){\nvar core = coreList[' + i + '];\nnoodle.node.add(core, core.name, mousePos);\n}; f;') //TODO: This feels like a really dirty way to generate a function
+                func: eval('var f = function(){\nvar core = coreList[' + i + '];\nnoodle.node.add(core, core.name, mousePos, noodle);\n}; f;') //TODO: This feels like a really dirty way to generate a function
             });
         }
         noodle.ui.menus.addAirMenu(newNodeMenuContent, mousePos);

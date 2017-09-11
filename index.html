@@ -142,8 +142,8 @@
                     },
                     resetFuncs: [
                         function(node){
-                            noodle.tools.html.firstByClass(node.html, 'btn').onclick = function(){
-                                var nodeEl = noodle.tools.html.getParentNodeEl(this);
+                            noodle.misc.html.firstByClass(node.html, 'btn').onclick = function(){
+                                var nodeEl = noodle.misc.html.getParentNodeEl(this);
                                 var node = noodle.node.getObj(nodeEl);
                                 
                                 node.core.data.code = noodle.userFunc;
@@ -163,10 +163,10 @@
                     func: function(node){
                         var core = node.core;
                         if(core.inPorts[core.inPorts.length-1].wires.length != 0){ //If last port is connected
-                            noodle.ports.addToPorts(node, core.inPorts, {name: 'in', portType: "text", isIn: true, wires: [], value: ''});
+                            noodle.port.addToPorts(node, core.inPorts, {type: 'port', name: 'in', portType: "text", isIn: true, wires: [], value: ''});
                         }
                         if(core.outPorts[core.outPorts.length-1].wires.length != 0){
-                            noodle.ports.addToPorts(node, core.outPorts, {name: 'out', portType: "text", isIn: false, wires: [], value: ''});
+                            noodle.port.addToPorts(node, core.outPorts, {type: 'port', name: 'out', portType: "text", isIn: false, wires: [], value: ''});
                         }
                         
                     },
@@ -230,9 +230,9 @@
 
 
             function updateWireStyle(){
-                noodle.wires.slack = document.getElementById("slack").value;
-                noodle.wires.hanLen = document.getElementById("hanLen").value;
-                noodle.wires.update(wires[0]);
+                noodle.wire.slack = document.getElementById("slack").value;
+                noodle.wire.hanLen = document.getElementById("hanLen").value;
+                noodle.wire.update(wires[0]);
             }
 
         </script>

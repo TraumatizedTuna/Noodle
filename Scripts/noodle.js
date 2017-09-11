@@ -3,7 +3,7 @@ var noodle = {
         //Data{
 
         //Set to true to render nodes in parallell. Causes issues if a wire is trying to connect to unfinished node
-        async: true,
+        async: false,
 
         objsById: {},
         //}
@@ -34,17 +34,17 @@ var noodle = {
                 noodle: noodle,
                 rendered: false
             };
-            
-            core.parNode = core.parent = node;
-            if(core.noodle == undefined)
-                core.noodle = noodle;
-            noodle.node.forEachPort(core, function(port, core){
-               if(port.noodle == undefined)
-                   port.noodle = core.noodle;
+
+            node.core.parNode = node.core.parent = node;
+            if(node.core.noodle == undefined)
+                node.core.noodle = noodle;
+            noodle.node.forEachPort(node.core, function(port, core){
+                if(port.noodle == undefined)
+                    port.noodle = core.noodle;
                 port.parNode = core.parNode;
             });
-            
-            
+
+
             return node;
         },
 
@@ -195,6 +195,10 @@ var noodle = {
 
         //Functions{
         addToPorts: function(node, ports, port){
+            if(port.noodle == undefined)
+                port.noodle = node.noodle;
+            port.type = 'port';
+
             ports.push(port);
             port.noodle.port.render(node, port);
             port.parNode = node;
@@ -426,8 +430,8 @@ var noodle = {
         },
 
         //Returns js object of wire element
-        getObj: function(wireEl){
-            return wire.noodle.wire.objsById[wireEl.id];
+        getObj: function(wireEl, noodle){
+            return noodle.wire.objsById[wireEl.id];
         }
         //}
     },
@@ -569,7 +573,7 @@ var noodle = {
             port:[0],
             wire: [0]
         },
-        
+
         add(obj){
             var t = obj.noodle[obj.type];
             t.objsById[obj.id] = obj;
@@ -672,7 +676,7 @@ var noodle = {
                 return el;
             }
         },
-        strings: {
+        string: {
             //Removes amount chars at end of str
             trimEnd: function(str, amount){
                 return str.substr(0, str.length - amount);
