@@ -27,7 +27,7 @@
 
         <script src="Scripts/events.js"></script>
         <script src="Scripts/active.js"></script>
-        
+
         <script src="Scripts/coodle.js"></script>
 
     </head>
@@ -46,7 +46,7 @@
 
 
         <script>
-
+            //{
             var mainCont = document.getElementById("mainCont0");
             var nodeBoard = document.getElementById("nodeCanvas");
             var wireBoard = document.getElementById("wireBoard0"); //TODO: wireBoard should be auto generated
@@ -54,6 +54,21 @@
 
             //nodeCanv(document.getElementById("nodeCanvas"));
 
+
+            var obj = {
+                a: 3, b: [1, [1, 2, "apa"], { p: 1, q: 'a' }], c: { x: 1, y: [7, 5], z: "apa" }
+            };
+            obj.d = obj;
+            obj.b[2].r = obj;
+
+            var flat = noodle.misc.obj.flatList(noodle, obj);
+            
+            var clone = noodle.misc.obj.clone(noodle, obj);
+            
+            var obj1 = {a: 3};
+            obj1.b = obj1;
+            
+            var clone1 = noodle.misc.obj.clone(noodle, obj1);
 
 
 
@@ -63,15 +78,15 @@
                     name: "Add",
                     color: "yellow",
                     inPorts: [
-                        {type: 'port', name: "term0", portType: "num", isIn: true, wires: [], value: 2.1},
-                        {type: 'port', name: "term1", portType: "num", isIn: true, wires: [], value: 3.14}
+                        noodle.port.newExpr(noodle, 'term0', 'num', true),
+                        noodle.port.newExpr(noodle, 'term1', 'num', true)
                     ],
                     inVals: [0, 0],
                     outPorts: [
-                        {type: 'port', name: "sum", portType: "num", isIn: false, wires: []}
+                        noodle.port.newExpr(noodle, 'sum', 'num', false)
                     ],
                     outVals: [0],
-                    func: function(node){
+                    func(node){
                         node.core.outPorts[0].value = node.core.inPorts[0].value + node.core.inPorts[0].value;
                     },
                     resetFuncs: []
@@ -81,9 +96,11 @@
                     name: "Value",
                     color: "blue",
                     inPorts: [],
-                    outPorts: [{type: 'port', name: "value", portType: "num", isIn: false, wires: [], value: 0}],
+                    outPorts: [
+                        noodle.port.newExpr(noodle, 'value', 'num', false)
+                    ],
                     outVals: [3],
-                    func: function(node){
+                    func(node){
                         node.core.outPorts[0].value = 3;
                     },
                     resetFuncs: [],
@@ -94,15 +111,17 @@
                     name: "Text",
                     color: "Grey",
                     inPorts: [],
-                    outPorts: [{type: 'port', name: "value", portType: "text", isIn: false, wires: [], value: ''}],
-                    func: function(node){
+                    outPorts: [
+                        noodle.port.newExpr(noodle, 'value', 'text', false)
+                    ],
+                    func(node){
                         var core = node.core;
                         //core.data.text = core.inPorts[0].value;
                         core.outPorts[0].value = core.data.text;
                     },
                     data: {
                         text: "",
-                        updateOutPort: function(core){
+                        updateOutPort(core){
                             core.outPorts[0].value = core.data.text;
                         }
                     },
@@ -115,9 +134,11 @@
                 {
                     name: "Eval",
                     color: "Green",
-                    inPorts: [{type: 'port', name: 'code', portType: "text", isIn: true, wires: [], value: ''}],
+                    inPorts: [
+                        noodle.port.newExpr(noodle, 'code', 'text', true)
+                    ],
                     outPorts: [],
-                    func: function(node){
+                    func(node){
                         var core = node.core;
                         eval(core.inPorts[0].value);
                     },
@@ -132,8 +153,10 @@
                     name: "BrowserCode",
                     color: "Grey",
                     inPorts: [],
-                    outPorts: [{type: 'port', name: 'function', portType: "js", isIn: false, wires: [], value: null}],
-                    func: function(node){
+                    outPorts: [
+                        noodle.port.newExpr(noodle, 'function', 'js', false)
+                    ],
+                    func(node){
                         var core = node.core;
 
                     },
@@ -145,7 +168,7 @@
                             noodle.misc.html.firstByClass(node.html, 'btn').onclick = function(){
                                 var nodeEl = noodle.misc.html.getParentNodeEl(this);
                                 var node = noodle.node.getObj(nodeEl);
-                                
+
                                 node.core.data.code = noodle.userFunc;
                             }
                         }
@@ -158,17 +181,21 @@
                 {
                     name: "Dummy",
                     color: "White",
-                    inPorts: [{type: 'port', name: 'in', portType: "text", isIn: true, wires: [], value: ''}],
-                    outPorts: [{type: 'port', name: "out", portType: "text", isIn: false, wires: [], value: ''}],
-                    func: function(node){
+                    inPorts: [
+                        noodle.port.newExpr(noodle, 'in', 'text', true)
+                    ],
+                    outPorts: [
+                        noodle.port.newExpr(noodle, 'out', 'text', false)
+                    ],
+                    func(node){
                         var core = node.core;
                         if(core.inPorts[core.inPorts.length-1].wires.length != 0){ //If last port is connected
-                            noodle.port.addToPorts(node, core.inPorts, {type: 'port', name: 'in', portType: "text", isIn: true, wires: [], value: ''});
+                            noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'in', 'text', true));
                         }
                         if(core.outPorts[core.outPorts.length-1].wires.length != 0){
-                            noodle.port.addToPorts(node, core.outPorts, {type: 'port', name: 'out', portType: "text", isIn: false, wires: [], value: ''});
+                            noodle.port.addToPorts(node, core.outPorts, noodle.port.new(noodle, 'out', 'text', false));
                         }
-                        
+
                     },
                     data: {
                         code: '',
@@ -185,10 +212,10 @@
             var calcTime = 0;
             startTime = new Date().getTime();
             var forest = [
-                noodle.node.add(coreObj.Value, '', {x: 0, y: 0}, noodle),
-                noodle.node.add(coreObj.Add, '', {x: 500, y: 0}, noodle),
-                noodle.node.add(coreObj.Text, '', {x: 40, y: 200}, noodle),
-                noodle.node.add(coreObj.Eval, '', {x: 100, y: 500}, noodle)
+                //noodle.node.add(noodle, coreObj.Value, '', {x: 0, y: 0}),
+                noodle.node.add(noodle, coreObj.Add, '', {x: 500, y: 0}),
+                noodle.node.add(noodle, coreObj.Text, '', {x: 40, y: 200}),
+                noodle.node.add(noodle, coreObj.Eval, '', {x: 100, y: 500})
             ];
             calcTime = new Date().getTime() - startTime;
             console.log('Render time: ' + calcTime);
@@ -234,7 +261,8 @@
                 noodle.wire.hanLen = document.getElementById("hanLen").value;
                 noodle.wire.update(wires[0]);
             }
-
+            
+            //}
         </script>
 
 

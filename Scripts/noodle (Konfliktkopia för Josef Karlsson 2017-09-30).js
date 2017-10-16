@@ -19,157 +19,101 @@ var noodle = {
         //Adds new node, sets it up properly and renders it
         add(noodle, core, label, pos, noodleExp){
             var node = noodle.node.new(noodle, core, label, pos, noodleExp);
-            var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
+            var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp)
             nodeNoodle.node.render(node, nodeBoard);
 
             return node;
         },
         new(noodle, core, label = '', pos = {x: 0, y: 0}, noodleExp = noodle.expr.fromObj(noodle, noodle)){
-            //Properties{
-            var coreClone = {};
-            //try{
-            coreClone = noodle.misc.obj.clone(noodle, core);
-            /*}
-            catch(e){
-                console.log(e.message);
-            }*/
 
             var node = {
                 type: 'node',
                 label: label,
-                core: coreClone,
+                core: $.extend(true, {}, core),
                 default: core,
                 pos: pos,
                 noodleExp: noodleExp,
                 useNoodle: false,
                 rendered: false
             };
-
-
-            var test = noodle.misc.obj.equals(noodle, core, node.core, 200);
-            /*node.core.parent = node.core.parNode = node;
-            node.core.noodleExp = noodle.expr.defaultNoodle(noodle, node.core);*/
-
-            //}
-
-            //Ports{
-            noodle.node.forEachPort(
-                node.core,
-                function(port, core){
-                    port.noodleExp.args[1] = port;
-                }
-            )
-
-            node.core.inPorts = noodle.expr.evalAll(noodle, node.core.inPorts);
+            node.core.inPorts = noodle.expr.evalAll(noodle, node.core.inports);
             node.core.outPorts = noodle.expr.evalAll(noodle, node.core.outPorts);
             /*noodle.node.forEachPort(node.core, function(port, core){
                 port = noodle.expr.eval(noodle, port);
             });*/ //Looks like same thing twice
-            /*
-            for (var i in node.core.inPorts){
-                node.core.inPorts[i].parent = node.core.inPorts;
-            }
-            for (var i in node.core.outPorts){
-                node.core.outPorts[i].parent = node.core.outPorts;
-            }
-            /*
-            node.core.inPorts.noodleExp = noodle.expr.defaultNoodle(noodle, node.core.inPorts);
-            node.core.inPorts.parent = node.core;
 
-            node.core.outPorts.noodleExp = noodle.expr.defaultNoodle(noodle, node.core.outPorts);
-            */
-            //}
+            node.core.parNode = node.core.parent = node;
+            if(node.core.noodle == undefined)
+                node.core.noodle = noodle;
+            noodle.node.forEachPort(node.core, function(port, core){
+                if(port.noodle == undefined)
+                    port.noodle = core.noodle;
+                port.parNode = core.parNode;
+            });
 
-            //node.core.parNode = node.core.parent = node;
-
-            noodle.misc.obj.deepStandardize(noodle, node, node);
 
             return node;
         },
 
-        newExpr(noodle, name, func, inPortExps = [], outPortExps = [], data, resetFuncs, color){
-            return coreExp = noodle.expr.new(
-                noodle, //noodle
-                function (noodle, name, func, inPorts, outPorts, data = {}, resetFuncs = [], color = 'auto') {
-                    return {
-                        name: name,
-                        color: color,
-                        inPorts: inPorts,
-                        outPorts: outPorts,
-                        func: func,
-                        resetFuncs: resetFuncs
-                    }
-                }, //func
-                noodle.expr.allFromObj(noodle, [noodle, name, func]).concat([inPortExps, outPortExps]).concat(noodle.expr.allFromObj(data, resetFuncs, color, label)), //args - Port expressions shouldn't be turned into expressions
-                null, //ans
-                noodle.expr.defaultNoodle(noodle, null) //noodleExp
-                //noodle.expr.fromObj(noodle, noodle) //noodleExp
-            );
-        },
         //Renders node in container
         render(node, container){ //TODO: Noodle
             var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
             var nodeId = nodeNoodle.ids.firstFree(nodeNoodle.ids.freeList.node);
-            var data = '';
-            //TODO: Put all the stuff back into success to allow async
             $.ajax({
                 //ajax options{
-                async: false,//nodeNoodle.node.async,
+                async: nodeNoodle.node.async,
                 type: 'GET',
                 url: 'Html/emptyNode.html',
                 //}
-                success(d){
-                    data = d;
+                success(data){
+
+
+                    //Html text{
+                    //Set color of node
+                    var style = nodeNoodle.graphics.color.style(node.core.color);
+
+                    node.id = 'n' + nodeId;
+                    node.html = '<div class="node" id="n' + nodeId + '"' + style + '>' + data; //Not sure I like .html stuff
+                    node.html += '<div class="nodeContent"></div><br><a style="background-color: rgba(255, 255, 255, 0.5)"> id: ' + node.id + '</a>';
+                    //}
+
+                    //Render node in container{
+                    container.insertAdjacentHTML('beforeend', node.html);
+                    node.html = document.getElementById(node.id);
+
+                    nodeNoodle.ids.add(node);
+                    //}
+
+                    //Set events{
+                    $(".borderSensor").unbind('mousedown').mousedown(nodeNoodle.graphics.transformable.borderSensorFunc); //Ineffective to set mousedown functions for all border sensors every time? Who cares? Will I fix it? Hmm...
+                    //$(".btnClose").mousedown(nodeClose);
+                    nodeNoodle.misc.html.firstByClass(node.html, "btnClose").onmousedown = nodeNoodle.graphics.transformable.close;
+                    nodeNoodle.misc.html.firstByClass(node.html, "btnMaximize").onmousedown = nodeNoodle.graphics.transformable.maximize;
+
+                    nodeNoodle.misc.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
+
+                    nodeNoodle.node.renderPorts(node);
+                    nodeNoodle.node.setSockEv(node);
+                    //}
+
+                    //Add content to node{
+                    var nodeEl = nodeNoodle.misc.html.getEl(node);
+                    if(node.core.htmlContent != undefined){
+                        nodeEl.getElementsByClassName('nodeContent')[0].innerHTML = node.core.htmlContent;
+                    }
+                    nodeEl.style.left = node.pos.x + 'px';
+                    nodeEl.style.top = node.pos.y + 'px';
+                    nodeNoodle.ids.add(node);
+                    //}
+
+                    //Run reset functions of node
+                    for(var i = 0; i < node.core.resetFuncs.length; i++){
+                        node.core.resetFuncs[i](node, nodeEl);
+                    }
+
+                    node.rendered = true;
                 }
             });
-
-
-            //Html text{
-            //Set color of node
-            var style = nodeNoodle.graphics.color.style(node.core.color);
-
-            node.id = 'n' + nodeId;
-            node.html = '<div class="node" id="n' + nodeId + '"' + style + '>' + data; //Not sure I like .html stuff
-            node.html += '<div class="nodeContent"></div><br><a style="background-color: rgba(255, 255, 255, 0.5)"> id: ' + node.id + '</a>';
-            //}
-
-            //Render node in container{
-            container.insertAdjacentHTML('beforeend', node.html);
-            node.html = document.getElementById(node.id);
-
-            nodeNoodle.ids.add(node);
-            //}
-
-            //Set events{
-            $(".borderSensor").unbind('mousedown').mousedown(nodeNoodle.graphics.transformable.borderSensorFunc); //Ineffective to set mousedown functions for all border sensors every time? Who cares? Will I fix it? Hmm...
-            //$(".btnClose").mousedown(nodeClose);
-            nodeNoodle.misc.html.firstByClass(node.html, "btnClose").onmousedown = nodeNoodle.graphics.transformable.close;
-            nodeNoodle.misc.html.firstByClass(node.html, "btnMaximize").onmousedown = nodeNoodle.graphics.transformable.maximize;
-
-            nodeNoodle.misc.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
-
-            nodeNoodle.node.renderPorts(node);
-            nodeNoodle.node.setSockEv(node);
-            //}
-
-            //Add content to node{
-            var nodeEl = nodeNoodle.misc.html.getEl(node);
-            if(node.core.htmlContent != undefined){
-                nodeEl.getElementsByClassName('nodeContent')[0].innerHTML = node.core.htmlContent;
-            }
-            nodeEl.style.left = node.pos.x + 'px';
-            nodeEl.style.top = node.pos.y + 'px';
-            nodeNoodle.ids.add(node);
-            //}
-
-            //Run reset functions of node
-            for(var i = 0; i < node.core.resetFuncs.length; i++){
-                node.core.resetFuncs[i](node, nodeEl);
-            }
-
-            node.rendered = true;
-            //}
-            //});
         },
 
         //Cuts all wires connected to node
@@ -225,11 +169,9 @@ var noodle = {
         setSockEv(node){
             $('.socket').unbind().mousedown(function(e){ //TODO: Only set this event for children of node.html
                 var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
-                var port = nodeNoodle.port.getObj(active.socketEl.parentElement, nodeNoodle);
-                var portNoodle = noodle.expr.eval(noodle, port.noodleExp); //Should we use nodeNoodle rather than noodle here?
-
                 active.socketEl = e.target;
-                active.pullWire = portNoodle.wire.new(portNoodle);
+                var port = nodeNoodle.port.getObj(active.socketEl.parentElement, nodeNoodle);
+                active.pullWire = port.noodle.wire.new(port.noodle);
                 active.pullWire.noodle.wire.render(active.pullWire);
                 toolBox.pullWire(e); //To avoid awkward start
                 mousemove.setActiveTool(toolBox.pullWire);
@@ -265,7 +207,7 @@ var noodle = {
         //Functions{
         new(noodle, name, portType, isIn, wires = [], value = null, noodleExp){
 
-            var port = {type: 'port', name: name, portType: portType, isIn: isIn, wires: [], value: value};
+            var port = {type: 'port', name: name, portType: portType, isIn: true, wires: [], value: value};
 
             noodleExp = noodleExp || noodle.expr.defaultNoodle(noodle, port);
 
@@ -274,15 +216,7 @@ var noodle = {
         },
         //Returnes expression to generate port
         newExpr(noodle, name, type, isIn){
-            var exp = noodle.expr.new(
-                noodle, //noodle
-                noodle.port.new, //function
-                noodle.expr.allFromObj(noodle, [noodle, name, type, isIn]), //args
-                null, //ans
-                noodle.expr.defaultNoodle(noodle, null) //noodleExp
-                //noodle.expr.fromObj(noodle, noodle) //noodleExp
-            );
-            return exp;
+            return noodle.expr.new(noodle, noodle.port.new, noodle.expr.allFromObj(noodle, [noodle, name, type, isIn]), null, noodle.expr.fromObj(noodle, noodle));
         },
         addToPorts(node, ports, port){
             port.noodleExp = port.noodleExp || node.noodleExp;
@@ -296,7 +230,7 @@ var noodle = {
 
         //Renders port in node.html
         render(node, port){
-            var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
+
             //String inOrOut indicates whether port is in or out{
             var inOrOut;
             if(port.isIn){
@@ -308,17 +242,17 @@ var noodle = {
             //}
 
             //Add port to node element
-            node.html.getElementsByClassName(inOrOut + 'Ports')[0].insertAdjacentHTML('beforeend', portNoodle.port.code(port, inOrOut + 'put', node));
+            node.html.getElementsByClassName(inOrOut + 'Ports')[0].insertAdjacentHTML('beforeend', port.noodle.port.code(port, inOrOut + 'put', node));
 
             port.rendered = true;
 
-            portNoodle.port.updateWires([port]);
+            port.noodle.port.updateWires([port]);
         },
 
         //Sets up new wire between p0 and p1 and renders it
         connect(port0, port1){
-            var port0Noodle = noodle.expr.eval(noodle, port0.noodleExp);
-            var wire = port0Noodle.wire.new(port0Noodle); //What?!
+            var port0Noodle = noodle.expr.eval(port0.noodleExp);
+            var wire = port0Noodle.wire.new(port0Noodle.noodle);
             var wireNoodle = noodle.expr.eval(wire.noodleExp);
 
             wireNoodle.wire.connect(port0, port1, wire, noodle);
@@ -327,8 +261,7 @@ var noodle = {
 
         //Generates html code for port
         code(port, classes, node){
-            var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
-            var portId = portNoodle.ids.firstFree(portNoodle.ids.freeList.port);
+            var portId = port.noodle.ids.firstFree(port.noodle.ids.freeList.port);
             var code = '<div class="port ' + classes + '" id="p' + portId + '"><div class="socket num ' + classes + '" id="s' + portId + '"></div> <a class="hoverSelect">' + port.name + '</a>';
 
             //Add value element and finish port code{
@@ -342,7 +275,7 @@ var noodle = {
             //}
 
             port.id = 'p' + portId;
-            portNoodle.ids.add(port);
+            port.noodle.ids.add(port);
 
             return code;
         },
@@ -365,15 +298,13 @@ var noodle = {
 
         //Cuts all wires connected to port
         cut(port){
-            var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
-            portNoodle.port.forEachWire(port, function(wire){ wire.noodle.wire.cut; });
+            port.noodle.port.forEachWire(port, function(wire){ wire.noodle.wire.cut; });
         },
 
         //Makes sure that nothing will try to use port (useful when removing port)
         forget(port){
-            var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
-            portNoodle.port.cut(port);
-            portNoodle.ids.forget(portNoodle.ids.freeList.port, parseInt(port.id.substr(1), 10), true);
+            port.noodle.port.cut(port);
+            port.noodle.ids.forget(port.noodle.ids.freeList.port, parseInt(port.id.substr(1), 10), true);
         },
 
         //Renders all wires of ports
@@ -556,16 +487,7 @@ var noodle = {
         },
         //Returns expression with obj as answer
         fromObj(noodle, obj, noodleExp = noodle.expr.defaultNoodle(noodle, obj)){
-            return noodle.expr.new(
-                noodle, //noodle
-                function(noodle, obj){ //func
-                    return obj;
-                },
-                [],
-                obj, //ans
-                noodleExp, //noodleExp
-                noodle.expr.done //state
-            );
+            return noodle.expr.new(noodle, function(){return obj;}, [], obj, noodleExp, noodle.expr.done);
         },
         allFromObj(noodle, objs, noodleExp){
             for(var i in objs){
@@ -584,7 +506,7 @@ var noodle = {
                 function(noodle, obj){
                     return noodle.expr.eval(noodle, obj.parent.noodleExp);
                 },
-                noodle.expr.allFromObj(noodle, [noodle, obj], innerNoodleExp),
+                [noodle, obj],
                 null,
                 innerNoodleExp,
                 noodle.expr.alwaysReady
@@ -602,11 +524,9 @@ var noodle = {
             return exp.ans;
         },
         evalAll(noodle, exps){
-            var ansList = new exps.constructor;
-            for (var i in exps) {
-                //if (i != 'parent' && i != 'parNode') {
-                ansList[i] = noodle.expr.eval(noodle, exps[i]);
-                //}
+            var ansList = [];
+            for(var i in exps){
+                ansList.push(noodle.expr.eval(noodle, exps[i]));
             }
             return ansList;
         }
@@ -868,173 +788,25 @@ var noodle = {
             }
         },
         obj: {
-
-            newSameType(noodle, obj) {
-                if (obj == null) {
-                    return null;
-                }
-                return new obj.constructor;
-            },
-
-            equals(noodle, obj0, obj1, depth) {
-                if (depth <= 0)
-                    return true;
-                if (typeof obj0 != 'object' || typeof obj1 != 'object' || obj0 == null || obj1 == null){
-                    var eq = obj0 == obj1;
-                    return eq;
-                }
-                if(Object.getOwnPropertyNames(obj0).length != Object.getOwnPropertyNames(obj1).length)
-                    return false;
-
-                depth --;
-                for (var i in obj0){
-                    var eq = (noodle.misc.obj.equals(noodle, obj0[i], obj1[i], depth)); //TODO: Figure out why the following if can't evaluate this stuff itself
-                    if (!eq)
-                        return false;
-                }
-                return true;
-
-            },
-
-            standardize(noodle, obj, parNode){ //TODO: Dynamically figure out parent node
-                if(obj != null && obj != undefined){
-                    if (parNode == undefined){
-                        parNode = obj;
-                        while(parNode.parent != undefined && parNode.type != 'node'){
-                            parNode = parNode.parent;
-                        }
-                    }
-                    obj.parNode = parNode;
-                    if (obj.type == undefined && typeof obj == 'object'){
-                        obj.type = 'obj';
-                    }
-                    for (var i in obj) {
-                        if(typeof obj[i] == 'object' && obj[i] != null && obj[i] != undefined && i != 'parent' && i != 'parNode') {
-                            obj[i].parent = obj;
-                            obj[i].parNode = parNode;
-                        }
-                    }
-                }
-            },
-
-            deepStandardize(noodle, obj, parNode, clone = {}){
-                noodle.misc.obj.clonePlus(
-                    noodle,
-                    obj,
-                    clone,
-                    [],
-                    [],
-                    function(noodle, obj, clone, flatList, flatClone, parNode){
-                        noodle.misc.obj.standardize(noodle, obj, parNode);
-                    },
-                    parNode
-                );
-            },
-
-            //TODO: Generalize flatList and clone to one function that take a function as an argument?
-
-            //Digs up all descendants of obj and adds them as elements in flatList
-            flatList(noodle, obj, flatList = []) {
-                if (typeof obj == 'object') {
-                    for (var i in obj) {
-                        if (flatList.indexOf(obj[i]) == -1) { //If obj[i] hasn't already been found
-                            flatList.push(obj[i]);
-                            //flatList = flatList.concat(
-                            noodle.misc.obj.flatList(noodle, obj[i], flatList);
-                        }
+            flatList(noodle, obj){
+                if(typeof obj == 'object'){
+                    var flatList = [];
+                    for(var i in obj){
+                        flatList = flatList.concat(noodle.misc.obj.flatList(noodle, obj[i]));
                     }
                     return flatList;
                 }
-                return [obj]; //In case obj is a primitive type
-            },
-
-            //Turns clone into a deep clone of obj. flatList and flatClone are optional but should have same length, preferably 0
-            clone(noodle, obj, clone, flatList = [], flatClone = []) {
-                //flatClone.push(clone);
-                if (obj == null || obj == undefined)
-                    return obj;
-
-                if (typeof obj == 'object') {
-                    //If clone is undefined, make it an empty array or object
-                    if (clone == undefined){
-                        if(obj.constructor == Array){
-                            clone = [];
-                        }
-                        else{
-                            clone = {};
-                        }
-                    }
-                    flatList.push(obj);
-                    flatClone.push(clone);
-                    //Go through obj to clone all its properties
-                    for (var i in obj) { 
-                        var flatInd = flatList.indexOf(obj[i]);
-                        //If we've found a new object, add it to flatList and clone it to clone and flatClone
-                        if (flatInd == -1) {
-                            //clone[i] = clone[i] || {};
-                            clone[i] = noodle.misc.obj.clone(noodle, obj[i], clone[i], flatList, flatClone); //This works because flatList gets updated
-                        }
-                        //If we've seen obj[i] before, add the clone of it to clone
-                        else {
-                            clone[i] = flatClone[flatInd];
-                        }
-                    }
-                    return clone;
-                }
                 return obj;
             },
-            clonePlus(noodle, obj, clone, flatList = [], flatClone = [], func = function(){}) {
-                var args = Array.from(arguments);
-                args.splice(5, 1);
-                func.apply(undefined, args);
-
-                //flatClone.push(clone);
-                if (obj == null || obj == undefined)
-                    return obj;
-
-                if (typeof obj == 'object') {
-                    //If clone is undefined, make it an empty array or object
-                    if (clone == undefined){
-                        if(obj.constructor == Array){
-                            clone = [];
-                        }
-                        else{
-                            clone = {};
-                        }
-                    }
-                    flatList.push(obj);
-                    flatClone.push(clone);
-                    //Go through obj to clone all its properties
-                    for (var i in obj) { 
-                        var flatInd = flatList.indexOf(obj[i]);
-                        //If we've found a new object, add it to flatList and clone it to clone and flatClone
-                        if (flatInd == -1) {
-                            //clone[i] = clone[i] || {};
-                            [...args] = arguments;
-                            args[1] = obj[i];
-                            args[2] = clone[i];
-                            clone[i] = noodle.misc.obj.clonePlus.apply(undefined, args); //This works because flatList gets updated
-                        }
-                        //If we've seen obj[i] before, add the clone of it to clone
-                        else {
-                            clone[i] = flatClone[flatInd];
-                        }
-                    }
-                    return clone;
-                }
-                return obj;
-            },
-
-            //Don't think this guy works but you could get a flat clone frome the ordinary clone function   
-            flatClone(noodle, flatList = noodle.misc.obj.flatList(obj), newList = new Array(flatList.length)) { //Kinda stupid to check lists for each recursion?
-                for (var i in flatList) {
+            flatClone(noodle, flatList = noodle.misc.obj.flatList(obj), newList = new Array(flatList.length)){ //Kinda stupid to check lists for each recursion?
+                for(var i in flatList){
                     var obj = flatList[i];
-                    if (typeof obj == 'object') {
+                    if(typeof obj == 'object'){
                         //Go through obj to find its properties in flatList and clone them to newList
-                        for (var j in obj) {
+                        for(var j in obj){
                             var ind = flatList.indexOf(obj[i]);//Find obj[i] in flatList
-                            if (ind != -1) {
-                                if (newList[i] == undefined) {//If this object hasn't been found before
+                            if(ind != -1){
+                                if(newList[i] == undefined){//If this object hasn't been found before
                                     newList[i] = shallowClone(); //TODO
                                 }
                             }
@@ -1052,7 +824,8 @@ var noodle = {
         },
         arrays: {
             //Returns object obj where obj[list[i].name] = list[i] for every int i (No, I didn't forget i < list.length)
-            listToObj(list, obj = {}){
+            listToObj(list){
+                var obj = {};
                 for(var i = 0; i < list.length; i++){
                     var el = list[i];
                     //eval('obj.' + el.name + '=el;'); //TODO: If there's no name, give it a number
@@ -1079,7 +852,7 @@ var noodle = {
     },
 
     //Finds nearest ancestor with useNoodle on and returns its noodle. If none is found, return noodle
-    /*getNoodle(obj, noodle){
+    getNoodle(obj, noodle){
         var anc = obj;
         while(anc != undefined){
             if(anc.useNoodle)
@@ -1087,5 +860,5 @@ var noodle = {
             anc = anc.parent;
         }
         return noodle;
-    }*/
+    }
 }

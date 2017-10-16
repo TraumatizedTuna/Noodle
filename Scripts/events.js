@@ -1,5 +1,5 @@
 toolBox = {
-    scale: function(e){
+    scale(e){
         //TODO: move those two lines to the mousedown event if possible
         var nodeRect = active.nodeEl.getBoundingClientRect();
         var parRect = active.nodeEl.parentElement.getBoundingClientRect();
@@ -33,14 +33,14 @@ toolBox = {
         noodle.port.updateWires(noodle.node.getObj(active.nodeEl, noodle).core.inPorts);
         noodle.port.updateWires(noodle.node.getObj(active.nodeEl, noodle).core.outPorts);
     },
-    move: function(e){
+    move(e){
         active.nodeEl.style.left = e.pageX + noodle.graphics.transformable.offsetX + "px";
         active.nodeEl.style.top = e.pageY + noodle.graphics.transformable.offsetY + "px";
         //TODO: Update wires
         noodle.port.updateWires(noodle.node.getObj(active.nodeEl, noodle).core.inPorts);
         noodle.port.updateWires(noodle.node.getObj(active.nodeEl, noodle).core.outPorts);
     },
-    pullWire: function(e){
+    pullWire(e){
         var sockEl = active.socketEl;
         
         var p0 = { x: e.pageX, y: e.pageY};
@@ -55,13 +55,13 @@ toolBox = {
 };
 
 var mousemove = {
-    setActiveTool: function(tool){
+    setActiveTool(tool){
         active.mousemoveTool = tool;
     }
 };
 
 var keydown = {
-    setActiveTool: function(tool){
+    setActiveTool(tool){
         active.keydownTool = tool;
     }
 }
@@ -108,7 +108,7 @@ window.onkeydown = function(e){
             var core = coreList[i];
             newNodeMenuContent.push({
                 label: core.name,
-                func: eval('var f = function(){\nvar core = coreList[' + i + '];\nnoodle.node.add(core, core.name, mousePos, noodle);\n}; f;') //TODO: This feels like a really dirty way to generate a function
+                func: eval('var f = function(){\nvar core = coreList[' + i + '];\nnoodle.node.add(noodle, core, core.name, mousePos);\n}; f;') //TODO: This feels like a really dirty way to generate a function
             });
         }
         noodle.ui.menus.addAirMenu(newNodeMenuContent, mousePos);
