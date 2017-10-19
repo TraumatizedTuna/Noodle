@@ -62,108 +62,113 @@
             obj.b[2].r = obj;
 
             var flat = noodle.misc.obj.flatList(noodle, obj);
-            
+
             var clone = noodle.misc.obj.clone(noodle, obj);
-            
+
             var obj1 = {a: 3};
             obj1.b = obj1;
-            
+
             var clone1 = noodle.misc.obj.clone(noodle, obj1);
 
 
 
             var coreList = [
 
-                {
-                    name: "Add",
-                    color: "yellow",
-                    inPorts: [
+                noodle.node.newExpr(
+                    noodle, //noodle
+                    'Add', //name
+                    function(node){
+                        node.core.outPorts[0].value = node.core.inPorts[0].value + node.core.inPorts[0].value;
+                    }, //func
+                    [
                         noodle.port.newExpr(noodle, 'term0', 'num', true),
                         noodle.port.newExpr(noodle, 'term1', 'num', true)
-                    ],
-                    inVals: [0, 0],
-                    outPorts: [
+                    ], //inPortExps
+                    [
                         noodle.port.newExpr(noodle, 'sum', 'num', false)
-                    ],
-                    outVals: [0],
-                    func(node){
-                        node.core.outPorts[0].value = node.core.inPorts[0].value + node.core.inPorts[0].value;
-                    },
-                    resetFuncs: []
-                },
-
-                {
-                    name: "Value",
-                    color: "blue",
-                    inPorts: [],
-                    outPorts: [
-                        noodle.port.newExpr(noodle, 'value', 'num', false)
-                    ],
-                    outVals: [3],
-                    func(node){
+                    ], //outPortExps
+                    {}, //data
+                    [], //resetFuncs
+                    'yellow' //color
+                ),
+                noodle.node.newExpr(
+                    noodle, //noodle
+                    'Value', //name
+                    function(node){
                         node.core.outPorts[0].value = 3;
-                    },
-                    resetFuncs: [],
-                    htmlContent: noodle.misc.files.getFile('Html/valueNode.html')
-                },
+                    }, //func
+                    [], //inPortExps
+                    [
+                        noodle.port.newExpr(noodle, 'value', 'num', false)
+                    ], //outPortExps
+                    {}, //data
+                    [], //resetFuncs
+                    'blue', //color
+                    noodle.misc.files.getFile('Html/valueNode.html') //htmlContent
+                ),
 
-                {
-                    name: "Text",
-                    color: "Grey",
-                    inPorts: [],
-                    outPorts: [
-                        noodle.port.newExpr(noodle, 'value', 'text', false)
-                    ],
-                    func(node){
+
+                noodle.node.newExpr(
+                    noodle, //noodle
+                    'Text', //name
+                    function(node){
                         var core = node.core;
                         //core.data.text = core.inPorts[0].value;
                         core.outPorts[0].value = core.data.text;
-                    },
-                    data: {
+                    }, //func
+                    [], //inPortExps
+                    [
+                        noodle.port.newExpr(noodle, 'value', 'text', false)
+                    ], //outPortExps
+                    {
                         text: "",
                         updateOutPort(core){
                             core.outPorts[0].value = core.data.text;
                         }
-                    },
-                    resetFuncs: [function(){
-                        $('.textDbInput').change(defTextDbInputChange); 
-                    }],
-                    htmlContent: '<input type="text" class="textDbInput">'
-                },
+                    }, //data
+                    [
+                        function(){
+                            $('.textDbInput').change(defTextDbInputChange); 
+                        }
+                    ], //resetFuncs
+                    'grey', //color
+                    '<input type="text" class="textDbInput">'
+                ),
 
-                {
-                    name: "Eval",
-                    color: "Green",
-                    inPorts: [
-                        noodle.port.newExpr(noodle, 'code', 'text', true)
-                    ],
-                    outPorts: [],
-                    func(node){
+
+                noodle.node.newExpr(
+                    noodle, //noodle
+                    'Eval', //name
+                    function(node){
                         var core = node.core;
                         eval(core.inPorts[0].value);
-                    },
-                    data: {
-                        code: '',
-                    },
-                    resetFuncs: [],
-                    htmlContent: ''
-                },
+                    }, //func
+                    [
+                        noodle.port.newExpr(noodle, 'code', 'string', true),
+                    ], //inPortExps
+                    [], //outPortExps
+                    {
+                        code: ''
+                    }, //data
+                    [], //resetFuncs
+                    'green' //color
+                ),
 
-                {
-                    name: "BrowserCode",
-                    color: "Grey",
-                    inPorts: [],
-                    outPorts: [
-                        noodle.port.newExpr(noodle, 'function', 'js', false)
-                    ],
-                    func(node){
+
+                noodle.node.newExpr(
+                    noodle, //noodle
+                    'BrowserCode', //name
+                    function(node){
                         var core = node.core;
-
-                    },
-                    data: {
-                        code: null,
-                    },
-                    resetFuncs: [
+                    }, //func
+                    [], //inPortExps
+                    [
+                        noodle.port.newExpr(noodle, 'function', 'function', false)
+                    ], //outPortExps
+                    {
+                        code: null
+                    }, //data
+                    [
                         function(node){
                             noodle.misc.html.firstByClass(node.html, 'btn').onclick = function(){
                                 var nodeEl = noodle.misc.html.getParentNodeEl(this);
@@ -172,22 +177,16 @@
                                 node.core.data.code = noodle.userFunc;
                             }
                         }
-                    ],
-                    htmlContent: '<button class="btn">Get code</button>'
-                },
+                    ], //resetFuncs
+                    'Grey', //color
+                    '<button class="btn">Get code</button>'
+                ),
 
 
-
-                {
-                    name: "Dummy",
-                    color: "White",
-                    inPorts: [
-                        noodle.port.newExpr(noodle, 'in', 'text', true)
-                    ],
-                    outPorts: [
-                        noodle.port.newExpr(noodle, 'out', 'text', false)
-                    ],
-                    func(node){
+                noodle.node.newExpr(
+                    noodle, //noodle
+                    'Dummy', //name
+                    function(node){
                         var core = node.core;
                         if(core.inPorts[core.inPorts.length-1].wires.length != 0){ //If last port is connected
                             noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'in', 'text', true));
@@ -195,16 +194,22 @@
                         if(core.outPorts[core.outPorts.length-1].wires.length != 0){
                             noodle.port.addToPorts(node, core.outPorts, noodle.port.new(noodle, 'out', 'text', false));
                         }
-
-                    },
-                    data: {
-                        code: '',
-                    },
-                    resetFuncs: [function(node){
-                        node.core.func(node);
-                    }],
-                    htmlContent: '<input type="text" class="textDbInput" style="width: 100%">'
-                }
+                    }, //func
+                    [
+                        noodle.port.newExpr(noodle, 'in', 'text', true)
+                    ], //inPortExps
+                    [
+                        noodle.port.newExpr(noodle, 'out', 'text', false)
+                    ], //outPortExps
+                    {}, //data
+                    [
+                        function(node){
+                            node.core.func(node);
+                        }
+                    ], //resetFuncs
+                    'White', //color
+                    '<input type="text" class="textDbInput" style="width: 100%">'
+                )
             ];
             var coreObj = noodle.misc.arrays.listToObj(coreList);
 
@@ -213,9 +218,9 @@
             startTime = new Date().getTime();
             var forest = [
                 //noodle.node.add(noodle, coreObj.Value, '', {x: 0, y: 0}),
-                noodle.node.add(noodle, coreObj.Add, '', {x: 500, y: 0}),
-                noodle.node.add(noodle, coreObj.Text, '', {x: 40, y: 200}),
-                noodle.node.add(noodle, coreObj.Eval, '', {x: 100, y: 500})
+                noodle.node.add(noodle, coreList[0], '', {x: 500, y: 0}),
+                noodle.node.add(noodle, coreList[1], '', {x: 40, y: 200}),
+                noodle.node.add(noodle, coreList[2], '', {x: 100, y: 500})
             ];
             calcTime = new Date().getTime() - startTime;
             console.log('Render time: ' + calcTime);
@@ -261,7 +266,7 @@
                 noodle.wire.hanLen = document.getElementById("hanLen").value;
                 noodle.wire.update(wires[0]);
             }
-            
+
             //}
         </script>
 

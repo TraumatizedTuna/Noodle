@@ -24,31 +24,18 @@ var noodle = {
 
             return node;
         },
-        new(noodle, core, label = '', pos = {x: 0, y: 0}, noodleExp = noodle.expr.fromObj(noodle, noodle)){
+        new(noodle, coreExp, label = '', pos = {x: 0, y: 0}, noodleExp = noodle.expr.fromObj(noodle, noodle)){
             //Properties{
-            var coreClone = {};
-            //try{
-            coreClone = noodle.misc.obj.clone(noodle, core);
-            /*}
-            catch(e){
-                console.log(e.message);
-            }*/
-
             var node = {
                 type: 'node',
                 label: label,
-                core: coreClone,
-                default: core,
+                core: noodle.expr.eval(noodle, coreExp),
+                defaultExp: coreExp,
                 pos: pos,
                 noodleExp: noodleExp,
                 useNoodle: false,
                 rendered: false
             };
-
-
-            var test = noodle.misc.obj.equals(noodle, core, node.core, 200);
-            /*node.core.parent = node.core.parNode = node;
-            node.core.noodleExp = noodle.expr.defaultNoodle(noodle, node.core);*/
 
             //}
 
@@ -62,45 +49,28 @@ var noodle = {
 
             node.core.inPorts = noodle.expr.evalAll(noodle, node.core.inPorts);
             node.core.outPorts = noodle.expr.evalAll(noodle, node.core.outPorts);
-            /*noodle.node.forEachPort(node.core, function(port, core){
-                port = noodle.expr.eval(noodle, port);
-            });*/ //Looks like same thing twice
-            /*
-            for (var i in node.core.inPorts){
-                node.core.inPorts[i].parent = node.core.inPorts;
-            }
-            for (var i in node.core.outPorts){
-                node.core.outPorts[i].parent = node.core.outPorts;
-            }
-            /*
-            node.core.inPorts.noodleExp = noodle.expr.defaultNoodle(noodle, node.core.inPorts);
-            node.core.inPorts.parent = node.core;
-
-            node.core.outPorts.noodleExp = noodle.expr.defaultNoodle(noodle, node.core.outPorts);
-            */
             //}
-
-            //node.core.parNode = node.core.parent = node;
 
             noodle.misc.obj.deepStandardize(noodle, node, node);
 
             return node;
         },
 
-        newExpr(noodle, name, func, inPortExps = [], outPortExps = [], data, resetFuncs, color){
-            return coreExp = noodle.expr.new(
+        newExpr(noodle, name, func, inPortExps = [], outPortExps = [], data, resetFuncs, color, htmlContent){
+            return noodle.expr.new(
                 noodle, //noodle
-                function (noodle, name, func, inPorts, outPorts, data = {}, resetFuncs = [], color = 'auto') {
+                function (noodle, name, func, inPorts, outPorts, data = {}, resetFuncs = [], color = 'auto', htmlContent = '') {
                     return {
                         name: name,
                         color: color,
                         inPorts: inPorts,
                         outPorts: outPorts,
                         func: func,
-                        resetFuncs: resetFuncs
+                        resetFuncs: resetFuncs,
+                        htmlContent: htmlContent
                     }
                 }, //func
-                noodle.expr.allFromObj(noodle, [noodle, name, func]).concat([inPortExps, outPortExps]).concat(noodle.expr.allFromObj(data, resetFuncs, color, label)), //args - Port expressions shouldn't be turned into expressions
+                noodle.expr.allFromObj(noodle, [noodle, name, func, inPortExps, outPortExps, data, resetFuncs, color, htmlContent]), //args
                 null, //ans
                 noodle.expr.defaultNoodle(noodle, null) //noodleExp
                 //noodle.expr.fromObj(noodle, noodle) //noodleExp
@@ -114,7 +84,7 @@ var noodle = {
             //TODO: Put all the stuff back into success to allow async
             $.ajax({
                 //ajax options{
-                async: false,//nodeNoodle.node.async,
+                async: nodeNoodle.node.async,
                 type: 'GET',
                 url: 'Html/emptyNode.html',
                 //}
@@ -582,7 +552,7 @@ var noodle = {
             return noodle.expr.new(
                 noodle,
                 function(noodle, obj){
-                    return noodle.expr.eval(noodle, obj.parent.noodleExp);
+                    return noodle.expr.eval(noodle, obj.parent.noodleExp) || noodle; //Should || noodle be considered bad?
                 },
                 noodle.expr.allFromObj(noodle, [noodle, obj], innerNoodleExp),
                 null,
@@ -596,8 +566,7 @@ var noodle = {
                 var args = exp.args.concat(Array.from(arguments).slice(2, arguments.length)); //TODO: Move this to evalAll?
                 exp.state = noodle.expr.wait;
                 exp.ans = exp.func.apply(undefined, noodle.expr.evalAll(noodle, args));
-                if(exp.state == noodle.expr.ready)
-                    exp.state = noodle.expr.done;
+                exp.state = noodle.expr.done;
             }
             return exp.ans;
         },
@@ -898,6 +867,7 @@ var noodle = {
 
             standardize(noodle, obj, parNode){ //TODO: Dynamically figure out parent node
                 if(obj != null && obj != undefined){
+                    //Set parNode of obj{
                     if (parNode == undefined){
                         parNode = obj;
                         while(parNode.parent != undefined && parNode.type != 'node'){
@@ -905,15 +875,23 @@ var noodle = {
                         }
                     }
                     obj.parNode = parNode;
+                    //}
+                    
+                    //Set type of obj
                     if (obj.type == undefined && typeof obj == 'object'){
                         obj.type = 'obj';
                     }
+                    
+                    //Set parent of properties
                     for (var i in obj) {
                         if(typeof obj[i] == 'object' && obj[i] != null && obj[i] != undefined && i != 'parent' && i != 'parNode') {
                             obj[i].parent = obj;
-                            obj[i].parNode = parNode;
+                            //obj[i].parNode = parNode;
                         }
                     }
+                    
+                    //Set noodleExp of obj
+                    obj.noodleExp = obj.noodleExp || noodle.expr.defaultNoodle(noodle, obj);
                 }
             },
 
@@ -926,7 +904,12 @@ var noodle = {
                     [],
                     function(noodle, obj, clone, flatList, flatClone, parNode){
                         noodle.misc.obj.standardize(noodle, obj, parNode);
-                    },
+                    }, //func
+                    function(noodle, obj){
+                        if(obj != undefined && obj != null)
+                            return obj.type != 'expr';
+                        return false;
+                    }, //cond
                     parNode
                 );
             },
@@ -983,9 +966,14 @@ var noodle = {
                 }
                 return obj;
             },
-            clonePlus(noodle, obj, clone, flatList = [], flatClone = [], func = function(){}) {
+
+            //Same as clone but applies all arguments except func and cond to func and cond. Stops recursion if cond returns false
+            clonePlus(noodle, obj, clone, flatList = [], flatClone = [], func = function(){}, cond = function(){return true}) {
                 var args = Array.from(arguments);
-                args.splice(5, 1);
+                args.splice(5, 2);
+                if(!cond.apply(undefined, args)){
+                    return obj;
+                }
                 func.apply(undefined, args);
 
                 //flatClone.push(clone);
