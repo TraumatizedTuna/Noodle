@@ -113,10 +113,16 @@ var noodle = {
             //Set events{
             $(".borderSensor").unbind('mousedown').mousedown(nodeNoodle.graphics.transformable.borderSensorFunc); //Ineffective to set mousedown functions for all border sensors every time? Who cares? Will I fix it? Hmm...
             //$(".btnClose").mousedown(nodeClose);
+            console.log(nodeNoodle.misc.html.firstByClass);
+            try{
             nodeNoodle.misc.html.firstByClass(node.html, "btnClose").onmousedown = nodeNoodle.graphics.transformable.close;
             nodeNoodle.misc.html.firstByClass(node.html, "btnMaximize").onmousedown = nodeNoodle.graphics.transformable.maximize;
 
             nodeNoodle.misc.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
+            }
+            catch(e){
+                console.error(e.message);
+            }
 
             nodeNoodle.node.renderPorts(node);
             nodeNoodle.node.setSockEv(node);
@@ -289,7 +295,7 @@ var noodle = {
         connect(port0, port1){
             var port0Noodle = noodle.expr.eval(noodle, port0.noodleExp);
             var wire = port0Noodle.wire.new(port0Noodle); //What?!
-            var wireNoodle = noodle.expr.eval(wire.noodleExp);
+            var wireNoodle = noodle.expr.eval(noodle, wire.noodleExp);
 
             wireNoodle.wire.connect(port0, port1, wire, noodle);
             return wire;
@@ -393,8 +399,9 @@ var noodle = {
                 node1: null, port1: 0,
                 rendered: false,
                 noodle: noodle,
-                useNoodle: false
             };
+            wire.noodleExp = noodle.expr.defaultNoodle(noodle, wire)
+            //noodle.misc.obj.deepStandardize(noodle, wire); //This line shouldn't do any difference but I guess I should check why it crashes
             wires.push(wire);
             var wireId = noodle.ids.firstFree(noodle.ids.freeList.wire);
             wire.id = 'w' + wireId;
@@ -405,7 +412,7 @@ var noodle = {
 
         //Connects ports p0 and p1 with wire
         connect(p0, p1, wire, noodle){
-            var wireNoodle = noodle.getNoodle(wire, noodle);
+            var wireNoodle = noodle.getNoodle(noodle, wire);
             //Set up objects so ports contain wire{
             //Set indices of wire in the ports
             wire.p0Ind = p0.wires.length;
@@ -428,7 +435,7 @@ var noodle = {
 
             wireNoodle.wire.update(wire);
             if(wire.port0.rendered)
-                noodle.getNoodle(wire.node0, noodle).node.execute(wire.node0);
+                noodle.getNoodle(noodle, wire.node0).node.execute(wire.node0);
         },
 
         //Sets up wire html and renders wire to wireBoard
@@ -547,12 +554,14 @@ var noodle = {
             noodle.expr.new(noodle, function(val){return val;}, [exp], undefined, noodleExp);
         },
         defaultNoodle(noodle, obj){
-            var innerNoodleExp = noodle.expr.new(noodle, null, [], noodle, null, noodle.expr.done) //Can't use fromObj
+            var innerNoodleExp = noodle.expr.new(noodle, function(noodle){ return noodle; }, [noodle], noodle, null, noodle.expr.done) //Can't use fromObj
             innerNoodleExp.noodleExp = innerNoodleExp; //TODO: Let outer noodleExp use itself? Needs parent
             return noodle.expr.new(
                 noodle,
                 function(noodle, obj){
-                    return noodle.expr.eval(noodle, obj.parent.noodleExp) || noodle; //Should || noodle be considered bad?
+                    if(obj.parent)
+                        return noodle.expr.eval(noodle, obj.parent.noodleExp) || noodle; 
+                    return noodle;//Should this be considered bad?
                 },
                 noodle.expr.allFromObj(noodle, [noodle, obj], innerNoodleExp),
                 null,
@@ -868,12 +877,14 @@ var noodle = {
             standardize(noodle, obj, parNode){ //TODO: Dynamically figure out parent node
                 if(obj != null && obj != undefined){
                     //Set parNode of obj{
-                    if (parNode == undefined){
+                    if (parNode == undefined || parNode.type != 'node'){
                         parNode = obj;
                         while(parNode.parent != undefined && parNode.type != 'node'){
                             parNode = parNode.parent;
                         }
                     }
+                    if (parNode.type != 'node')
+                        parNode = undefined;
                     obj.parNode = parNode;
                     //}
                     
@@ -1067,13 +1078,7 @@ var noodle = {
     },
 
     //Finds nearest ancestor with useNoodle on and returns its noodle. If none is found, return noodle
-    /*getNoodle(obj, noodle){
-        var anc = obj;
-        while(anc != undefined){
-            if(anc.useNoodle)
-                return anc.noodle;
-            anc = anc.parent;
-        }
-        return noodle;
-    }*/
+    getNoodle(noodle, obj){
+        return noodle.expr.eval(noodle, obj.noodleExp);
+    }
 }
