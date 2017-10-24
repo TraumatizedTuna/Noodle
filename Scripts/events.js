@@ -104,7 +104,7 @@ window.onkeydown = function(e){
     
     if(e.shiftKey && e.keyCode == 65){ //Shift + A
         var newNodeMenuContent = [];
-        for(var i = 0; i < coreList.length; i++){
+        for(var i in coreList){
             var core = coreList[i];
             newNodeMenuContent.push({
                 label: core.name,

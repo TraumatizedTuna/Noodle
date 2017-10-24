@@ -57,7 +57,7 @@ var noodle = {
         },
 
         newExpr(noodle, name, func, inPortExps = [], outPortExps = [], data, resetFuncs, color, htmlContent){
-            return noodle.expr.new(
+            var nodeExp = noodle.expr.new(
                 noodle, //noodle
                 function (noodle, name, func, inPorts, outPorts, data = {}, resetFuncs = [], color = 'auto', htmlContent = '') {
                     return {
@@ -66,6 +66,7 @@ var noodle = {
                         inPorts: inPorts,
                         outPorts: outPorts,
                         func: func,
+                        data: data,
                         resetFuncs: resetFuncs,
                         htmlContent: htmlContent
                     }
@@ -75,6 +76,8 @@ var noodle = {
                 noodle.expr.defaultNoodle(noodle, null) //noodleExp
                 //noodle.expr.fromObj(noodle, noodle) //noodleExp
             );
+            nodeExp.name = name;
+            return nodeExp;
         },
         //Renders node in container
         render(node, container){ //TODO: Noodle
@@ -113,16 +116,12 @@ var noodle = {
             //Set events{
             $(".borderSensor").unbind('mousedown').mousedown(nodeNoodle.graphics.transformable.borderSensorFunc); //Ineffective to set mousedown functions for all border sensors every time? Who cares? Will I fix it? Hmm...
             //$(".btnClose").mousedown(nodeClose);
-            console.log(nodeNoodle.misc.html.firstByClass);
-            try{
+            
             nodeNoodle.misc.html.firstByClass(node.html, "btnClose").onmousedown = nodeNoodle.graphics.transformable.close;
             nodeNoodle.misc.html.firstByClass(node.html, "btnMaximize").onmousedown = nodeNoodle.graphics.transformable.maximize;
 
             nodeNoodle.misc.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
-            }
-            catch(e){
-                console.error(e.message);
-            }
+            
 
             nodeNoodle.node.renderPorts(node);
             nodeNoodle.node.setSockEv(node);
@@ -201,10 +200,11 @@ var noodle = {
         setSockEv(node){
             $('.socket').unbind().mousedown(function(e){ //TODO: Only set this event for children of node.html
                 var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
+                
+                active.socketEl = e.target;
                 var port = nodeNoodle.port.getObj(active.socketEl.parentElement, nodeNoodle);
                 var portNoodle = noodle.expr.eval(noodle, port.noodleExp); //Should we use nodeNoodle rather than noodle here?
 
-                active.socketEl = e.target;
                 active.pullWire = portNoodle.wire.new(portNoodle);
                 active.pullWire.noodle.wire.render(active.pullWire);
                 toolBox.pullWire(e); //To avoid awkward start
@@ -777,7 +777,7 @@ var noodle = {
                 var menuEl = document.getElementById("airMenu");
                 menuEl.style.left = position.x - 8 + "px";
                 menuEl.style.top = position.y - 8 + "px";
-                for(var i = 0; i < content.length; i++){
+                for(var i  in content){
                     menuEl.insertAdjacentHTML('beforeend', '<div class="menuRow" id="mr' + i + '">' + content[i].label + '</div>');
                     var rowEl = document.getElementById('mr' + i);
                     rowEl.onmousedown = content[i].func;
