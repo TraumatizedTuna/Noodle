@@ -31,15 +31,15 @@ noodle.events = {
                 var height = 100 * (e.pageY - nodeRect.top) / parRect.width;
                 noodle.global.active.nodeEl.style.height = height + 'vw';
             }
-            noodle.port.updateWires(noodle.node.getObj(noodle.global.active.nodeEl, noodle).core.inPorts);
-            noodle.port.updateWires(noodle.node.getObj(noodle.global.active.nodeEl, noodle).core.outPorts);
+            noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.inPorts);
+            noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.outPorts);
         },
         move(e) {
             noodle.global.active.nodeEl.style.left = e.pageX + noodle.graphics.transformable.offsetX + "px";
             noodle.global.active.nodeEl.style.top = e.pageY + noodle.graphics.transformable.offsetY + "px";
             //TODO: Update wires
-            noodle.port.updateWires(noodle.node.getObj(noodle.global.active.nodeEl, noodle).core.inPorts);
-            noodle.port.updateWires(noodle.node.getObj(noodle.global.active.nodeEl, noodle).core.outPorts);
+            noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.inPorts);
+            noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.outPorts);
         },
         pullWire(e) {
             var sockEl = noodle.global.active.socketEl;
@@ -93,7 +93,7 @@ window.onkeydown = function (e) {
 
         $('.wire').unbind().mouseover(function (e) {
             if (e.which === 1)
-                noodle.wire.cut(noodle.wire.getObj(e.target, noodle));
+                noodle.wire.cut(noodle.wire.getObj(noodle, e.target));
         });
 
         window.onkeyup = function (e) {

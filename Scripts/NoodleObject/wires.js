@@ -126,7 +126,7 @@ noodle.wire = {
     },
 
     //Returns js object of wire element
-    getObj(wireEl, noodle) {
+    getObj(noodle, wireEl) {
         return noodle.wire.objsById[wireEl.id];
     }
     //}

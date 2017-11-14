@@ -53,12 +53,12 @@ noodle.graphics = {
         close() {
             //TODO: Remove js object
             var nodeEl = noodle.misc.html.getParentNodeEl(this);
-            //disconnectNode(noodle.node.getObj(nodeEl));
+            var node = noodle.node.getObj(noodle, nodeEl);
 
-            var node = noodle.node.getObj(nodeEl);
+            noodle.node.disconnect(noodle, node); //TODO: Noodle from noodle expression
+            noodle.ids.forget(noodle.ids.freeList.node, parseInt(node.id.substr(1), 10), true); //This needs to be before the next line, right?
             noodle.node.forEachPort(node.core, noodle.port.forget);
-            noodle.ids.forget(noodle.ids.freeList.node, parseInt(node.id.substr(1), 10), true);
-            forest.splice(forest.indexOf(node), 1);
+            container.forest.splice(container.forest.indexOf(node), 1);
 
             nodeEl.remove();
 

@@ -100,14 +100,14 @@ noodle.port = {
     },
 
     //Gets js port from html element
-    getObj(portEl, noodle) {
+    getObj(noodle, portEl) {
         return noodle.port.objsById[portEl.id];
     },
 
     //Cuts all wires connected to port
     cut(port) {
         var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
-        portNoodle.port.forEachWire(port, function (wire) { wire.noodle.wire.cut; });
+        portNoodle.port.forEachWire(port, portNoodle.wire.cut);
     },
 
     //Makes sure that nothing will try to use port (useful when removing port)

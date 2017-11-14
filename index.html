@@ -205,7 +205,7 @@
                         function(node){
                             noodle.misc.html.firstByClass(node.html, 'btn').onclick = function(){
                                 var nodeEl = noodle.misc.html.getParentNodeEl(this);
-                                var node = noodle.node.getObj(nodeEl);
+                                var node = noodle.node.getObj(noodle, nodeEl);
 
                                 node.core.data.code = noodle.userFunc;
                             }

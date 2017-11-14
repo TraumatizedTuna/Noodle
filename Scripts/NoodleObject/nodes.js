@@ -148,12 +148,12 @@ noodle.node = {
     },
 
     //Cuts all wires connected to node
-    disconnect(node) { // Seems like this function is never used
-        forEachPort(node.core, cutPort);
+    disconnect(noodle, node) { // Seems like this function is never used
+        noodle.node.forEachPort(node.core, noodle.port.cut);
     },
 
     //Gets js node from html element
-    getObj(nodeEl, noodle) { //Switch arg order
+    getObj(noodle, nodeEl) {
         return noodle.node.objsById[nodeEl.id];
     },
 
@@ -202,7 +202,7 @@ noodle.node = {
             var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
 
             noodle.global.active.socketEl = e.target;
-            var port = nodeNoodle.port.getObj(noodle.global.active.socketEl.parentElement, nodeNoodle);
+            var port = nodeNoodle.port.getObj(nodeNoodle, noodle.global.active.socketEl.parentElement);
             var portNoodle = noodle.expr.eval(noodle, port.noodleExp); //Should we use nodeNoodle rather than noodle here?
 
             noodle.global.active.pullWire = portNoodle.wire.new(portNoodle);
@@ -210,8 +210,8 @@ noodle.node = {
             noodle.events.toolBox.pullWire(e); //To avoid awkward start
             noodle.events.mousemove.setActiveTool(noodle.events.toolBox.pullWire);
             $('.socket').mouseup(function (e) {
-                var pullPort = noodle.port.getObj(noodle.global.active.socketEl.parentElement, noodle);
-                var targetPort = noodle.port.getObj(e.target.parentElement, noodle);
+                var pullPort = noodle.port.getObj(noodle, noodle.global.active.socketEl.parentElement);
+                var targetPort = noodle.port.getObj(noodle, e.target.parentElement);
                 if (noodle.misc.html.hasClass(noodle.global.active.socketEl, 'output')) { //If the wire is pulled from an output socket
                     noodle.wire.connect(pullPort, targetPort, noodle.global.active.pullWire, noodle);
                 }
