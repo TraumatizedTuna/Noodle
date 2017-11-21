@@ -1,18 +1,19 @@
+//This document is totally obsolete
+
 tools.js {
-	trimEnd(str, amount),						//Removes amount chars at end of str
-	hasClass(el, className),					//Returns true if el has the class className
-	getElPos(el, depth),						//Returns position of depth:th parent of el
-	getEl(obj),									//Returns html element e such that e.id == obj.id
-	getParentNodeEl(el)							//Returns closest parent node element
+	trimEnd(str, amount),						
+	hasClass(el, className),					
+	getElPos(el, depth),						
+	getEl(obj),									
+	getParentNodeEl(el)							
 }
 
 nodes.js {
 	nodeCanv(el)								//Sets up el to be node canvas  - TODO: Allow multiple node canvases and find a better name
-	addNode(core, label, pos)						//Adds new node, sets it up properly and renders it
-	renderNode(node, container)					//Renders node in container
-	disconnectNode(node)						//Cuts all wires connected to node
-	add2IdForest(node)							//Adds node to id list for nodes  - TODO: Rename
-	getNode(nodeEl)								//Gets js node from html node nodeEl
+	add(core, label, pos)						
+	render(node, container)					
+	disconnect(node)
+	getNode(nodeEl)								
 }
 
 nodeTransform.js {
@@ -25,8 +26,8 @@ ports.js {
 	portCode(ports, classes, node)
 	addToPortIds(port)
 	getPort(portEl)
-	cutPort(port)								//Cuts all wires connected to port
-	forEachPort(core, func)						//Runs func with each port on core
+	cutPort(port)								
+	forEachPort(core, func)						
 	renderPortVal(port)
 }
 
@@ -48,6 +49,16 @@ wires.js {
 
 wireEvents.js {
 	setSockEv()									//Makes sure that a new wire will be pulled on mousemove and connected or deleted on mouseup
+}
+
+expr {
+	//Evaluation states{
+    alwaysReady: 0,
+    ready: 1,
+    done: 2,
+    wait: 3,
+    //}
+	new(noodle, func, args = [], ans, noodleExp, state = noodle.expr.ready)
 }
 
 menus.js {
@@ -79,5 +90,5 @@ active.js {
 }
 
 nodeExec.js {
-	execNode(node)								//Executes node and nodes connected to out ports
+	execNode(node)								
 }

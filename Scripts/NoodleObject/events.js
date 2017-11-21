@@ -21,7 +21,7 @@ noodle.events = {
                     oldWidth = 25;
                 }
 
-                var width = oldWidth - 100 * (e.pageX - 1 * noodle.misc.string.trimEnd(noodle.global.active.nodeEl.style.left, 2)) / parRect.width;
+                var width = oldWidth - 100 * (e.pageX - 1 * noodle.string.trimEnd(noodle.global.active.nodeEl.style.left, 2)) / parRect.width;
 
                 noodle.global.active.nodeEl.style.width = width + '%';
                 noodle.global.active.nodeEl.style.left = e.pageX + 'px';
@@ -45,9 +45,9 @@ noodle.events = {
             var sockEl = noodle.global.active.socketEl;
 
             var p0 = { x: e.pageX, y: e.pageY };
-            var p1 = noodle.misc.html.getElPos(sockEl, 1);
+            var p1 = noodle.html.getElPos(sockEl, 1);
 
-            if (!noodle.misc.html.hasClass(sockEl, "input")) {
+            if (!noodle.html.hasClass(sockEl, "input")) {
                 [p0, p1] = [p1, p0];
             }
 
@@ -106,11 +106,11 @@ window.onkeydown = function (e) {
 
     if (e.shiftKey && e.keyCode === 65) { //Shift + A
         var newNodeMenuContent = [];
-        for (var i in coreList) {
-            var core = coreList[i];
+        for (var i in nodeTypes) {
+            var nodeType = nodeTypes[i];
             newNodeMenuContent.push({
-                label: core.name,
-                func: eval('var f = function(){\nvar core = coreList[' + i + '];\nnoodle.node.add(noodle, core, core.name, noodle.global.mousePos);\n}; f;') //TODO: This feels like a really dirty way to generate a function
+                label: i,
+                func: eval('var f = function(){\nvar nodeType = nodeTypes["' + i + '"];\nnoodle.node.add(noodle, nodeType, undefined, noodle.global.mousePos);\n}; f;') //TODO: This feels like a really dirty way to generate a function
             });
         }
         noodle.ui.menus.addAirMenu(newNodeMenuContent, noodle.global.mousePos);

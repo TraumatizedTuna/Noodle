@@ -39,6 +39,31 @@ noodle.expr = {
         }
         return objs;
     },
+
+    newGenerator(noodle, obj, noodleExp){
+        if(typeof obj === 'object' || typeof obj ==='function'){
+            noodleExp = noodleExp || noodle.expr.defaultNoodle(noodle, obj);
+            return noodle.expr.new(
+                noodle,
+                function(noodle, obj){
+                    return noodle.obj.binClonePlus(noodle, obj);
+                },
+                [noodleExp, noodle.expr.fromObj(noodle, obj, noodleExp)], //TODO: Should I really use noodleExp as first argument?
+                null,
+                noodleExp,
+                noodle.expr.alwaysReady
+            );
+        }
+        return noodle.expr.fromObj(noodle, obj, noodleExp);
+    },
+    newGenerators(noodle, objs, noodleExps = []){
+        var gens = new Array(objs.length);
+        for(var i in objs){
+            gens[i] = noodle.expr.newGenerator(noodle, objs[i], noodleExps[i]);
+        }
+        return gens;
+    },
+
     ref(noodle, exp, noodleExp) {
         noodle.expr.new(noodle, function (val) { return val; }, [exp], undefined, noodleExp);
     },
@@ -48,7 +73,7 @@ noodle.expr = {
         return noodle.expr.new(
             noodle,
             function (noodle, obj) {
-                if (obj.parent)
+                if (obj && obj.parent)
                     return noodle.expr.eval(noodle, obj.parent.noodleExp) || noodle;
                 return noodle;//Should this be considered bad?
             },

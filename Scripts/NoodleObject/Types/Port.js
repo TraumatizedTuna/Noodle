@@ -8,9 +8,8 @@ noodle.port = {
 
         var port = { type: 'port', name: name, portType: portType, isIn: isIn, wires: wires, value: value };
 
-        noodleExp = noodleExp || noodle.expr.defaultNoodle(noodle, port);
+        port.noodleExp = noodleExp || noodle.expr.defaultNoodle(noodle, port);
 
-        port.noodleExp = noodleExp;
         return port;
     },
     //Returnes expression to generate port

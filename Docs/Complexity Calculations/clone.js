@@ -21,7 +21,7 @@
                         //If we've found a new object, add it to flatList and clone it to clone and flatClone
                         if (flatInd == -1) {
                             //clone[i] = clone[i] || {};
-                            clone[i] = noodle.misc.obj.clone(noodle, obj[i], clone[i], flatList, flatClone); //This works because flatList gets updated
+                            clone[i] = noodle.obj.clone(noodle, obj[i], clone[i], flatList, flatClone); //This works because flatList gets updated
                         }
                         //If we've seen obj[i] before, add the clone of it to clone
                         else {

@@ -42,17 +42,17 @@ noodle.graphics = {
         //Functions{
         borderSensorFunc() {
             noodle.events.mousemove.setActiveTool(noodle.events.toolBox.scale); //Or should it just replace everything?
-            noodle.global.active.nodeEl = noodle.misc.html.getParentNodeEl(this);
+            noodle.global.active.nodeEl = noodle.html.getParentNodeEl(this);
 
-            noodle.graphics.transformable.edges.left = noodle.misc.html.hasClass(this, "bsl");
-            noodle.graphics.transformable.edges.top = noodle.misc.html.hasClass(this, "bst");
-            noodle.graphics.transformable.edges.right = noodle.misc.html.hasClass(this, "bsr");
-            noodle.graphics.transformable.edges.bottom = noodle.misc.html.hasClass(this, "bsb");
+            noodle.graphics.transformable.edges.left = noodle.html.hasClass(this, "bsl");
+            noodle.graphics.transformable.edges.top = noodle.html.hasClass(this, "bst");
+            noodle.graphics.transformable.edges.right = noodle.html.hasClass(this, "bsr");
+            noodle.graphics.transformable.edges.bottom = noodle.html.hasClass(this, "bsb");
         },
 
         close() {
             //TODO: Remove js object
-            var nodeEl = noodle.misc.html.getParentNodeEl(this);
+            var nodeEl = noodle.html.getParentNodeEl(this);
             var node = noodle.node.getObj(noodle, nodeEl);
 
             noodle.node.disconnect(noodle, node); //TODO: Noodle from noodle expression
