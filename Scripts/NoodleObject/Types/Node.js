@@ -17,7 +17,7 @@ noodle.node = {
 
     //Adds new node, sets it up properly and renders it
     add(noodle, constr, label, pos, noodleExp) {
-        var node = new constr(noodle, label, pos, noodleExp);
+        var node = constr(noodle, label, pos, noodleExp);
         container.forest.push(node);
         var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
         nodeNoodle.node.render(node, nodeBoard);
