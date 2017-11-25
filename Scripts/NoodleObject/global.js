@@ -11,6 +11,7 @@ noodle.global = {
         tools: []
     },
 
-    mousePos: { x: 0, y: 0 }
+    mousePos: { x: 0, y: 0 },
+    maxZInd: 0
 };
 

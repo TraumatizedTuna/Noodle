@@ -52,7 +52,7 @@ body{
     border-radius: 8px;
     border-width: 2px;
     border-style: solid;
-    border-color: aliceblue;
+    border-color: #777777;
     overflow: visible;
     
     z-index: 3;
@@ -67,6 +67,11 @@ body{
     min-height: 32px;
     
     pointer-events: all;
+}
+
+.node.active{
+    border-color: #f3ff68;
+    opacity: 1;
 }
 
 .nodeContent{

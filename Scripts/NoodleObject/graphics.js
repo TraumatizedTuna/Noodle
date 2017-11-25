@@ -40,9 +40,23 @@ noodle.graphics = {
         //}
 
         //Functions{
+        setActive(noodle, el) {
+            el.style.zIndex = noodle.global.maxZInd++;
+            
+            var oldActive = noodle.global.active.nodeEl;
+            if(oldActive){
+                oldActive.classList.remove('active');
+            }
+            el.classList.add('active');
+            noodle.global.active.nodeEl = el;
+        },
+
+
         borderSensorFunc() {
             noodle.events.mousemove.setActiveTool(noodle.events.toolBox.scale); //Or should it just replace everything?
-            noodle.global.active.nodeEl = noodle.html.getParentNodeEl(this);
+            nodeEl = noodle.html.getParentNodeEl(this);
+
+            //noodle.graphics.transformable.setActive(noodle, nodeEl);
 
             noodle.graphics.transformable.edges.left = noodle.html.hasClass(this, "bsl");
             noodle.graphics.transformable.edges.top = noodle.html.hasClass(this, "bst");
@@ -65,11 +79,15 @@ noodle.graphics = {
             console.info('nodeClose() - id: ' + node.id + ', name: ' + node.core.name);
         },
         topBarFunc(e) {
-            noodle.global.active.nodeEl = this.parentElement.parentElement;
+            nodeEl = this.parentElement.parentElement;
+            //noodle.graphics.transformable.setActive(noodle, nodeEl);
+
             noodle.events.mousemove.setActiveTool(noodle.events.toolBox.move);
-            var left = noodle.global.active.nodeEl.style.left;
+            //var left = noodle.global.active.nodeEl.style.left;
+            var left = nodeEl.style.left;
             left = left.substring(0, left.length - 2);
-            var top = noodle.global.active.nodeEl.style.top;
+            //var top = noodle.global.active.nodeEl.style.top;
+            var top = nodeEl.style.top;
             top = top.substring(0, top.length - 2);
             noodle.graphics.transformable.offsetX = left - e.pageX; //Might cause problems with automatic positioning?
             noodle.graphics.transformable.offsetY = top - e.pageY;

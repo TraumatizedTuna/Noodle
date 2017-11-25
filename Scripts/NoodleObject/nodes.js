@@ -16,48 +16,45 @@ noodle.node = {
     },
 
     //Adds new node, sets it up properly and renders it
-    add(noodle, constr, label, pos, noodleExp) {
-        var node = constr(noodle, label, pos, noodleExp);
-        container.forest.push(node);
+    add(noodle, core, label, pos, noodleExp) {
+        var node = noodle.node.new(noodle, core, label, pos, noodleExp);
         var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
         nodeNoodle.node.render(node, nodeBoard);
-        nodeNoodle.graphics.transformable.setActive(nodeNoodle, node.html); //Should this be inside render?
 
         return node;
     },
-    new(noodle, core, label = '', pos = { x: 0, y: 0 }, noodleExp = noodle.expr.fromObj(noodle, noodle)) {
+    new(noodle, coreExp, label = '', pos = { x: 0, y: 0 }, noodleExp = noodle.expr.fromObj(noodle, noodle)) {
         //Properties{
-        cloneCounter = 0;
-        //var newCoreExp = noodle.obj.clone(noodle, core, {});
+        var newCoreExp = noodle.misc.obj.clone(noodle, coreExp, {});
         var node = {
             type: 'node',
             label: label,
-            core: core,
+            core: noodle.expr.eval(noodle, newCoreExp),
+            defaultExp: coreExp,
             pos: pos,
             noodleExp: noodleExp,
             useNoodle: false,
             rendered: false
-        };
-        console.log('Clone iterations: ' + cloneCounter + '\nObject: ' + core.toString());
+        },
 
+            //}
+
+            //Ports{
+            noodle.node.forEachPort(
+                node.core,
+                function (port, core) {
+                    port.noodleExp.args[1] = port;
+                }
+            )
+
+        node.core.inPorts = noodle.expr.evalAll(noodle, node.core.inPorts);
+        node.core.outPorts = noodle.expr.evalAll(noodle, node.core.outPorts);
         //}
 
-        //Ports{
-        noodle.node.forEachPort(
-            node.core,
-            function (port, core) {
-                port.noodleExp.args[1] = port;
-            }
-        )
-
-        /*node.core.inPorts = noodle.expr.evalAll(noodle, node.core.inPorts);
-        node.core.outPorts = noodle.expr.evalAll(noodle, node.core.outPorts);*/
-        //}
-
-        noodle.obj.deepStandardize(noodle, node, node);
+        noodle.misc.obj.deepStandardize(noodle, node, node);
 
         return node;
-    },
+    }
 
     newExpr(noodle, name, func, inPortExps = [], outPortExps = [], data, resetFuncs, color, htmlContent) {
         var nodeExp = noodle.expr.new(
@@ -74,11 +71,10 @@ noodle.node = {
                     htmlContent: htmlContent
                 }
             }, //func
-            noodle.expr.allFromObj(noodle, [noodle, name]).concat(noodle.expr.newGenerators(noodle, [func, inPortExps, outPortExps, data, resetFuncs, color, htmlContent])), //args
+            noodle.expr.allFromObj(noodle, [noodle, name, func, inPortExps, outPortExps, data, resetFuncs, color, htmlContent]), //args
             null, //ans
-            noodle.expr.defaultNoodle(noodle, null), //noodleExp
+            noodle.expr.defaultNoodle(noodle, null) //noodleExp
             //noodle.expr.fromObj(noodle, noodle) //noodleExp
-            noodle.expr.alwaysReady
         );
         nodeExp.name = name;
         return nodeExp;
@@ -113,7 +109,6 @@ noodle.node = {
         //Render node in container{
         container.insertAdjacentHTML('beforeend', node.html);
         node.html = document.getElementById(node.id);
-        node.html.obj = node;
 
         nodeNoodle.ids.add(node);
         //}
@@ -122,14 +117,10 @@ noodle.node = {
         $(".borderSensor").unbind('mousedown').mousedown(nodeNoodle.graphics.transformable.borderSensorFunc); //Ineffective to set mousedown functions for all border sensors every time? Who cares? Will I fix it? Hmm...
         //$(".btnClose").mousedown(nodeClose);
 
-        node.html.onmousedown = function () {
-            noodle.graphics.transformable.setActive(noodle, this); //TODO: Use correct noodle
-        }
+        nodeNoodle.misc.html.firstByClass(node.html, "btnClose").onmousedown = nodeNoodle.graphics.transformable.close;
+        nodeNoodle.misc.html.firstByClass(node.html, "btnMaximize").onmousedown = nodeNoodle.graphics.transformable.maximize;
 
-        nodeNoodle.html.firstByClass(node.html, "btnClose").onmousedown = nodeNoodle.graphics.transformable.close;
-        nodeNoodle.html.firstByClass(node.html, "btnMaximize").onmousedown = nodeNoodle.graphics.transformable.maximize;
-
-        nodeNoodle.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
+        nodeNoodle.misc.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
 
 
         nodeNoodle.node.renderPorts(node);
@@ -137,7 +128,7 @@ noodle.node = {
         //}
 
         //Add content to node{
-        var nodeEl = nodeNoodle.html.getEl(node);
+        var nodeEl = nodeNoodle.misc.html.getEl(node);
         if (node.core.htmlContent != undefined) {
             nodeEl.getElementsByClassName('nodeContent')[0].innerHTML = node.core.htmlContent;
         }
@@ -157,12 +148,12 @@ noodle.node = {
     },
 
     //Cuts all wires connected to node
-    disconnect(noodle, node) { // Seems like this function is never used
-        noodle.node.forEachPort(node.core, noodle.port.cut);
+    disconnect(node) { // Seems like this function is never used
+        forEachPort(node.core, cutPort);
     },
 
     //Gets js node from html element
-    getObj(noodle, nodeEl) {
+    getObj(nodeEl, noodle) { //Switch arg order
         return noodle.node.objsById[nodeEl.id];
     },
 
@@ -210,35 +201,36 @@ noodle.node = {
         $('.socket').unbind().mousedown(function (e) { //TODO: Only set this event for children of node.html
             var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
 
-            noodle.global.active.socketEl = e.target;
-            var port = nodeNoodle.port.getObj(nodeNoodle, noodle.global.active.socketEl.parentElement);
+            active.socketEl = e.target;
+            var port = nodeNoodle.port.getObj(active.socketEl.parentElement, nodeNoodle);
             var portNoodle = noodle.expr.eval(noodle, port.noodleExp); //Should we use nodeNoodle rather than noodle here?
 
-            noodle.global.active.pullWire = portNoodle.wire.new(portNoodle);
-            noodle.global.active.pullWire.noodle.wire.render(noodle.global.active.pullWire);
-            noodle.events.toolBox.pullWire(e); //To avoid awkward start
-            noodle.events.mousemove.setActiveTool(noodle.events.toolBox.pullWire);
+            active.pullWire = portNoodle.wire.new(portNoodle);
+            active.pullWire.noodle.wire.render(active.pullWire);
+            toolBox.pullWire(e); //To avoid awkward start
+            mousemove.setActiveTool(toolBox.pullWire);
             $('.socket').mouseup(function (e) {
-                var pullPort = noodle.port.getObj(noodle, noodle.global.active.socketEl.parentElement);
-                var targetPort = noodle.port.getObj(noodle, e.target.parentElement);
-                if (noodle.html.hasClass(noodle.global.active.socketEl, 'output')) { //If the wire is pulled from an output socket
-                    noodle.wire.connect(pullPort, targetPort, noodle.global.active.pullWire, noodle);
+                var pullPort = noodle.port.getObj(active.socketEl.parentElement, noodle);
+                var targetPort = noodle.port.getObj(e.target.parentElement, noodle);
+                if (noodle.misc.html.hasClass(active.socketEl, 'output')) { //If the wire is pulled from an output socket
+                    noodle.wire.connect(pullPort, targetPort, active.pullWire, noodle);
                 }
                 else {
-                    noodle.wire.connect(targetPort, pullPort, noodle.global.active.pullWire, noodle);
+                    noodle.wire.connect(targetPort, pullPort, active.pullWire, noodle);
                 }
 
-                noodle.events.defMouseup();
-                document.onmouseup = noodle.events.defMouseup;
+                defMouseup();
+                document.onmouseup = defMouseup;
                 $('.socket').mouseup(null); //TODO: Same as next TODO
             });
             document.onmouseup = function () {
-                noodle.wire.removeEl(noodle.global.active.pullWire);
-                noodle.events.defMouseup();
+                noodle.wire.removeEl(active.pullWire);
+                defMouseup();
                 $('.socket').mouseup(null); //TODO: This doesn't look good
-                document.onmouseup = noodle.events.defMouseup;
+                document.onmouseup = defMouseup;
             }
         });
     }
     //}
+},
 };
