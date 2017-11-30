@@ -4,11 +4,11 @@
 winexe
 C#
 .cs
-C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\obj\Debug\
+C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\obj\Release\
 Browser
 none
 false
-DEBUG;TRACE
+TRACE
 C:\Users\effek\Dropbox\Webbutveckling\FXtend\public\Nodes\Browser\Browser\App.xaml
 11151548125
 
