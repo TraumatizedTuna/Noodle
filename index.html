@@ -61,7 +61,7 @@
 
 
 
-    <div class="mainContainer" id="mainCont0">
+    <div class="container mainContainer" id="mainCont0">
         <svg id="wireBoard0" width="100%"></svg>
         <div id="nodeCanvas"></div>
 
@@ -90,6 +90,7 @@
         var container = {
             html: mainCont
         };
+        mainCont.obj = container;
 
 
         //nodeCanv(document.getElementById("nodeCanvas"));
@@ -384,13 +385,16 @@
                     color: '#1E1438',
                     inPorts: [
                         noodle.port.new(noodle, 'language', 'text', true),
-                        noodle.port.new(noodle, 'theme', 'text', true)
+                        noodle.port.new(noodle, 'theme', 'text', true),
+                        noodle.port.new(noodle, 'code', 'code', true)
                     ],
                     outPorts: [
                         noodle.port.new(noodle, 'code', 'text', false)
                     ],
                     func: function (node) {
                         var core = node.core;
+                        var codeInPort = core.inPorts[2];
+                        var outPort = core.outPorts[0];
                         var data = core.data;
                         var editor = ace.edit(data.edId);
                         var lang = core.inPorts[0].value;
@@ -402,7 +406,20 @@
                         if (theme) {
                             editor.setTheme("ace/theme/" + theme);
                         }
-                        core.outPorts[0].value = editor.getValue();
+
+                        if(codeInPort.wires.length){
+                            editor.setValue(codeInPort.value);
+                            editor.setOptions({
+                                readOnly: true
+                            });
+                        }
+                        else{
+                            editor.setOptions({
+                                readOnly: false
+                            });
+                        }
+                        
+                        outPort.value = editor.getValue();
                     },
                     data: {
                         code: '',
@@ -412,8 +429,6 @@
                     },
                     resetFuncs: [
                         function (node, nodeEl) {
-                            //TODO: Allow multiple code nodes with different settings
-
                             //$('.textDbInput').change(defTextDbInputChange);
 
                             var edEl = nodeEl.getElementsByClassName('editor')[0];
@@ -423,6 +438,9 @@
                             var editor = ace.edit(edEl.id);
                             editor.setTheme("ace/theme/monokai");
                             editor.getSession().setMode("ace/mode/javascript");
+                            editor.setOptions({
+                                maxLines: 18446744073709551616
+                            });
                         }
                     ],
                     htmlContent: '<div class="editor" style="width: 500px; height: 250px"></div>'
@@ -475,14 +493,16 @@
                     ],
                     outPorts: [
                         noodle.port.new(noodle, 'constructor', 'func', false),
-                        noodle.port.new(noodle, 'node', 'node', false)
+                        noodle.port.new(noodle, 'constructor body', 'string', false),
+                        noodle.port.new(noodle, 'error', 'string', false),
+                        noodle.port.new(noodle, 'error stack', 'string', false)
                     ],
                     func: function (node) {
                         var core = node.core;
                         var name = core.inPorts[0].value;
 
-                        var constr = new Function(
-                            'node',
+                        try{
+                            var constrBody =
                             'try {\n    var newCore = {\n        name: "' + name +
                             '",\n        color: "' + core.inPorts[1].value +
                             '",\n        inPorts: ' + core.inPorts[2].value +
@@ -491,14 +511,25 @@
                             ',\n        data: ' + core.inPorts[5].value +
                             ',\n        resetFuncs: ' + core.inPorts[7].value +
                             ',\n        htmlContent: "' + core.inPorts[6].value +
-                            '"\n    }\n    return noodle.node.new(noodle, newCore, label, pos);\n}\ncatch (e) {\n    return null;\n}'
+                            '"\n    }\n    return noodle.node.new(noodle, newCore, label, pos);\n}\ncatch (e) {\n    return null;\n}';
+                            core.outPorts[1].value = constrBody;
+                        var constr = new Function(
+                            ['noodle', 'label', 'pos', 'noodleExp'],
+                            constrBody
                         );
 
                         nodeTypes[name] = constr;
-                        var newNode = noodle.node.add(noodle, constr, '', {x: 30, y: 30});
+                        //var newNode = noodle.node.add(noodle, constr, '', {x: 30, y: 30});
 
                         core.outPorts[0].value = constr;
-                        core.outPorts[1].value = newNode;
+                        //core.outPorts[1].value = newNode;
+                        core.outPorts[2].value = '';
+                        core.outPorts[3].value = '';
+                        }
+                        catch(e){
+                            core.outPorts[2].value = e.message;
+                            core.outPorts[2].value = e.stack;
+                        }
                     },
                     data: {
                     },
@@ -579,6 +610,42 @@
                     this[i] = node[i];
                 } */
             },
+
+            
+            Container: function (noodle, label, pos, noodleExp) {
+                var core = {
+                    name: 'Container',
+                    color: 'rgba(64,64,64,0.4)',
+                    inPorts: [
+                        noodle.port.new(noodle, 'in', 'text', true)
+                    ],
+                    outPorts: [
+                        noodle.port.new(noodle, 'out', 'text', false)
+                    ],
+                    func: function (node) {
+                        var core = node.core;
+                    },
+                    data: {
+                        container: {
+                            forest: [],
+                            wires: []
+                        }
+                    },
+                    resetFuncs: [
+                        function(node, nodeEl){
+                            var container = core.data.container;
+                            container.html = nodeEl.getElementsByClassName('container')[0];
+                            container.html.obj = container;
+                        }
+                    ],
+                    htmlContent: '<div class="container"></div>'
+                };
+                return noodle.node.new(noodle, core, label, pos);
+                /* var node = noodle.node.new(noodle, core, label, pos);
+                for (var i in node) {
+                    this[i] = node[i];
+                } */
+            },
             Dummy: function (noodle, label, pos, noodleExp) {
                 var core = {
                     name: 'Dummy',
@@ -623,11 +690,11 @@
             startTime = new Date().getTime();
             container.forest = [];
             //noodle.node.add(noodle, coreObj.Value, '', {x: 0, y: 0}),
-            noodle.node.add(noodle, nodeTypes.Add, '', { x: 500, y: 0 });
-            noodle.node.add(noodle, nodeTypes.Value, '', { x: 10, y: 200 });
-            noodle.node.add(noodle, nodeTypes.Dummy, '', { x: 10, y: 500 });
-            noodle.node.add(noodle, nodeTypes.Code, '', { x: 200, y: 200 });
-            noodle.node.add(noodle, nodeTypes.NodeCreator, '', { x: 900, y: 100 });
+            noodle.node.add(noodle, container, nodeTypes.Add, '', { x: 500, y: 0 });
+            noodle.node.add(noodle, container, nodeTypes.Value, '', { x: 10, y: 200 });
+            noodle.node.add(noodle, container, nodeTypes.Dummy, '', { x: 10, y: 500 });
+            noodle.node.add(noodle, container, nodeTypes.Code, '', { x: 200, y: 200 });
+            noodle.node.add(noodle, container, nodeTypes.NodeCreator, '', { x: 900, y: 100 });
 
             calcTime = new Date().getTime() - startTime;
             console.log('Render time: ' + calcTime);

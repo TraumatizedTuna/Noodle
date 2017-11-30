@@ -15,11 +15,15 @@ body{
     user-select: auto;
 }
 
-.mainContainer{
+.container{
     width: 100%;
-    height: 1000px;
+    height: 100%;
     background-color: #e0ddb6;
     background-color: #584156;
+}
+
+.mainContainer{
+    height: 1000px;
 }
 
 #nodeCanvas{

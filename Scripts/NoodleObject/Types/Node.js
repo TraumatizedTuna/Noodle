@@ -15,12 +15,13 @@ noodle.node = {
         });
     },
 
+    //TODO: Add container parameter whenever add is called
     //Adds new node, sets it up properly and renders it
-    add(noodle, constr, label, pos, noodleExp) {
-        var node = constr(noodle, label, pos, noodleExp);
+    add(noodle, container, constr, label, pos, noodleExp) {
+        var node = constr(noodle, label, pos, noodleExp); 
         container.forest.push(node);
         var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
-        nodeNoodle.node.render(node, nodeBoard);
+        nodeNoodle.node.render(node, container);
         nodeNoodle.graphics.transformable.setActive(nodeNoodle, node.html); //Should this be inside render?
 
         return node;
@@ -111,7 +112,7 @@ noodle.node = {
         //}
 
         //Render node in container{
-        container.insertAdjacentHTML('beforeend', node.html);
+        container.html.insertAdjacentHTML('beforeend', node.html);
         node.html = document.getElementById(node.id);
         node.html.obj = node;
 

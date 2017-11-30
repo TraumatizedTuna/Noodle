@@ -2,8 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\Browser",
-    "\\Scripts"
+    "\\Html",
+    "\\Html\\Nodes",
+    "\\Scripts",
+    "\\Scripts\\NoodleObject"
   ],
-  "SelectedNode": "\\Scripts\\noodle.js",
+  "SelectedNode": "\\Scripts\\NoodleObject\\noodle.js",
   "PreviewInSolutionExplorer": false
 }

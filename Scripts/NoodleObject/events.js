@@ -89,7 +89,8 @@ document.onmouseup = noodle.events.defMouseup;
 window.onkeydown = function (e) {
     if (e.ctrlKey) {
         //setActiveTool(toolBox.cut)
-        mainCont.style.cursor = "crosshair";
+        //mainCont
+        document.getElementsByTagName("body")[0].style.cursor = "crosshair";
 
         $('.wire').unbind().mouseover(function (e) {
             if (e.which === 1)
@@ -98,7 +99,8 @@ window.onkeydown = function (e) {
 
         window.onkeyup = function (e) {
             console.log("Stop cut");
-            mainCont.style.cursor = "auto";
+            //mainCont
+            document.getElementsByTagName("body")[0].style.cursor = "auto";
             $('.wire').unbind();
             window.onkeyup = noodle.events.defKeyup;
         };
@@ -110,9 +112,10 @@ window.onkeydown = function (e) {
             var nodeType = nodeTypes[i];
             newNodeMenuContent.push({
                 label: i,
-                func: eval('var f = function(){\nvar nodeType = nodeTypes["' + i + '"];\nnoodle.node.add(noodle, nodeType, undefined, noodle.global.mousePos);\n}; f;') //TODO: This feels like a really dirty way to generate a function
+                //TODO: Use the right container
+                func: eval('var f = function(){\nvar nodeType = nodeTypes["' + i + '"];\nnoodle.node.add(noodle, container, nodeType, undefined, noodle.global.mousePos);\n}; f;') //TODO: This feels like a really dirty way to generate a function
             });
         }
-        noodle.ui.menus.addAirMenu(newNodeMenuContent, noodle.global.mousePos);
+        noodle.ui.menus.addAirMenu(e.target, newNodeMenuContent, noodle.global.mousePos); //Or should it be active container?
     }
 };
