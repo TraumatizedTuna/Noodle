@@ -14,9 +14,10 @@ noodle.html = {
     },
 
     //Returns position of depth:th parent of el
+    //TODO: 0 should give pos of el?
     getElPos(el, depth) {
         var pos = { x: 0, y: 0 };
-        for (var i = 0; i < depth; i++) {
+        for (var i = 0; i < depth && el; i++) {
             pos.x += el.getBoundingClientRect().left;
             pos.y += el.getBoundingClientRect().top;
             el = el.parentElement;

@@ -86,36 +86,75 @@ document.onmousemove = function (e) {
 };
 document.onmouseup = noodle.events.defMouseup;
 
-window.onkeydown = function (e) {
-    if (e.ctrlKey) {
-        //setActiveTool(toolBox.cut)
-        //mainCont
-        document.getElementsByTagName("body")[0].style.cursor = "crosshair";
-
-        $('.wire').unbind().mouseover(function (e) {
-            if (e.which === 1)
-                noodle.wire.cut(noodle.wire.getObj(noodle, e.target));
-        });
-
-        window.onkeyup = function (e) {
-            console.log("Stop cut");
+window.onload = function (e) {
+    var a = 3;
+    document.onkeydown = function (e) {
+        if (e.ctrlKey) {
+            //setActiveTool(toolBox.cut)
             //mainCont
-            document.getElementsByTagName("body")[0].style.cursor = "auto";
-            $('.wire').unbind();
-            window.onkeyup = noodle.events.defKeyup;
-        };
-    }
+            document.getElementsByTagName("body")[0].style.cursor = "crosshair";
 
-    if (e.shiftKey && e.keyCode === 65) { //Shift + A
-        var newNodeMenuContent = [];
-        for (var i in nodeTypes) {
-            var nodeType = nodeTypes[i];
-            newNodeMenuContent.push({
-                label: i,
-                //TODO: Use the right container
-                func: eval('var f = function(){\nvar nodeType = nodeTypes["' + i + '"];\nnoodle.node.add(noodle, container, nodeType, undefined, noodle.global.mousePos);\n}; f;') //TODO: This feels like a really dirty way to generate a function
+            $('.wire').unbind().mouseover(function (e) {
+                if (e.which === 1)
+                    noodle.wire.cut(noodle.wire.getObj(noodle, e.target));
             });
+
+            window.onkeyup = function (e) {
+                console.log("Stop cut");
+                //mainCont
+                document.getElementsByTagName("body")[0].style.cursor = "auto";
+                $('.wire').unbind();
+                window.onkeyup = noodle.events.defKeyup;
+            };
         }
-        noodle.ui.menus.addAirMenu(e.target, newNodeMenuContent, noodle.global.mousePos); //Or should it be active container?
-    }
+
+        if (e.shiftKey && e.keyCode === 65) { //Shift + A
+            var newNodeMenuContent = [];
+            //TODO: Kinda stupid to convert back and forth between obj and html?
+            var contEl = noodle.global.active.container.html;
+            /*if (!contEl.classList.contains('container')) {
+                contEl = contEl.getElementsByClassName('container')[0];
+            }*/
+            if (contEl) {
+                var container = contEl.obj;
+                var mousePos = noodle.global.mousePos;
+                var contPos = noodle.html.getElPos(contEl, Infinity);
+                var pos = {
+                    x: mousePos.x - contPos.x,
+                    y: mousePos.y - contPos.y
+                };
+                for (var i in nodeTypes) {
+                    var nodeType = nodeTypes[i];
+                    newNodeMenuContent.push({
+                        label: i,
+                        //TODO: Use the right container
+                        func: eval('var f = function(){\nvar nodeType = nodeTypes["' + i + '"];\nnoodle.node.add(noodle, container, nodeType, undefined, noodle.global.mousePos);\n}; f;'), //TODO: This feels like a really dirty way to generate a function
+                        expr: noodle.expr.new(
+                            noodle,
+                            noodle.node.add,
+                            noodle.expr.allFromObj(noodle, [noodle, container, nodeTypes[i], '', pos]),
+                            null,
+                            noodle.expr.fromObj(noodle),
+                            noodle.expr.alwaysReady
+                        )
+                    });
+                }
+                noodle.ui.menus.addAirMenu(contEl, newNodeMenuContent, pos); //Or should it be active container?
+            }
+        }
+    };
+
+    $(document).on('click', '.container', function(e){
+        noodle.global.active.container = e.target.obj;
+    });
+
+
+    $('.container').click(function (e) {
+        var a = 3;
+    });
+
+    document.getElementsByClassName('container')[0].onclick = function (e) {
+        var contEl = e.target;
+        contEl.focus();
+    };
 };
