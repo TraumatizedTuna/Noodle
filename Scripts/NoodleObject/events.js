@@ -7,8 +7,9 @@ noodle.events = {
 
             //TODO: Kinda stupid to check this on every mousemove event
             if (noodle.graphics.transformable.edges.right) {
-                var width = 100 * (e.pageX - nodeRect.left) / parRect.width;
-                noodle.global.active.nodeEl.style.width = width + '%';
+                var width = e.pageX - nodeRect.left;
+                //var width = 100 * (e.pageX - nodeRect.left) / parRect.width;
+                noodle.global.active.nodeEl.style.width = width + 'px';
             }
             else if (noodle.graphics.transformable.edges.left) {
                 //var width = 100 * (nodeRect.width + nodeRect.left - e.pageX) / parRect.width;
@@ -21,15 +22,17 @@ noodle.events = {
                     oldWidth = 25;
                 }
 
-                var width = oldWidth - 100 * (e.pageX - 1 * noodle.string.trimEnd(noodle.global.active.nodeEl.style.left, 2)) / parRect.width;
+                var width = oldWidth - (e.pageX - 1 * noodle.string.trimEnd(noodle.global.active.nodeEl.style.left, 2)) / parRect.width;
+                //var width = oldWidth - 100 * (e.pageX - 1 * noodle.string.trimEnd(noodle.global.active.nodeEl.style.left, 2)) / parRect.width;
 
-                noodle.global.active.nodeEl.style.width = width + '%';
+                noodle.global.active.nodeEl.style.width = width + 'px';
                 noodle.global.active.nodeEl.style.left = e.pageX + 'px';
             }
 
             if (noodle.graphics.transformable.edges.bottom) {
-                var height = 100 * (e.pageY - nodeRect.top) / parRect.width;
-                noodle.global.active.nodeEl.style.height = height + 'vw';
+                var height = e.pageY - nodeRect.top;
+                //var height = 100 * (e.pageY - nodeRect.top) / parRect.width;
+                noodle.global.active.nodeEl.style.height = height + 'px';//'vw';
             }
             noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.inPorts);
             noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.outPorts);
@@ -118,7 +121,7 @@ window.onload = function (e) {
             if (contEl) {
                 var container = contEl.obj;
                 var mousePos = noodle.global.mousePos;
-                var contPos = noodle.html.getElPos(contEl, Infinity);
+                var contPos = noodle.html.getElPos(contEl, 1);
                 var pos = {
                     x: mousePos.x - contPos.x,
                     y: mousePos.y - contPos.y

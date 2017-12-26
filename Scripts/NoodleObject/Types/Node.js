@@ -123,7 +123,8 @@ noodle.node = {
         $(".borderSensor").unbind('mousedown').mousedown(nodeNoodle.graphics.transformable.borderSensorFunc); //Ineffective to set mousedown functions for all border sensors every time? Who cares? Will I fix it? Hmm...
         //$(".btnClose").mousedown(nodeClose);
 
-        node.html.onmousedown = function () {
+        node.html.onmousedown = function (e) {
+            e.stopPropagation();
             noodle.graphics.transformable.setActive(noodle, this); //TODO: Use correct noodle
         }
 

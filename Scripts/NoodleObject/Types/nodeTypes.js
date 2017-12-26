@@ -169,12 +169,31 @@ var nodeTypes = {
                     edEl.id = 'ed' + node.id.substr(1);
                     node.core.data.edId = edEl.id;
 
+                    ace.require("ace/ext/language_tools");
                     var editor = ace.edit(edEl.id);
+
                     editor.setTheme("ace/theme/monokai");
                     editor.getSession().setMode("ace/mode/javascript");
                     editor.setOptions({
-                        maxLines: 18446744073709551616
+                        maxLines: 18446744073709551616,
+                        enableBasicAutocompletion: true,
+                        enableSnippets: true,
+                        enableLiveAutocompletion: true
                     });
+
+
+
+                    editor.on('change', function (e, aceThing) {
+                        try {
+                            var edEl = aceThing.container;
+                            var nodeEl = noodle.html.getParentNodeEl(edEl);
+                            noodle.node.execute(nodeEl.obj);
+                        }
+                        catch (e) {
+                            console.error(e.stack);
+                        }
+                    }
+                    );
                 }
             ],
             htmlContent: '<div class="editor" style="width: 500px; height: 250px"></div>'
@@ -204,6 +223,43 @@ var nodeTypes = {
             resetFuncs: [
             ],
             htmlContent: ''
+        };
+        return noodle.node.new(noodle, core, label, pos);
+        /* var node = noodle.node.new(noodle, core, label, pos);
+        for (var i in node) {
+            this[i] = node[i];
+        } */
+    },
+    Html: function (noodle, label, pos, noodleExp) {
+        var core = {
+            name: 'Html',
+            color: 'Darkgrey',
+            inPorts: [
+                noodle.port.new(noodle, 'Html', 'string', true),
+            ],
+            outPorts: [
+            ],
+            func: function (node) {
+                var core = node.core;
+                var box = core.data.renderBox;
+                box.html.innerHTML = core.inPorts[0].value;
+            },
+            data: {
+
+            },
+            resetFuncs: [
+                function (node, nodeEl) {
+                    var core = node.core;
+                    var box = {};
+                    core.data.renderBox = box;
+                    box.html = nodeEl.getElementsByClassName('renderBox')[0];
+                    box.html.innerHtml = '';
+                    box.html.obj = box;
+                    box.html.style.height = '200px';
+                    box.html.style.width = '400px';
+                }
+            ],
+            htmlContent: '<div class="renderBox"></div>'
         };
         return noodle.node.new(noodle, core, label, pos);
         /* var node = noodle.node.new(noodle, core, label, pos);
@@ -277,31 +333,31 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
-
-    BrowserCode: function (noodle, label, pos, noodleExp) {
+    
+    Cookie: function (noodle, label, pos, noodleExp) {
         var core = {
-            name: 'BrowserCode',
-            color: 'Grey',
+            name: 'Cookie',
+            color: 'cyan',
             inPorts: [
+                noodle.port.new(noodle, 'key', 'string', true),
+                noodle.port.new(noodle, 'value', 'any', true)
             ],
             outPorts: [
-                noodle.port.new(noodle, 'function', 'function', false)
+                noodle.port.new(noodle, 'cookie main', 'object', false),
             ],
             func: function (node) {
                 var core = node.core;
+                var key = core.inPorts[0].value;
+                var val = core.inPorts[1].value;
+                if(key && val){
+                    noodle.cookie.set(noodle, key, val);
+                }
+                core.outPorts[0].value = noodle.cookie.get(noodle);
+
             },
             data: {
-                code: null,
             },
             resetFuncs: [
-                function (node) {
-                    noodle.html.firstByClass(node.html, 'btn').onclick = function () {
-                        var nodeEl = noodle.html.getParentNodeEl(this);
-                        var node = noodle.node.getObj(noodle, nodeEl);
-
-                        node.core.data.code = noodle.userFunc;
-                    }
-                }
             ],
             htmlContent: ''
         };
@@ -311,40 +367,6 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
-    Repl: function (noodle, label, pos, noodleExp) {
-        var core = {
-            name: 'Repl',
-            color: 'purple',
-            inPorts: [
-            ],
-            outPorts: [
-                noodle.port.new(noodle, 'function', 'function', false)
-            ],
-            func: function (node) {
-                var core = node.core;
-            },
-            data: {
-                code: null,
-            },
-            resetFuncs: [
-                function (node) {
-                    noodle.html.firstByClass(node.html, 'btn').onclick = function () {
-                        var nodeEl = noodle.html.getParentNodeEl(this);
-                        var node = noodle.node.getObj(noodle, nodeEl);
-
-                        node.core.data.code = noodle.userFunc;
-                    }
-                }
-            ],
-            htmlContent: '<iframe height="400px" width="100%" src="https://repl.it/repls/StridentGiftedLice?lite=true" scrolling="no" frameborder="no" allowtransparency="true" allowfullscreen="true" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-modals" width="100%" ></iframe>'
-        };
-        return noodle.node.new(noodle, core, label, pos);
-        /* var node = noodle.node.new(noodle, core, label, pos);
-        for (var i in node) {
-            this[i] = node[i];
-        } */
-    },
-
 
     Container: function (noodle, label, pos, noodleExp) {
         var core = {
@@ -367,6 +389,7 @@ var nodeTypes = {
             },
             resetFuncs: [
                 function (node, nodeEl) {
+                    var core = node.core;
                     var container = core.data.container;
                     container.html = nodeEl.getElementsByClassName('container')[0];
                     container.html.obj = container;
@@ -415,4 +438,8 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
+}
+
+function apa() {
+    alert('apa');
 }

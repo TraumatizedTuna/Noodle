@@ -1,4 +1,4 @@
-body{/*
+body{
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -12,7 +12,7 @@ body{/*
     -khtml-user-select: all;
     -webkit-user-select: all;
     -ms-user-select: all;
-    user-select: auto;*/
+    user-select: auto;
 }
 
 .container{

@@ -71,13 +71,14 @@ noodle.port = {
         var portId = portNoodle.ids.firstFree(portNoodle.ids.freeList.port);
         var code = '<div class="port ' + classes + '" id="p' + portId + '"><div class="socket num ' + classes + '" id="s' + portId + '"></div> <a class="hoverSelect">' + port.name + '</a>';
 
+        //TODO: Clean up
         //Add value element and finish port code{
-        if (port.isIn) {
+        /*if (port.isIn) {
             code += '<input type="number" id="val' + portId + '"><br></div><br>';
         }
-        else {
-            code += '<a class="hoverSelect" id="val' + portId + '"><br></div><br>';
-        }
+        else {*/
+        code += '<a class="hoverSelect" id="val' + portId + '"><br></div><br>';
+        //}
         port.valId = 'val' + portId;
         //}
 
@@ -90,12 +91,14 @@ noodle.port = {
     //Renders value of port
     renderVal(port) {
         var valEl = document.getElementById(port.valId);
+        //TODO; Clean up
+        /*
         if (port.isIn) {
             valEl.value = port.value;
         }
-        else {
+        else {*/
             valEl.innerHTML = port.value;
-        }
+        //}
     },
 
     //Gets js port from html element
