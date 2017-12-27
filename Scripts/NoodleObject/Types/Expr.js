@@ -10,14 +10,15 @@ noodle.expr = {
 
     //Creates a new expression
     new(noodle, func, args = [], ans, noodleExp, state = noodle.expr.ready) { //TODO: Should state be done if ans isn't undefined/null?
-        return {
+        var expr = {
             noodleExp: noodleExp,
-            type: 'expr',
             func: func,
             args: args,
             ans: ans,
             state: state
         };
+        Object.defineProperty(expr, 'type', {enumerable: false, value: 'expr'});
+        return expr;
     },
 
     //Returns expression with obj as answer

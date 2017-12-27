@@ -6,8 +6,8 @@ noodle.port = {
     //Functions{
     new(noodle, name, portType, isIn, wires = [], value = null, noodleExp) {
 
-        var port = { type: 'port', name: name, portType: portType, isIn: isIn, wires: wires, value: value };
-
+        var port = { name: name, portType: portType, isIn: isIn, wires: wires, value: value };
+        Object.defineProperty(port, 'type', {enumerable: false, value: 'port'});
         port.noodleExp = noodleExp || noodle.expr.defaultNoodle(noodle, port);
 
         return port;

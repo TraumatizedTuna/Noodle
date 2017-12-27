@@ -338,10 +338,10 @@ var nodeTypes = {
         var core = {
             name: 'Cookie',
             color: 'cyan',
-            inPorts: [
-                noodle.port.new(noodle, 'key', 'string', true),
-                noodle.port.new(noodle, 'value', 'any', true)
-            ],
+            inPorts: {
+                key: noodle.port.new(noodle, 'key', 'string', true),
+                val: noodle.port.new(noodle, 'value', 'any', true)
+            },
             outPorts: [
                 noodle.port.new(noodle, 'cookie main', 'object', false),
             ],
@@ -438,8 +438,4 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
-}
-
-function apa() {
-    alert('apa');
 }

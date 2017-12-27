@@ -27,7 +27,6 @@ noodle.node = {
         //Properties{
         var newCoreExp = noodle.misc.obj.clone(noodle, coreExp, {});
         var node = {
-            type: 'node',
             label: label,
             core: noodle.expr.eval(noodle, newCoreExp),
             defaultExp: coreExp,
@@ -35,7 +34,8 @@ noodle.node = {
             noodleExp: noodleExp,
             useNoodle: false,
             rendered: false
-        },
+        };
+        Object.defineProperty(node, 'type', {enumerable: false, value: 'node'});
 
             //}
 

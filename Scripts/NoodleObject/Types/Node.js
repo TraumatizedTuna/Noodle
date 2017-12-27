@@ -18,7 +18,7 @@ noodle.node = {
     //TODO: Add container parameter whenever add is called
     //Adds new node, sets it up properly and renders it
     add(noodle, container, constr, label, pos, noodleExp) {
-        var node = constr(noodle, label, pos, noodleExp); 
+        var node = constr(noodle, label, pos, noodleExp);
         container.forest.push(node);
         var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
         nodeNoodle.node.render(node, container);
@@ -31,7 +31,6 @@ noodle.node = {
         cloneCounter = 0;
         //var newCoreExp = noodle.obj.clone(noodle, core, {});
         var node = {
-            type: 'node',
             label: label,
             core: core,
             pos: pos,
@@ -39,6 +38,7 @@ noodle.node = {
             useNoodle: false,
             rendered: false
         };
+        Object.defineProperty(node, 'type', {enumerable: false, value: 'node'});
         console.log('Clone iterations: ' + cloneCounter + '\nObject: ' + core.toString());
 
         //}
@@ -174,7 +174,7 @@ noodle.node = {
             var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
             node.core.func(node);
             var outPorts = node.core.outPorts;
-            for (var i = 0; i < outPorts.length; i++) {
+            for (var i in outPorts) {
                 var port = outPorts[i]; //TODO: Only execute nodes of ports with new values
                 for (var j = 0; j < port.wires.length; j++) {
                     var wire = port.wires[j];
@@ -188,20 +188,20 @@ noodle.node = {
 
     //Runs func with each port of core
     forEachPort(core, func) {
-        for (var i = 0; i < core.inPorts.length; i++)
+        for (var i in core.inPorts)
             func(core.inPorts[i], core);
 
-        for (var i = 0; i < core.outPorts.length; i++)
+        for (var i in core.outPorts)
             func(core.outPorts[i], core);
     },
 
     //Renders all ports of node
     renderPorts(node) {
         var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
-        for (var i = 0; i < node.core.inPorts.length; i++)
+        for (var i in node.core.inPorts)
             nodeNoodle.port.render(node, node.core.inPorts[i]);
 
-        for (var i = 0; i < node.core.outPorts.length; i++)
+        for (var i in node.core.outPorts)
             nodeNoodle.port.render(node, node.core.outPorts[i]);
 
         nodeNoodle.node.forEachPort(node.core, nodeNoodle.port.renderVal);

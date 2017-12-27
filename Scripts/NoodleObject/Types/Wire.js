@@ -15,12 +15,12 @@ noodle.wire = {
     //Returns a new, unconnected wire object
     new(noodle) {
         var wire = {
-            type: 'wire',
             node0: null, port0: 0,
             node1: null, port1: 0,
             rendered: false,
             noodle: noodle,
         };
+        Object.defineProperty(wire, 'type', {enumerable: false, value: 'wire'});
         wire.noodleExp = noodle.expr.defaultNoodle(noodle, wire)
         //noodle.obj.deepStandardize(noodle, wire); //This line shouldn't do any difference but I guess I should check why it crashes
         container.wires.push(wire);
