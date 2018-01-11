@@ -7,7 +7,7 @@ noodle.port = {
     new(noodle, name, portType, isIn, wires = [], value = null, noodleExp, shortable = false) {
 
         var port = { name: name, portType: portType, isIn: isIn, wires: wires, value: value, shortable: shortable };
-        Object.defineProperty(port, 'type', {enumerable: false, value: 'port'});
+        Object.defineProperty(port, 'type', { enumerable: false, value: 'port' });
         port.noodleExp = noodleExp || noodle.expr.defaultNoodle(noodle, port);
 
         return port;
@@ -28,7 +28,7 @@ noodle.port = {
         port.noodleExp = port.noodleExp || node.noodleExp;
         var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
 
-        ports.push(port);
+        ports[port.name] = port;
         portNoodle.port.render(node, port);
         port.parNode = node;
         port.parent = ports;
@@ -36,23 +36,31 @@ noodle.port = {
 
     //Renders port in node.html
     render(node, port) {
-        var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
-        //String inOrOut indicates whether port is in or out{
-        var inOrOut;
-        if (port.isIn) {
-            inOrOut = 'in';
+        if (port.type === 'port') {
+            var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
+            //String inOrOut indicates whether port is in or out{
+            var inOrOut;
+            if (port.isIn) {
+                inOrOut = 'in';
+            }
+            else {
+                inOrOut = 'out';
+            }
+            //}
+
+            //Add port to node element
+            node.html.getElementsByClassName(inOrOut + 'Ports')[0].insertAdjacentHTML('beforeend', portNoodle.port.code(port, inOrOut + 'put', node));
+
+            port.rendered = true;
+
+            portNoodle.port.updateWires([port]);
         }
         else {
-            inOrOut = 'out';
+            //Assuming that port is either a port or a group and that groups don't contain themselves
+            for (var i in port) {
+                noodle.port.render(node, port[i]);
+            }
         }
-        //}
-
-        //Add port to node element
-        node.html.getElementsByClassName(inOrOut + 'Ports')[0].insertAdjacentHTML('beforeend', portNoodle.port.code(port, inOrOut + 'put', node));
-
-        port.rendered = true;
-
-        portNoodle.port.updateWires([port]);
     },
 
     //Sets up new wire between p0 and p1 and renders it
@@ -97,7 +105,7 @@ noodle.port = {
             valEl.value = port.value;
         }
         else {*/
-            valEl.innerHTML = port.value;
+        valEl.innerHTML = port.value;
         //}
     },
 
@@ -130,11 +138,16 @@ noodle.port = {
         }
     },
     updateWires(ports) {
-        for (var i = 0; i < ports.length; i++) {
-            for (var j = 0; j < ports[i].wires.length; j++) {
-                var wire = ports[i].wires[j];
-                if (wire != null) //Should this be in more places?
-                    wire.noodle.wire.update(wire);
+        for (var i in ports) {
+            var port = ports[i];
+            if (port.type === 'port')
+                for (var j in port.wires) {
+                    var wire = port.wires[j];
+                    if (wire != null) //Should this be in more places?
+                        wire.noodle.wire.update(wire);
+                }
+            else {
+                noodle.port.updateWires(port);
             }
         }
     },

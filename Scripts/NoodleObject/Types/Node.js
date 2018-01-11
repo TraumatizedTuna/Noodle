@@ -5,10 +5,19 @@ noodle.node = {
     async: false,
 
     objsById: {},
+
     //}
 
 
     //Functions{
+    //TODO: What if node is already rendered?
+    setDefaultPorts(noodle, node) {
+        var inports = node.core.inPorts;
+        var outPorts = node.core.outPorts;
+
+        outPorts.meta = outPorts.meta || {};
+        outPorts.meta.node = noodle.port.new(noodle, 'node', 'node', false, [], node);
+    },
     setBoard(el) { //Never used - should it be removed?
         $.get('Html/nodeBoard.html', function (data) {
             el.innerHTML = data;
@@ -39,6 +48,7 @@ noodle.node = {
             useNoodle: false,
             rendered: false
         };
+        noodle.node.setDefaultPorts(noodle, node);
         Object.defineProperty(node, 'type', { enumerable: false, value: 'node' });
         console.log('Clone iterations: ' + cloneCounter + '\nObject: ' + core.toString());
 
@@ -173,25 +183,42 @@ noodle.node = {
             var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
             node.core.func(node);
             var outPorts = node.core.outPorts;
-            for (var port of outPorts) {
-                //TODO: Only execute nodes of ports with new values
-                for (var j = 0; j < port.wires.length; j++) {
-                    var wire = port.wires[j];
-                    wire.port1.value = port.value;
-                    nodeNoodle.node.execute(wire.node1); //TODO: Don't execute same node again in case of multiple connections to same node
+
+            var f = function (noodle, port) {
+                if (port.type === 'port') {
+                    //TODO: Only execute nodes of ports with new values
+                    for (var j = 0; j < port.wires.length; j++) {
+                        var wire = port.wires[j];
+                        wire.port1.value = port.value;
+                        nodeNoodle.node.execute(wire.node1); //TODO: Don't execute same node again in case of multiple connections to same node
+                    }
+                    nodeNoodle.port.renderVal(port);
                 }
-                nodeNoodle.port.renderVal(port);
+                else {
+                    for (var i in port)
+                        f(noodle, port[i])
+                }
             }
+
+            f(noodle, node.core.outPorts);
         }
     },
 
     //Runs func with each port of core
     forEachPort(core, func) {
-        for (var i in core.inPorts)
-            func(core.inPorts[i], core);
+        var f = function (port, core, func) {
+            if (port.type === 'port')
+                func(port, core);
+            else
+                for (var i in port) {
+                    f(port[i], core, func);
+                }
+        }
 
+        for (var i in core.inPorts)
+            f(core.inPorts[i], core, func);
         for (var i in core.outPorts)
-            func(core.outPorts[i], core);
+            f(core.outPorts[i], core, func);
     },
 
     //Renders all ports of node

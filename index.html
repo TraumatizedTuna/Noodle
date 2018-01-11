@@ -149,7 +149,7 @@
 
             calcTime = new Date().getTime() - startTime;
             console.log('Render time: ' + calcTime);
-            noodle.port.connect(container.forest[1].core.outPorts[0], container.forest[0].core.inPorts[0]);
+            noodle.port.connect(container.forest[1].core.outPorts[0], container.forest[0].core.inPorts.term0);
         }
 
 

@@ -47,8 +47,8 @@ noodle.events = {
                 nodeEl.style.top = node.pos.y + 'px';
 
                 //TODO: Update wires
-                noodle.port.updateWires(noodle.node.getObj(noodle, nodeEl).core.inPorts);
-                noodle.port.updateWires(noodle.node.getObj(noodle, nodeEl).core.outPorts);
+                noodle.port.updateWires(node.core.inPorts);
+                noodle.port.updateWires(node.core.outPorts);
             }
         },
         pullWire(e) {
@@ -151,6 +151,12 @@ window.onload = function (e) {
                 }
                 noodle.ui.menus.addAirMenu(contEl, newNodeMenuContent, pos); //Or should it be active container?
             }
+        }
+
+        switch (e.keyCode) {
+            case 46: //Delete
+            case 88: //X
+                noodle.graphics.transformable.close();
         }
     };
 

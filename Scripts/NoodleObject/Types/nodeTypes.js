@@ -4,15 +4,15 @@ var nodeTypes = {
         var core = {
             name: 'add',
             color: 'yellow',
-            inPorts: [
-                noodle.port.new(noodle, 'term0', 'num', true),
-                noodle.port.new(noodle, 'term1', 'num', true)
-            ],
-            outPorts: [
-                noodle.port.new(noodle, 'sum', 'num', false)
-            ],
+            inPorts: {
+                term0: noodle.port.new(noodle, 'term0', 'num', true),
+                term1: noodle.port.new(noodle, 'term1', 'num', true)
+            },
+            outPorts: {
+                sum: noodle.port.new(noodle, 'sum', 'num', false)
+            },
             func: function (node) {
-                node.core.outPorts[0].value = node.core.inPorts[0].value + node.core.inPorts[0].value;
+                node.core.outPorts.sum.value = node.core.inPorts.term0.value + node.core.inPorts.term1.value;
             },
             data: {},
             resetFuncs: [],
@@ -289,18 +289,18 @@ var nodeTypes = {
             ],
             func: function (node) {
                 var core = node.core;
-                var name = core.inPorts[0].value;
+                var name = core.inPorts.name.value;
 
                 try {
                     var constrBody =
                         'try {\n    var newCore = {\n        name: "' + name +
-                        '",\n        color: "' + core.inPorts[1].value +
-                        '",\n        inPorts: ' + core.inPorts[2].value +
-                        ',\n        outPorts: ' + core.inPorts[3].value +
-                        ',\n        func: ' + core.inPorts[4].value +
-                        ',\n        data: ' + core.inPorts[5].value +
-                        ',\n        resetFuncs: ' + core.inPorts[7].value +
-                        ',\n        htmlContent: "' + core.inPorts[6].value +
+                        '",\n        color: "' + core.inPorts.color.value +
+                        '",\n        inPorts: ' + core.inPorts['in ports'].value +
+                        ',\n        outPorts: ' + core.inPorts['out ports'].value +
+                        ',\n        func: ' + core.inPorts.function.value +
+                        ',\n        data: ' + core.inPorts.data.value +
+                        ',\n        resetFuncs: ' + core.inPorts['reset functions'].value +
+                        ',\n        htmlContent: "' + core.inPorts.html.value +
                         '"\n    }\n    return noodle.node.new(noodle, newCore, label, pos);\n}\ncatch (e) {\n    return null;\n}';
                     core.outPorts[1].value = constrBody;
                     var constr = new Function(
@@ -333,6 +333,48 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
+    Object: function (noodle, label, pos, noodleExp) {
+        var core = {
+            name: 'Object',
+            color: 'magenta',
+            inPorts: {
+                object: noodle.port.new(noodle, 'object', 'object', true)
+            },
+            outPorts: {
+                object: noodle.port.new(noodle, 'object', 'object', false)
+            },
+            func: function (node) {
+                var core = node.core;
+                var inPorts = core.inPorts;
+                var outPorts = core.outPorts;
+                var obj = inPorts.object.value;
+
+                if (obj === undefined)
+                    obj = {};
+
+                outPorts.object.value = obj;
+                outPorts.properties = outPorts.properties || {};
+                for (var i in obj) {
+                    var prop = obj[i];
+                    var propPort = outPorts.properties[i];
+                    if (!propPort) {
+                        noodle.port.addToPorts(node, core.outPorts.properties, noodle.port.new(noodle, i, prop.type || typeof prop, false, [], prop));
+                    }
+                }
+            },
+            data: {
+            },
+            resetFuncs: [
+            ],
+            htmlContent: noodle.files.getFile('Html/Nodes/nodeCreator.html')
+        };
+        return noodle.node.new(noodle, core, label, pos);
+        /* var node = noodle.node.new(noodle, core, label, pos);
+        for (var i in node) {
+            this[i] = node[i];
+        } */
+    },
+
     
     Cookie: function (noodle, label, pos, noodleExp) {
         var core = {
