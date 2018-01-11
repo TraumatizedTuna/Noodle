@@ -36,19 +36,33 @@ noodle.graphics = {
         scale: false,
         offsetX: 0,
         offsetY: 0,
+        startPos: { x: 0, y: 0 },
         edges: { left: false, top: false, right: false, bottom: false },
         //}
 
         //Functions{
-        setActive(noodle, el) {
+        setActive(noodle, el, solo) {
             el.style.zIndex = noodle.global.maxZInd++;
-            
+
             var oldActive = noodle.global.active.nodeEl;
-            if(oldActive){
+            if (oldActive) {
                 oldActive.classList.remove('active');
             }
             el.classList.add('active');
             noodle.global.active.nodeEl = el;
+
+            noodle.graphics.transformable.select(noodle, el, solo);
+        },
+
+        select(noodle, el, solo) {
+            if (solo) {
+                for (var oldSelEl of noodle.global.selected.nodeEls)
+                    oldSelEl.classList.remove('selected');
+                noodle.global.selected.nodeEls.length = 0;
+            }
+
+            noodle.array.pushIfAbsent(noodle, noodle.global.selected.nodeEls, el); //TODO: Use faster list
+            el.classList.add('selected');
         },
 
 
@@ -66,22 +80,21 @@ noodle.graphics = {
 
         close() {
             //TODO: Remove js object
-            var nodeEl = noodle.html.getParentNodeEl(this);
-            var node = noodle.node.getObj(noodle, nodeEl);
+            for (var nodeEl of noodle.global.selected.nodeEls) {
+                var node = nodeEl.obj;
 
-            noodle.node.disconnect(noodle, node); //TODO: Noodle from noodle expression
-            noodle.ids.forget(noodle.ids.freeList.node, parseInt(node.id.substr(1), 10), true); //This needs to be before the next line, right?
-            noodle.node.forEachPort(node.core, noodle.port.forget);
-            container.forest.splice(container.forest.indexOf(node), 1);
+                noodle.node.disconnect(noodle, node); //TODO: Noodle from noodle expression
+                noodle.ids.forget(noodle.ids.freeList.node, parseInt(node.id.substr(1), 10), true); //This needs to be before the next line, right?
+                noodle.node.forEachPort(node.core, noodle.port.forget);
+                container.forest.splice(container.forest.indexOf(node), 1);
 
-            nodeEl.remove();
+                nodeEl.remove();
 
-            console.info('nodeClose() - id: ' + node.id + ', name: ' + node.core.name);
+                console.info('nodeClose() - id: ' + node.id + ', name: ' + node.core.name);
+            }
         },
         topBarFunc(e) {
-            nodeEl = this.parentElement.parentElement;
-            //noodle.graphics.transformable.setActive(noodle, nodeEl);
-
+            var nodeEl = noodle.html.getParentNodeEl(this);
             noodle.events.mousemove.setActiveTool(noodle.events.toolBox.move);
             //var left = noodle.global.active.nodeEl.style.left;
             var left = nodeEl.style.left;
@@ -89,8 +102,18 @@ noodle.graphics = {
             //var top = noodle.global.active.nodeEl.style.top;
             var top = nodeEl.style.top;
             top = top.substring(0, top.length - 2);
+            //TODO: Figure out whether or not the following two lines are useful
             noodle.graphics.transformable.offsetX = left - e.pageX; //Might cause problems with automatic positioning?
             noodle.graphics.transformable.offsetY = top - e.pageY;
+
+            for (var nodeEl of noodle.global.selected.nodeEls) {
+                var node = nodeEl.obj;
+                node.startPos.x = node.pos.x;
+                node.startPos.y = node.pos.y;
+            }
+
+            noodle.graphics.transformable.startPos.x = e.pageX;
+            noodle.graphics.transformable.startPos.y = e.pageY;
         },
         maximize: null
         //}

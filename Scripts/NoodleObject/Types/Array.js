@@ -10,5 +10,11 @@ noodle.array={
     },
     sort(noodle, list) {
 
+    },
+    pushIfAbsent(noodle, list, el) {
+        if (list.indexOf(el) === -1) {
+            list.push(el);
+        }
+        return list;
     }
 };

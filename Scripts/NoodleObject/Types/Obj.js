@@ -67,6 +67,8 @@ noodle.obj = {
 
     standardize(noodle, obj, parNode) { //TODO: Dynamically figure out parent node
         if (obj != null && obj != undefined) {
+            if (typeof obj != 'object' && typeof obj != 'function')
+                return;
             //Set parNode of obj{
             if (parNode == undefined || parNode.type != 'node') {
                 parNode = obj;
@@ -76,24 +78,26 @@ noodle.obj = {
             }
             if (parNode.type != 'node')
                 parNode = undefined;
-            obj.parNode = parNode;
+            Object.defineProperty(obj, 'parNode', { enumerable: false, value: parNode });
+            //obj.parNode = parNode;
             //}
 
             //Set type of obj
             if (obj.type == undefined && typeof obj == 'object') {
-                obj.type = 'obj';
+                Object.defineProperty(obj, 'type', { enumerable: false, value: 'obj' });
             }
 
             //Set parent of properties
             for (var i in obj) {
                 if (typeof obj[i] == 'object' && obj[i] != null && obj[i] != undefined && i != 'parent' && i != 'parNode') {
-                    obj[i].parent = obj;
+                    Object.defineProperty(obj[i], 'parent', { enumerable: false, value: obj });
                     //obj[i].parNode = parNode;
                 }
             }
 
             //Set noodleExp of obj
-            obj.noodleExp = obj.noodleExp || noodle.expr.defaultNoodle(noodle, obj);
+            var noodleExp = obj.noodleExp || noodle.expr.defaultNoodle(noodle, obj);
+            Object.defineProperty(obj, 'noodleExp', { enumerable: false, value: noodleExp });
         }
     },
 

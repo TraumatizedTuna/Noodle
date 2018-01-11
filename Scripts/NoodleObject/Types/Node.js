@@ -5,10 +5,19 @@ noodle.node = {
     async: false,
 
     objsById: {},
+
     //}
 
 
     //Functions{
+    //TODO: What if node is already rendered?
+    setDefaultPorts(noodle, node) {
+        var inports = node.core.inPorts;
+        var outPorts = node.core.outPorts;
+
+        outPorts.meta = outPorts.meta || {};
+        outPorts.meta.node = noodle.port.new(noodle, 'node', 'node', false, [], node);
+    },
     setBoard(el) { //Never used - should it be removed?
         $.get('Html/nodeBoard.html', function (data) {
             el.innerHTML = data;
@@ -18,7 +27,7 @@ noodle.node = {
     //TODO: Add container parameter whenever add is called
     //Adds new node, sets it up properly and renders it
     add(noodle, container, constr, label, pos, noodleExp) {
-        var node = constr(noodle, label, pos, noodleExp); 
+        var node = constr(noodle, label, pos, noodleExp);
         container.forest.push(node);
         var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
         nodeNoodle.node.render(node, container);
@@ -31,14 +40,16 @@ noodle.node = {
         cloneCounter = 0;
         //var newCoreExp = noodle.obj.clone(noodle, core, {});
         var node = {
-            type: 'node',
             label: label,
             core: core,
             pos: pos,
+            startPos: { x: pos.x, y: pos.y }, //Have to clone it to avoid weird stuff
             noodleExp: noodleExp,
             useNoodle: false,
             rendered: false
         };
+        noodle.node.setDefaultPorts(noodle, node);
+        Object.defineProperty(node, 'type', { enumerable: false, value: 'node' });
         console.log('Clone iterations: ' + cloneCounter + '\nObject: ' + core.toString());
 
         //}
@@ -88,7 +99,6 @@ noodle.node = {
     render(node, container) { //TODO: Noodle
         var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
         var nodeId = nodeNoodle.ids.firstFree(nodeNoodle.ids.freeList.node);
-        var data = '';
         //TODO: Put all the stuff back into success to allow async
         $.ajax({
             //ajax options{
@@ -96,65 +106,65 @@ noodle.node = {
             type: 'GET',
             url: 'Html/emptyNode.html',
             //}
-            success(d) {
-                data = d;
+            success(data) {
+
+
+                //Html text{
+                //Set color of node
+                var style = nodeNoodle.graphics.color.style(node.core.color);
+
+                node.id = 'n' + nodeId;
+                node.html = '<div class="node" id="n' + nodeId + '"' + style + '>' + data; //Not sure I like .html stuff
+                node.html += '<div class="nodeContent"></div><br><a style="background-color: rgba(255, 255, 255, 0.5)"> id: ' + node.id + '</a>';
+                //}
+
+                //Render node in container{
+                container.html.insertAdjacentHTML('beforeend', node.html);
+                node.html = document.getElementById(node.id);
+                node.html.obj = node;
+
+                nodeNoodle.ids.add(node);
+                //}
+
+                //Set events{
+                $(".borderSensor").unbind('mousedown').mousedown(nodeNoodle.graphics.transformable.borderSensorFunc); //Ineffective to set mousedown functions for all border sensors every time? Who cares? Will I fix it? Hmm...
+                //$(".btnClose").mousedown(nodeClose);
+
+                node.html.onmousedown = function (e) {
+                    e.stopPropagation();
+                    //noodle.graphics.transformable.setActive(noodle, this); //TODO: Use correct noodle
+                    if (!this.classList.contains('active'))
+                        noodle.graphics.transformable.setActive(noodle, this, !e.shiftKey);
+                }
+
+                nodeNoodle.html.firstByClass(node.html, "btnClose").onmousedown = nodeNoodle.graphics.transformable.close;
+                nodeNoodle.html.firstByClass(node.html, "btnMaximize").onmousedown = nodeNoodle.graphics.transformable.maximize;
+
+                nodeNoodle.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
+
+
+                nodeNoodle.node.renderPorts(node);
+                nodeNoodle.node.setSockEv(node);
+                //}
+
+                //Add content to node{
+                var nodeEl = nodeNoodle.html.getEl(node);
+                if (node.core.htmlContent != undefined) {
+                    nodeEl.getElementsByClassName('nodeContent')[0].innerHTML = node.core.htmlContent;
+                }
+                nodeEl.style.left = node.pos.x + 'px';
+                nodeEl.style.top = node.pos.y + 'px';
+                nodeNoodle.ids.add(node);
+                //}
+
+                //Run reset functions of node
+                for (var i = 0; i < node.core.resetFuncs.length; i++) {
+                    node.core.resetFuncs[i](node, nodeEl);
+                }
+
+                node.rendered = true;
             }
         });
-
-
-        //Html text{
-        //Set color of node
-        var style = nodeNoodle.graphics.color.style(node.core.color);
-
-        node.id = 'n' + nodeId;
-        node.html = '<div class="node" id="n' + nodeId + '"' + style + '>' + data; //Not sure I like .html stuff
-        node.html += '<div class="nodeContent"></div><br><a style="background-color: rgba(255, 255, 255, 0.5)"> id: ' + node.id + '</a>';
-        //}
-
-        //Render node in container{
-        container.html.insertAdjacentHTML('beforeend', node.html);
-        node.html = document.getElementById(node.id);
-        node.html.obj = node;
-
-        nodeNoodle.ids.add(node);
-        //}
-
-        //Set events{
-        $(".borderSensor").unbind('mousedown').mousedown(nodeNoodle.graphics.transformable.borderSensorFunc); //Ineffective to set mousedown functions for all border sensors every time? Who cares? Will I fix it? Hmm...
-        //$(".btnClose").mousedown(nodeClose);
-
-        node.html.onmousedown = function () {
-            noodle.graphics.transformable.setActive(noodle, this); //TODO: Use correct noodle
-        }
-
-        nodeNoodle.html.firstByClass(node.html, "btnClose").onmousedown = nodeNoodle.graphics.transformable.close;
-        nodeNoodle.html.firstByClass(node.html, "btnMaximize").onmousedown = nodeNoodle.graphics.transformable.maximize;
-
-        nodeNoodle.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
-
-
-        nodeNoodle.node.renderPorts(node);
-        nodeNoodle.node.setSockEv(node);
-        //}
-
-        //Add content to node{
-        var nodeEl = nodeNoodle.html.getEl(node);
-        if (node.core.htmlContent != undefined) {
-            nodeEl.getElementsByClassName('nodeContent')[0].innerHTML = node.core.htmlContent;
-        }
-        nodeEl.style.left = node.pos.x + 'px';
-        nodeEl.style.top = node.pos.y + 'px';
-        nodeNoodle.ids.add(node);
-        //}
-
-        //Run reset functions of node
-        for (var i = 0; i < node.core.resetFuncs.length; i++) {
-            node.core.resetFuncs[i](node, nodeEl);
-        }
-
-        node.rendered = true;
-        //}
-        //});
     },
 
     //Cuts all wires connected to node
@@ -173,34 +183,51 @@ noodle.node = {
             var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
             node.core.func(node);
             var outPorts = node.core.outPorts;
-            for (var i = 0; i < outPorts.length; i++) {
-                var port = outPorts[i]; //TODO: Only execute nodes of ports with new values
-                for (var j = 0; j < port.wires.length; j++) {
-                    var wire = port.wires[j];
-                    wire.port1.value = port.value;
-                    nodeNoodle.node.execute(wire.node1); //TODO: Don't execute same node again in case of multiple connections to same node
+
+            var f = function (noodle, port) {
+                if (port.type === 'port') {
+                    //TODO: Only execute nodes of ports with new values
+                    for (var j = 0; j < port.wires.length; j++) {
+                        var wire = port.wires[j];
+                        wire.port1.value = port.value;
+                        nodeNoodle.node.execute(wire.node1); //TODO: Don't execute same node again in case of multiple connections to same node
+                    }
+                    nodeNoodle.port.renderVal(port);
                 }
-                nodeNoodle.port.renderVal(port);
+                else {
+                    for (var i in port)
+                        f(noodle, port[i])
+                }
             }
+
+            f(noodle, node.core.outPorts);
         }
     },
 
     //Runs func with each port of core
     forEachPort(core, func) {
-        for (var i = 0; i < core.inPorts.length; i++)
-            func(core.inPorts[i], core);
+        var f = function (port, core, func) {
+            if (port.type === 'port')
+                func(port, core);
+            else
+                for (var i in port) {
+                    f(port[i], core, func);
+                }
+        }
 
-        for (var i = 0; i < core.outPorts.length; i++)
-            func(core.outPorts[i], core);
+        for (var i in core.inPorts)
+            f(core.inPorts[i], core, func);
+        for (var i in core.outPorts)
+            f(core.outPorts[i], core, func);
     },
 
     //Renders all ports of node
     renderPorts(node) {
         var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
-        for (var i = 0; i < node.core.inPorts.length; i++)
+        for (var i in node.core.inPorts)
             nodeNoodle.port.render(node, node.core.inPorts[i]);
 
-        for (var i = 0; i < node.core.outPorts.length; i++)
+        for (var i in node.core.outPorts)
             nodeNoodle.port.render(node, node.core.outPorts[i]);
 
         nodeNoodle.node.forEachPort(node.core, nodeNoodle.port.renderVal);
@@ -222,11 +249,19 @@ noodle.node = {
             $('.socket').mouseup(function (e) {
                 var pullPort = noodle.port.getObj(noodle, noodle.global.active.socketEl.parentElement);
                 var targetPort = noodle.port.getObj(noodle, e.target.parentElement);
-                if (noodle.html.hasClass(noodle.global.active.socketEl, 'output')) { //If the wire is pulled from an output socket
-                    noodle.wire.connect(pullPort, targetPort, noodle.global.active.pullWire, noodle);
+
+                //If ports are different or allowed to short, connect them
+                if (pullPort !== targetPort || pullPort.shortable) {
+                    if (noodle.html.hasClass(noodle.global.active.socketEl, 'output')) { //If the wire is pulled from an output socket
+                        noodle.wire.connect(pullPort, targetPort, noodle.global.active.pullWire, noodle);
+                    }
+                    else {
+                        noodle.wire.connect(targetPort, pullPort, noodle.global.active.pullWire, noodle);
+                    }
                 }
+                //Otherwise, remove wire
                 else {
-                    noodle.wire.connect(targetPort, pullPort, noodle.global.active.pullWire, noodle);
+                    noodle.wire.removeEl(noodle.global.active.pullWire);
                 }
 
                 noodle.events.defMouseup();

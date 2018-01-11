@@ -7,8 +7,9 @@ noodle.events = {
 
             //TODO: Kinda stupid to check this on every mousemove event
             if (noodle.graphics.transformable.edges.right) {
-                var width = 100 * (e.pageX - nodeRect.left) / parRect.width;
-                noodle.global.active.nodeEl.style.width = width + '%';
+                var width = e.pageX - nodeRect.left;
+                //var width = 100 * (e.pageX - nodeRect.left) / parRect.width;
+                noodle.global.active.nodeEl.style.width = width + 'px';
             }
             else if (noodle.graphics.transformable.edges.left) {
                 //var width = 100 * (nodeRect.width + nodeRect.left - e.pageX) / parRect.width;
@@ -21,25 +22,34 @@ noodle.events = {
                     oldWidth = 25;
                 }
 
-                var width = oldWidth - 100 * (e.pageX - 1 * noodle.string.trimEnd(noodle.global.active.nodeEl.style.left, 2)) / parRect.width;
+                var width = oldWidth - (e.pageX - 1 * noodle.string.trimEnd(noodle.global.active.nodeEl.style.left, 2)) / parRect.width;
+                //var width = oldWidth - 100 * (e.pageX - 1 * noodle.string.trimEnd(noodle.global.active.nodeEl.style.left, 2)) / parRect.width;
 
-                noodle.global.active.nodeEl.style.width = width + '%';
+                noodle.global.active.nodeEl.style.width = width + 'px';
                 noodle.global.active.nodeEl.style.left = e.pageX + 'px';
             }
 
             if (noodle.graphics.transformable.edges.bottom) {
-                var height = 100 * (e.pageY - nodeRect.top) / parRect.width;
-                noodle.global.active.nodeEl.style.height = height + 'vw';
+                var height = e.pageY - nodeRect.top;
+                //var height = 100 * (e.pageY - nodeRect.top) / parRect.width;
+                noodle.global.active.nodeEl.style.height = height + 'px';//'vw';
             }
             noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.inPorts);
             noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.outPorts);
         },
         move(e) {
-            noodle.global.active.nodeEl.style.left = e.pageX + noodle.graphics.transformable.offsetX + "px";
-            noodle.global.active.nodeEl.style.top = e.pageY + noodle.graphics.transformable.offsetY + "px";
-            //TODO: Update wires
-            noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.inPorts);
-            noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.outPorts);
+            var startPos = noodle.graphics.transformable.startPos;
+            for (var nodeEl of noodle.global.selected.nodeEls) {
+                var node = nodeEl.obj;
+                node.pos.x = node.startPos.x + e.pageX - startPos.x;
+                node.pos.y = node.startPos.y + e.pageY - startPos.y;
+                nodeEl.style.left = node.pos.x + 'px';
+                nodeEl.style.top = node.pos.y + 'px';
+
+                //TODO: Update wires
+                noodle.port.updateWires(node.core.inPorts);
+                noodle.port.updateWires(node.core.outPorts);
+            }
         },
         pullWire(e) {
             var sockEl = noodle.global.active.socketEl;
@@ -86,36 +96,81 @@ document.onmousemove = function (e) {
 };
 document.onmouseup = noodle.events.defMouseup;
 
-window.onkeydown = function (e) {
-    if (e.ctrlKey) {
-        //setActiveTool(toolBox.cut)
-        //mainCont
-        document.getElementsByTagName("body")[0].style.cursor = "crosshair";
-
-        $('.wire').unbind().mouseover(function (e) {
-            if (e.which === 1)
-                noodle.wire.cut(noodle.wire.getObj(noodle, e.target));
-        });
-
-        window.onkeyup = function (e) {
-            console.log("Stop cut");
+window.onload = function (e) {
+    var a = 3;
+    document.onkeydown = function (e) {
+        if (e.ctrlKey) {
+            //setActiveTool(toolBox.cut)
             //mainCont
-            document.getElementsByTagName("body")[0].style.cursor = "auto";
-            $('.wire').unbind();
-            window.onkeyup = noodle.events.defKeyup;
-        };
-    }
+            document.getElementsByTagName("body")[0].style.cursor = "crosshair";
 
-    if (e.shiftKey && e.keyCode === 65) { //Shift + A
-        var newNodeMenuContent = [];
-        for (var i in nodeTypes) {
-            var nodeType = nodeTypes[i];
-            newNodeMenuContent.push({
-                label: i,
-                //TODO: Use the right container
-                func: eval('var f = function(){\nvar nodeType = nodeTypes["' + i + '"];\nnoodle.node.add(noodle, container, nodeType, undefined, noodle.global.mousePos);\n}; f;') //TODO: This feels like a really dirty way to generate a function
+            $('.wire').unbind().mouseover(function (e) {
+                if (e.which === 1)
+                    noodle.wire.cut(noodle.wire.getObj(noodle, e.target));
             });
+
+            window.onkeyup = function (e) {
+                console.log("Stop cut");
+                //mainCont
+                document.getElementsByTagName("body")[0].style.cursor = "auto";
+                $('.wire').unbind();
+                window.onkeyup = noodle.events.defKeyup;
+            };
         }
-        noodle.ui.menus.addAirMenu(e.target, newNodeMenuContent, noodle.global.mousePos); //Or should it be active container?
-    }
+
+        if (e.shiftKey && e.keyCode === 65) { //Shift + A
+            var newNodeMenuContent = [];
+            //TODO: Kinda stupid to convert back and forth between obj and html?
+            var contEl = noodle.global.active.container.html;
+            /*if (!contEl.classList.contains('container')) {
+                contEl = contEl.getElementsByClassName('container')[0];
+            }*/
+            if (contEl) {
+                var container = contEl.obj;
+                var mousePos = noodle.global.mousePos;
+                var contPos = noodle.html.getElPos(contEl, 1);
+                var pos = {
+                    x: mousePos.x - contPos.x,
+                    y: mousePos.y - contPos.y
+                };
+                for (var i in nodeTypes) {
+                    var nodeType = nodeTypes[i];
+                    newNodeMenuContent.push({
+                        label: i,
+                        //TODO: Use the right container
+                        func: eval('var f = function(){\nvar nodeType = nodeTypes["' + i + '"];\nnoodle.node.add(noodle, container, nodeType, undefined, noodle.global.mousePos);\n}; f;'), //TODO: This feels like a really dirty way to generate a function
+                        expr: noodle.expr.new(
+                            noodle,
+                            noodle.node.add,
+                            noodle.expr.allFromObj(noodle, [noodle, container, nodeTypes[i], '', pos]),
+                            null,
+                            noodle.expr.fromObj(noodle),
+                            noodle.expr.alwaysReady
+                        )
+                    });
+                }
+                noodle.ui.menus.addAirMenu(contEl, newNodeMenuContent, pos); //Or should it be active container?
+            }
+        }
+
+        switch (e.keyCode) {
+            case 46: //Delete
+            case 88: //X
+                noodle.graphics.transformable.close();
+        }
+    };
+
+    $(document).on('click', '.container', function (e) {
+        noodle.global.active.container = e.target.obj;
+    });
+
+
+    $('.container').click(function (e) {
+        var a = 3;
+    });
+
+    document.getElementsByClassName('container')[0].onclick = function (e) {
+        var contEl = e.target;
+        contEl.focus();
+    };
 };
