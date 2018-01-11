@@ -6,6 +6,7 @@ noodle.ui = {
             var menuEl = document.getElementById("airMenu");
             menuEl.style.left = position.x - 8 + "px";
             menuEl.style.top = position.y - 8 + "px";
+            menuEl.innerHTML = ''; //In case menu is opened again before it's closed
             for (var i in content) {
                 menuEl.insertAdjacentHTML('beforeend', '<div class="menuRow" id="mr' + i + '">' + content[i].label + '</div>');
                 var rowEl = document.getElementById('mr' + i);

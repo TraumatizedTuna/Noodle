@@ -7,11 +7,12 @@ noodle.global = {
         menuEl: null
     },
     selected: {
-        nodes: [],
+        nodeEls: [],
         tools: []
     },
 
     mousePos: { x: 0, y: 0 },
+    savedMousePos: { x: 0, y: 0 },
     maxZInd: 0
 };
 

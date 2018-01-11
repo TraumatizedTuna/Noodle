@@ -271,16 +271,16 @@ var nodeTypes = {
         var core = {
             name: 'NodeCreator',
             color: 'orange',
-            inPorts: [
-                noodle.port.new(noodle, 'name', 'string', true),
-                noodle.port.new(noodle, 'color', 'string', true),
-                noodle.port.new(noodle, 'in ports', 'string', true),
-                noodle.port.new(noodle, 'out ports', 'string', true),
-                noodle.port.new(noodle, 'function', 'string', true),
-                noodle.port.new(noodle, 'data', 'obj', true),
-                noodle.port.new(noodle, 'html', 'string', true),
-                noodle.port.new(noodle, 'reset functions', 'string', true)
-            ],
+            inPorts: {
+                name: noodle.port.new(noodle, 'name', 'string', true),
+                color: noodle.port.new(noodle, 'color', 'string', true),
+                'in ports': noodle.port.new(noodle, 'in ports', 'string', true),
+                'out ports': noodle.port.new(noodle, 'out ports', 'string', true),
+                function: noodle.port.new(noodle, 'function', 'string', true),
+                data: noodle.port.new(noodle, 'data', 'obj', true),
+                html: noodle.port.new(noodle, 'html', 'string', true),
+                'reset functions': noodle.port.new(noodle, 'reset functions', 'string', true)
+            },
             outPorts: [
                 noodle.port.new(noodle, 'constructor', 'func', false),
                 noodle.port.new(noodle, 'constructor body', 'string', false),
@@ -342,9 +342,9 @@ var nodeTypes = {
                 key: noodle.port.new(noodle, 'key', 'string', true),
                 val: noodle.port.new(noodle, 'value', 'any', true)
             },
-            outPorts: [
-                noodle.port.new(noodle, 'cookie main', 'object', false),
-            ],
+            outPorts: {
+                'cookie main': noodle.port.new(noodle, 'cookie main', 'object', false)
+            },
             func: function (node) {
                 var core = node.core;
                 var key = core.inPorts[0].value;
@@ -372,9 +372,9 @@ var nodeTypes = {
         var core = {
             name: 'Container',
             color: 'rgba(64,64,64,0.4)',
-            inPorts: [
-                noodle.port.new(noodle, 'in', 'text', true)
-            ],
+            inPorts: {
+                in: noodle.port.new(noodle, 'in', 'text', true)
+            },
             outPorts: [
                 noodle.port.new(noodle, 'out', 'text', false)
             ],
@@ -393,7 +393,8 @@ var nodeTypes = {
                     var container = core.data.container;
                     container.html = nodeEl.getElementsByClassName('container')[0];
                     container.html.obj = container;
-                    container.html.style.height = '200px';
+                    container.html.style.height = '100%';
+                    container.html.style.bottom = '0px;'; //TODO
                 }
             ],
             htmlContent: '<div class="container"></div>'

@@ -73,6 +73,11 @@ body{
     pointer-events: all;
 }
 
+.node.selected{
+    border-color: #ff5800;
+    border-width: 3px;
+}
+
 .node.active{
     border-color: #f3ff68;
     opacity: 1;
@@ -86,7 +91,8 @@ body{
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.29);
     border-radius: 5px;
-    
+    height: 100%;
+    bottom: 0;
 }
 
 #plus{

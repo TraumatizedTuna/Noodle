@@ -38,11 +38,18 @@ noodle.events = {
             noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.outPorts);
         },
         move(e) {
-            noodle.global.active.nodeEl.style.left = e.pageX + noodle.graphics.transformable.offsetX + "px";
-            noodle.global.active.nodeEl.style.top = e.pageY + noodle.graphics.transformable.offsetY + "px";
-            //TODO: Update wires
-            noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.inPorts);
-            noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.outPorts);
+            var startPos = noodle.graphics.transformable.startPos;
+            for (var nodeEl of noodle.global.selected.nodeEls) {
+                var node = nodeEl.obj;
+                node.pos.x = node.startPos.x + e.pageX - startPos.x;
+                node.pos.y = node.startPos.y + e.pageY - startPos.y;
+                nodeEl.style.left = node.pos.x + 'px';
+                nodeEl.style.top = node.pos.y + 'px';
+
+                //TODO: Update wires
+                noodle.port.updateWires(noodle.node.getObj(noodle, nodeEl).core.inPorts);
+                noodle.port.updateWires(noodle.node.getObj(noodle, nodeEl).core.outPorts);
+            }
         },
         pullWire(e) {
             var sockEl = noodle.global.active.socketEl;
@@ -147,7 +154,7 @@ window.onload = function (e) {
         }
     };
 
-    $(document).on('click', '.container', function(e){
+    $(document).on('click', '.container', function (e) {
         noodle.global.active.container = e.target.obj;
     });
 

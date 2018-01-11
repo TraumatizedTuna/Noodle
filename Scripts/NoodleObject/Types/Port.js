@@ -4,15 +4,15 @@ noodle.port = {
     //}
 
     //Functions{
-    new(noodle, name, portType, isIn, wires = [], value = null, noodleExp) {
+    new(noodle, name, portType, isIn, wires = [], value = null, noodleExp, shortable = false) {
 
-        var port = { name: name, portType: portType, isIn: isIn, wires: wires, value: value };
+        var port = { name: name, portType: portType, isIn: isIn, wires: wires, value: value, shortable: shortable };
         Object.defineProperty(port, 'type', {enumerable: false, value: 'port'});
         port.noodleExp = noodleExp || noodle.expr.defaultNoodle(noodle, port);
 
         return port;
     },
-    //Returnes expression to generate port
+    //Returns expression to generate port
     newExpr(noodle, name, type, isIn) {
         var exp = noodle.expr.new(
             noodle, //noodle
