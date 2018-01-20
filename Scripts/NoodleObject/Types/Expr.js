@@ -47,7 +47,7 @@ noodle.expr = {
             return noodle.expr.new(
                 noodle,
                 function(noodle, obj){
-                    return noodle.obj.binClonePlus(noodle, obj);
+                    return noodle.object.binClonePlus(noodle, obj);
                 },
                 [noodleExp, noodle.expr.fromObj(noodle, obj, noodleExp)], //TODO: Should I really use noodleExp as first argument?
                 null,

@@ -22,7 +22,7 @@ noodle.wire = {
         };
         Object.defineProperty(wire, 'type', {enumerable: false, value: 'wire'});
         wire.noodleExp = noodle.expr.defaultNoodle(noodle, wire)
-        //noodle.obj.deepStandardize(noodle, wire); //This line shouldn't do any difference but I guess I should check why it crashes
+        //noodle.object.deepStandardize(noodle, wire); //This line shouldn't do any difference but I guess I should check why it crashes
         container.wires.push(wire);
         var wireId = noodle.ids.firstFree(noodle.ids.freeList.wire);
         wire.id = 'w' + wireId;

@@ -1,5 +1,5 @@
 var cloneCounter = 0; //TODO: Get rid of this guy or make it look good
-noodle.obj = {
+noodle.object = {
 
     newSameType(noodle, obj) {
         if (obj == null) {
@@ -20,7 +20,7 @@ noodle.obj = {
 
         depth--;
         for (var i in obj0) {
-            var eq = (noodle.obj.equals(noodle, obj0[i], obj1[i], depth)); //TODO: Figure out why the following if can't evaluate this stuff itself
+            var eq = (noodle.object.equals(noodle, obj0[i], obj1[i], depth)); //TODO: Figure out why the following if can't evaluate this stuff itself
             if (!eq)
                 return false;
         }
@@ -102,7 +102,7 @@ noodle.obj = {
     },
 
     deepStandardize(noodle, obj, parNode, clone = {}, map = {}) {
-        noodle.obj.clonePlus(
+        noodle.object.clonePlus(
             noodle,
             obj,
             clone,
@@ -112,7 +112,7 @@ noodle.obj = {
             [],
             [],
             function (noodle, obj, clone, flatList, flatClone, map, parNode) {
-                noodle.obj.standardize(noodle, obj, parNode);
+                noodle.object.standardize(noodle, obj, parNode);
             }, //func
             function (noodle, obj) {
                 if (obj != undefined && obj != null)
@@ -131,7 +131,7 @@ noodle.obj = {
         var str = '';
         var end;
         for (var i in obj) {
-            str += indent + i + ': ' + noodle.obj.toStr(noodle, obj, depth, indent + ' ') + ',\n';
+            str += indent + i + ': ' + noodle.object.toStr(noodle, obj, depth, indent + ' ') + ',\n';
         }
         str = str.substr(0, str.length - 2); //Kinda ugly?
         if (obj.constructor === Array) {
@@ -150,7 +150,7 @@ noodle.obj = {
                 if (flatList.indexOf(obj[i]) == -1) { //If obj[i] hasn't already been found
                     flatList.push(obj[i]);
                     //flatList = flatList.concat(
-                    noodle.obj.flatList(noodle, obj[i], flatList);
+                    noodle.object.flatList(noodle, obj[i], flatList);
                 }
             }
             return flatList;
@@ -183,7 +183,7 @@ noodle.obj = {
                 //If we've found a new object, add it to flatList and clone it to clone and flatClone
                 if (flatInd == -1) {
                     //clone[i] = clone[i] || {};
-                    clone[i] = noodle.obj.clone(noodle, obj[i], clone[i], flatList, flatClone); //This works because flatList gets updated
+                    clone[i] = noodle.object.clone(noodle, obj[i], clone[i], flatList, flatClone); //This works because flatList gets updated
                 }
                 //If we've seen obj[i] before, add the clone of it to clone
                 else {
@@ -264,7 +264,7 @@ noodle.obj = {
                     args[1] = obj[i];
                     args[2] = clone[i];
                     args[3] = map[i].val;
-                    clone[i] = noodle.obj.binClonePlus.apply(undefined, args); //This works because flatList gets updated
+                    clone[i] = noodle.object.binClonePlus.apply(undefined, args); //This works because flatList gets updated
 
                 }
                 //If we've seen obj[i] before, add the clone of it to clone
@@ -340,7 +340,7 @@ noodle.obj = {
                     if (args[3] === null) {
                         var apa = 'prutt';
                     }
-                    clone[i] = noodle.obj.clonePlus.apply(undefined, args); //This works because flatList gets updated
+                    clone[i] = noodle.object.clonePlus.apply(undefined, args); //This works because flatList gets updated
 
                 }
                 //If we've seen obj[i] before, add the clone of it to clone
@@ -360,7 +360,7 @@ noodle.obj = {
     },
 
     /*map(noodle, obj, map = {}){
-        noodle.obj.clonePlus(
+        noodle.object.clonePlus(
             noodle,
             obj,
             {},
@@ -398,7 +398,7 @@ noodle.obj = {
                             clone[i] = [];
                     }
 
-                    clone[i] = noodle.obj.guidedClone(noodle, map[i].val, clone[i], baseClone);
+                    clone[i] = noodle.object.guidedClone(noodle, map[i].val, clone[i], baseClone);
                 }
                 else
                     clone[i] = map[i].val;
@@ -413,27 +413,27 @@ noodle.obj = {
         }
         if (obj.map == undefined) {
             var map = {};
-            clone = noodle.obj.clonePlus(noodle, obj, clone, map);
+            clone = noodle.object.clonePlus(noodle, obj, clone, map);
             if (Object.keys(obj).length != Object.keys(clone).length) {
                 console.error('Clone has ' + Object.keys(clone).length + ' keys while original has ' + Object.keys(obj).length + ' keys');
             }
             obj.map = map;
         }
         else {
-            clone = noodle.obj.guidedClone(noodle, obj.map);
+            clone = noodle.object.guidedClone(noodle, obj.map);
         }
         clone.map = {};
         $.extend(clone.map, obj.map);
 
         if (Object.keys(obj).length <= 1 || Object.keys(clone).length <= 1) {
-            console.error('Original or clone has only map\n Original: ' + noodle.obj.toStr(noodle, obj) + '\n Clone: ' + noodle.obj.toStr(noodle, clone));
+            console.error('Original or clone has only map\n Original: ' + noodle.object.toStr(noodle, obj) + '\n Clone: ' + noodle.object.toStr(noodle, clone));
         }
 
         return clone;
     },
 
     //Don't think this guy works but you could get a flat clone frome the ordinary clone function   
-    flatClone(noodle, flatList = noodle.obj.flatList(obj), newList = new Array(flatList.length)) { //Kinda stupid to check lists for each recursion?
+    flatClone(noodle, flatList = noodle.object.flatList(obj), newList = new Array(flatList.length)) { //Kinda stupid to check lists for each recursion?
         for (var i in flatList) {
             var obj = flatList[i];
             if (typeof obj == 'object') {
@@ -468,11 +468,45 @@ noodle.obj = {
         }
     },
 
-    random(noodle, contProb = 0.5, mem = [], drawProb = 0.5) {
-        var type = ['']
-        while (Math.random() < contProb) {
-            var key = noodle.string.random(noodle);
+    random(noodle, contProb = 0.8, mem = [], drawProb = 0.5, types = ['object', 'array', 'string', 'number']) {
+        var obj = {};
 
+        while (Math.random() < contProb) {
+            var type = types[Math.floor(Math.random() * types.length)];
+            var key = noodle.string.random(noodle, contProb);
+            obj[key] = noodle[type].random(noodle, contProb);
         }
+        return obj;
+    },
+
+    toHtml(noodle, obj) {
+        var html = '';
+        for (var i in obj) {
+            html += '<div class="prop">';
+            var child = obj[i];
+            var type = undefined;
+            var toHtml = undefined;
+
+            if (child)
+                type = noodle[child.type];
+            if (type) {
+                toHtml = type.toHtml;
+            }
+            if (toHtml) {
+                html += toHtml(noodle, child);
+            }
+            else {
+                type = noodle[typeof child]
+                if (type)
+                    toHtml = type.toHtml;
+                if (toHtml) {
+                    html += toHtml(noodle, child)
+                }
+                else
+                    html += child;
+            }
+            html += '</div>';
+        }
+        return html;
     }
 };

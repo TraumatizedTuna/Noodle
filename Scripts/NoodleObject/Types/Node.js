@@ -38,7 +38,7 @@ noodle.node = {
     new(noodle, core, label = '', pos = { x: 0, y: 0 }, noodleExp = noodle.expr.fromObj(noodle, noodle)) {
         //Properties{
         cloneCounter = 0;
-        //var newCoreExp = noodle.obj.clone(noodle, core, {});
+        //var newCoreExp = noodle.object.clone(noodle, core, {});
         var node = {
             label: label,
             core: core,
@@ -66,7 +66,7 @@ noodle.node = {
         node.core.outPorts = noodle.expr.evalAll(noodle, node.core.outPorts);*/
         //}
 
-        noodle.obj.deepStandardize(noodle, node, node);
+        noodle.object.deepStandardize(noodle, node, node);
 
         return node;
     },
@@ -115,16 +115,22 @@ noodle.node = {
 
                 node.id = 'n' + nodeId;
                 node.html = '<div class="node" id="n' + nodeId + '"' + style + '>' + data; //Not sure I like .html stuff
-                node.html += '<div class="nodeContent"></div><br><a style="background-color: rgba(255, 255, 255, 0.5)"> id: ' + node.id + '</a>';
                 //}
 
-                //Render node in container{
+                //Render node frame in container{
                 container.html.insertAdjacentHTML('beforeend', node.html);
                 node.html = document.getElementById(node.id);
                 node.html.obj = node;
 
                 nodeNoodle.ids.add(node);
                 //}
+
+                nodeNoodle.node.renderInterior(noodle, node);
+
+                node.html.insertAdjacentHTML('beforeend', );
+                //Render ports
+                nodeNoodle.node.renderPorts(node);
+                
 
                 //Set events{
                 $(".borderSensor").unbind('mousedown').mousedown(nodeNoodle.graphics.transformable.borderSensorFunc); //Ineffective to set mousedown functions for all border sensors every time? Who cares? Will I fix it? Hmm...
@@ -143,7 +149,6 @@ noodle.node = {
                 nodeNoodle.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
 
 
-                nodeNoodle.node.renderPorts(node);
                 nodeNoodle.node.setSockEv(node);
                 //}
 
@@ -165,6 +170,9 @@ noodle.node = {
                 node.rendered = true;
             }
         });
+    },
+    renderInterior(noodle, node) {
+        node.html.insertAdjacentHTML('beforeend', '<div class="nodeContent"></div><br><a style="background-color: rgba(255, 255, 255, 0.5)"> id: ' + node.id + '</a>');
     },
 
     //Cuts all wires connected to node

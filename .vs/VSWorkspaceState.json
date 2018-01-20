@@ -2,11 +2,14 @@
   "ExpandedNodes": [
     "",
     "\\Browser",
+    "\\Docs",
+    "\\Docs\\Complexity Calculations",
     "\\Html",
     "\\Html\\Nodes",
     "\\Scripts",
-    "\\Scripts\\NoodleObject"
+    "\\Scripts\\NoodleObject",
+    "\\Scripts\\NoodleObject\\Types"
   ],
-  "SelectedNode": "\\Scripts\\NoodleObject\\misc.js",
+  "SelectedNode": "\\Scripts\\NoodleObject\\Types\\array.js",
   "PreviewInSolutionExplorer": false
 }

@@ -208,14 +208,15 @@ var nodeTypes = {
         var core = {
             name: 'Eval',
             color: 'green',
-            inPorts: [
-                noodle.port.new(noodle, 'code', 'string', true),
-            ],
-            outPorts: [
-            ],
+            inPorts: {
+                code: noodle.port.new(noodle, 'code', 'string', true)
+            },
+            outPorts: {
+                value: noodle.port.new(noodle, 'value', 'any', false)
+            },
             func: function (node) {
                 var core = node.core;
-                eval(core.inPorts[0].value);
+                core.outPorts.value.value = eval(core.inPorts.code.value);
             },
             data: {
                 code: '',
@@ -347,6 +348,7 @@ var nodeTypes = {
                 var core = node.core;
                 var inPorts = core.inPorts;
                 var outPorts = core.outPorts;
+                var box = core.data.renderBox;
                 var obj = inPorts.object.value;
 
                 if (obj === undefined)
@@ -361,12 +363,27 @@ var nodeTypes = {
                         noodle.port.addToPorts(node, core.outPorts.properties, noodle.port.new(noodle, i, prop.type || typeof prop, false, [], prop));
                     }
                 }
+
+
+                //Draw tree{
+                box.html.innerHTML = noodle.object.toHtml(noodle, obj);
+                //}
             },
             data: {
             },
             resetFuncs: [
+                function (node, nodeEl) {
+                    var core = node.core;
+                    var box = {};
+                    core.data.renderBox = box;
+                    box.html = nodeEl.getElementsByClassName('renderBox')[0];
+                    box.html.innerHtml = '';
+                    box.html.obj = box;
+                    box.html.style.height = '200px';
+                    box.html.style.width = '400px';
+                }
             ],
-            htmlContent: noodle.files.getFile('Html/Nodes/nodeCreator.html')
+            htmlContent: '<div class="renderBox"></div>'
         };
         return noodle.node.new(noodle, core, label, pos);
         /* var node = noodle.node.new(noodle, core, label, pos);
@@ -375,7 +392,7 @@ var nodeTypes = {
         } */
     },
 
-    
+
     Cookie: function (noodle, label, pos, noodleExp) {
         var core = {
             name: 'Cookie',
@@ -391,7 +408,7 @@ var nodeTypes = {
                 var core = node.core;
                 var key = core.inPorts[0].value;
                 var val = core.inPorts[1].value;
-                if(key && val){
+                if (key && val) {
                     noodle.cookie.set(noodle, key, val);
                 }
                 core.outPorts[0].value = noodle.cookie.get(noodle);
