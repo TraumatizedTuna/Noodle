@@ -497,5 +497,34 @@ var nodeTypes = {
         for (var i in node) {
             this[i] = node[i];
         } */
-    },
-}
+    }
+};
+nodeTypes.Test = function (noodle, label, pos, noodleExp) {
+    var core = {
+        name: 'Test',
+        color: 'white',
+        inPorts: [
+            noodle.port.new(noodle, 'in', 'text', true)
+        ],
+        outPorts: [
+            noodle.port.new(noodle, 'out', 'text', false),
+            nodeTypes.Text(noodle)
+        ],
+        func: function (node) {
+
+        },
+        data: {
+        },
+        resetFuncs: [
+            function (node) {
+                node.core.func(node);
+            }
+        ],
+        htmlContent: ''
+    };
+    return noodle.node.new(noodle, core, label, pos);
+    /* var node = noodle.node.new(noodle, core, label, pos);
+    for (var i in node) {
+        this[i] = node[i];
+    } */
+};

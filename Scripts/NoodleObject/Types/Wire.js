@@ -76,9 +76,9 @@ noodle.wire = {
         if (outPort.rendered && inPort.rendered) {
             wire.html.style = 'visibility: visible;'; //In case wire is hidden
 
-            var outPos = wire.noodle.html.getElPos(document.getElementById(outPort.id).getElementsByClassName("socket")[0], 1);
+            var outPos = wire.noodle.html.getElPos(outPort.html.getElementsByClassName("socket")[0], 1);
 
-            var inPos = wire.noodle.html.getElPos(document.getElementById(inPort.id).getElementsByClassName("socket")[0], 1);
+            var inPos = wire.noodle.html.getElPos(inPort.html.getElementsByClassName("socket")[0], 1);
 
             wire.noodle.wire.wireBetween(outPos, inPos, wire);
         }

@@ -127,52 +127,53 @@ noodle.node = {
 
                 nodeNoodle.node.renderInterior(noodle, node);
 
-                node.html.insertAdjacentHTML('beforeend', );
-                //Render ports
-                nodeNoodle.node.renderPorts(node);
                 
-
-                //Set events{
-                $(".borderSensor").unbind('mousedown').mousedown(nodeNoodle.graphics.transformable.borderSensorFunc); //Ineffective to set mousedown functions for all border sensors every time? Who cares? Will I fix it? Hmm...
-                //$(".btnClose").mousedown(nodeClose);
-
-                node.html.onmousedown = function (e) {
-                    e.stopPropagation();
-                    //noodle.graphics.transformable.setActive(noodle, this); //TODO: Use correct noodle
-                    if (!this.classList.contains('active'))
-                        noodle.graphics.transformable.setActive(noodle, this, !e.shiftKey);
-                }
-
-                nodeNoodle.html.firstByClass(node.html, "btnClose").onmousedown = nodeNoodle.graphics.transformable.close;
-                nodeNoodle.html.firstByClass(node.html, "btnMaximize").onmousedown = nodeNoodle.graphics.transformable.maximize;
-
-                nodeNoodle.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
-
-
-                nodeNoodle.node.setSockEv(node);
-                //}
-
-                //Add content to node{
-                var nodeEl = nodeNoodle.html.getEl(node);
-                if (node.core.htmlContent != undefined) {
-                    nodeEl.getElementsByClassName('nodeContent')[0].innerHTML = node.core.htmlContent;
-                }
-                nodeEl.style.left = node.pos.x + 'px';
-                nodeEl.style.top = node.pos.y + 'px';
-                nodeNoodle.ids.add(node);
-                //}
-
-                //Run reset functions of node
-                for (var i = 0; i < node.core.resetFuncs.length; i++) {
-                    node.core.resetFuncs[i](node, nodeEl);
-                }
-
-                node.rendered = true;
             }
         });
     },
-    renderInterior(noodle, node) {
+    renderInterior(noodle, node, nodeNoodle = noodle) {
         node.html.insertAdjacentHTML('beforeend', '<div class="nodeContent"></div><br><a style="background-color: rgba(255, 255, 255, 0.5)"> id: ' + node.id + '</a>');
+
+        //Render ports
+        nodeNoodle.node.renderPorts(node);
+
+
+        //Set events{
+        $(".borderSensor").unbind('mousedown').mousedown(nodeNoodle.graphics.transformable.borderSensorFunc); //Ineffective to set mousedown functions for all border sensors every time? Who cares? Will I fix it? Hmm...
+        //$(".btnClose").mousedown(nodeClose);
+
+        node.html.onmousedown = function (e) {
+            e.stopPropagation();
+            //noodle.graphics.transformable.setActive(noodle, this); //TODO: Use correct noodle
+            if (!this.classList.contains('active'))
+                noodle.graphics.transformable.setActive(noodle, this, !e.shiftKey);
+        }
+
+        nodeNoodle.html.firstByClass(node.html, "btnClose").onmousedown = nodeNoodle.graphics.transformable.close;
+        nodeNoodle.html.firstByClass(node.html, "btnMaximize").onmousedown = nodeNoodle.graphics.transformable.maximize;
+
+        nodeNoodle.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
+
+
+        nodeNoodle.node.setSockEv(node);
+        //}
+
+        //Add content to node{
+        var nodeEl = nodeNoodle.html.getEl(node);
+        if (node.core.htmlContent != undefined) {
+            nodeEl.getElementsByClassName('nodeContent')[0].innerHTML = node.core.htmlContent;
+        }
+        nodeEl.style.left = node.pos.x + 'px';
+        nodeEl.style.top = node.pos.y + 'px';
+        nodeNoodle.ids.add(node);
+        //}
+
+        //Run reset functions of node
+        for (var i = 0; i < node.core.resetFuncs.length; i++) {
+            node.core.resetFuncs[i](node, nodeEl);
+        }
+
+        node.rendered = true;
     },
 
     //Cuts all wires connected to node
@@ -215,7 +216,7 @@ noodle.node = {
     //Runs func with each port of core
     forEachPort(core, func) {
         var f = function (port, core, func) {
-            if (port.type === 'port')
+            if (port.type === 'port' || port.type === 'node')
                 func(port, core);
             else
                 for (var i in port) {

@@ -89,9 +89,14 @@ noodle.object = {
 
             //Set parent of properties
             for (var i in obj) {
-                if (typeof obj[i] == 'object' && obj[i] != null && obj[i] != undefined && i != 'parent' && i != 'parNode') {
-                    Object.defineProperty(obj[i], 'parent', { enumerable: false, value: obj });
-                    //obj[i].parNode = parNode;
+                if (typeof obj[i] === 'object' && obj[i] !== null && obj[i] !== undefined && i !== 'parent' && i !== 'parNode') {
+                    //If obj[i].parent is already defined, Object.defineproprty() won't work
+                    if (obj[i].parent === undefined) {
+                        Object.defineProperty(obj[i], 'parent', { enumerable: false, value: obj });
+                    }
+                    else {
+                        obj[i].parent = obj;
+                    }
                 }
             }
 
