@@ -124,15 +124,21 @@ noodle.node = {
 
                 nodeNoodle.ids.add(node);
                 //}
+                //Set events{
+                nodeNoodle.html.firstByClass(node.html, "btnClose").onmousedown = nodeNoodle.graphics.transformable.close;
+                nodeNoodle.html.firstByClass(node.html, "btnMaximize").onmousedown = nodeNoodle.graphics.transformable.maximize;
+
+                nodeNoodle.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
+                //}
 
                 nodeNoodle.node.renderInterior(noodle, node);
 
-                
+
             }
         });
     },
     renderInterior(noodle, node, nodeNoodle = noodle) {
-        node.html.insertAdjacentHTML('beforeend', '<div class="nodeContent"></div><br><a style="background-color: rgba(255, 255, 255, 0.5)"> id: ' + node.id + '</a>');
+        node.html.insertAdjacentHTML('beforeend', '<div class="portContainer">\n            <div class="inPorts" ></div >\n            <div class="outPorts"></div>\n</div ><div class="nodeContent"></div><br><a style="background-color: rgba(255, 255, 255, 0.5)"> id: ' + node.id + '</a>');
 
         //Render ports
         nodeNoodle.node.renderPorts(node);
@@ -149,10 +155,7 @@ noodle.node = {
                 noodle.graphics.transformable.setActive(noodle, this, !e.shiftKey);
         }
 
-        nodeNoodle.html.firstByClass(node.html, "btnClose").onmousedown = nodeNoodle.graphics.transformable.close;
-        nodeNoodle.html.firstByClass(node.html, "btnMaximize").onmousedown = nodeNoodle.graphics.transformable.maximize;
 
-        nodeNoodle.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
 
 
         nodeNoodle.node.setSockEv(node);
