@@ -36,7 +36,7 @@ noodle.port = {
 
     //Renders port in node.html
     render(node, port) {
-        if (port.type === 'port') {
+        if (port.type === 'port' || port.type === 'node') {
             var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
             //String inOrOut indicates whether port is in or out{
             var inOrOut;
@@ -49,11 +49,17 @@ noodle.port = {
             //}
 
             //Add port to node element
-            node.html.getElementsByClassName(inOrOut + 'Ports')[0].insertAdjacentHTML('beforeend', portNoodle.port.code(port, inOrOut + 'put', node));
+            var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
+            port.id = portNoodle.ids.firstFree(portNoodle.ids.freeList.port);
+            //Insert port frame
+            node.html.getElementsByClassName(inOrOut + 'Ports')[0].insertAdjacentHTML('beforeend', '<div class="port ' + inOrOut + 'put" id="p' + port.id + '"></div><br>');
+            port.html = document.getElementById('p' + port.id);
+            //Insert interiror in frame
+            portNoodle[port.type].renderInterior(noodle, port, noodle, inOrOut + 'put', node, inOrOut);
 
             port.rendered = true;
 
-            portNoodle.port.updateWires([port]);
+            
         }
         else {
             //Assuming that port is either a port or a group and that groups don't contain themselves
@@ -74,24 +80,23 @@ noodle.port = {
     },
 
     //Generates html code for port
-    code(port, classes, node) {
-        var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
-        var portId = portNoodle.ids.firstFree(portNoodle.ids.freeList.port);
-        var code = '<div class="port ' + classes + '" id="p' + portId + '"><div class="socket num ' + classes + '" id="s' + portId + '"></div> <a class="hoverSelect">' + port.name + '</a>';
+    renderInterior(noodle, port, portNoodle, classes, node, inOrOut) {
+        var code ='<div class="socket num ' + classes + '" id= "s' + port.id + '" ></div> <a class="hoverSelect">' + port.name + '</a>';
 
         //TODO: Clean up
         //Add value element and finish port code{
-        /*if (port.isIn) {
-            code += '<input type="number" id="val' + portId + '"><br></div><br>';
-        }
-        else {*/
-        code += '<a class="hoverSelect" id="val' + portId + '"><br></div><br>';
-        //}
-        port.valId = 'val' + portId;
+
+        code += '<a class="hoverSelect" id="val' + port.id + '"><br>';
+        port.valId = 'val' + port.id;
         //}
 
-        port.id = 'p' + portId;
-        portNoodle.ids.add(port);
+        
+        //portNoodle.ids.add(port); //Do we really need this line?
+
+        //Insert code as html in port
+        port.html.insertAdjacentHTML('beforeend', code);
+        //Update wires
+        portNoodle.port.updateWires([port]);
 
         return code;
     },
@@ -124,7 +129,7 @@ noodle.port = {
     forget(port) {
         var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
         portNoodle.port.cut(port);
-        portNoodle.ids.forget(portNoodle.ids.freeList.port, parseInt(port.id.substr(1), 10), true);
+        portNoodle.ids.forget(portNoodle.ids.freeList.port, parseInt(port.id, 10), true);
     },
 
     //Renders all wires of ports

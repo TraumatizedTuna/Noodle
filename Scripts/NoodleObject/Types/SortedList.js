@@ -1,5 +1,5 @@
 noodle.sList = {
-    new(noodle, iterable = [], compare = noodle.obj.compare, noodleExp) {
+    new(noodle, iterable = [], compare = noodle.object.compare, noodleExp) {
         if (iterable.length > 1) {
             //TODO: Sort
         }

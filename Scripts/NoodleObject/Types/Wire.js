@@ -22,7 +22,7 @@ noodle.wire = {
         };
         Object.defineProperty(wire, 'type', {enumerable: false, value: 'wire'});
         wire.noodleExp = noodle.expr.defaultNoodle(noodle, wire)
-        //noodle.obj.deepStandardize(noodle, wire); //This line shouldn't do any difference but I guess I should check why it crashes
+        //noodle.object.deepStandardize(noodle, wire); //This line shouldn't do any difference but I guess I should check why it crashes
         container.wires.push(wire);
         var wireId = noodle.ids.firstFree(noodle.ids.freeList.wire);
         wire.id = 'w' + wireId;
@@ -76,9 +76,9 @@ noodle.wire = {
         if (outPort.rendered && inPort.rendered) {
             wire.html.style = 'visibility: visible;'; //In case wire is hidden
 
-            var outPos = wire.noodle.html.getElPos(document.getElementById(outPort.id).getElementsByClassName("socket")[0], 1);
+            var outPos = wire.noodle.html.getElPos(outPort.html.getElementsByClassName("socket")[0], 1);
 
-            var inPos = wire.noodle.html.getElPos(document.getElementById(inPort.id).getElementsByClassName("socket")[0], 1);
+            var inPos = wire.noodle.html.getElPos(inPort.html.getElementsByClassName("socket")[0], 1);
 
             wire.noodle.wire.wireBetween(outPos, inPos, wire);
         }

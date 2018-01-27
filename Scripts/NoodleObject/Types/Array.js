@@ -16,5 +16,15 @@ noodle.array={
             list.push(el);
         }
         return list;
+    },
+
+    random(noodle, contProb = 0.5, mem = [], drawProb = 0.5, types = ['object', 'array', 'string', 'number']) {
+        var arr = [];
+
+        while (Math.random() < contProb) {
+            var type = types[Math.floor(Math.random() * types.length)];
+            arr.push(noodle[type].random(noodle));
+        }
+        return arr;
     }
 };
