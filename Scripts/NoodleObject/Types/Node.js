@@ -48,6 +48,27 @@ noodle.node = {
             useNoodle: false,
             rendered: false
         };
+
+        node.mode = 0;
+        node.editMode = {
+            enter(args) {
+                var node = args.node;
+
+                node.mode = -1; //-1 for edit mode
+            },
+            exit(args) {
+                var node = args.node;
+
+                node.mode = 0; //0 for standard mode
+            },
+            toggle(args) {
+                if (args.node.mode === -1) //-1 for edit mode
+                    args.node.editMode.exit(args);
+                else
+                    args.node.editMode.enter(args);
+            }
+        }
+
         noodle.node.setDefaultPorts(noodle, node);
         Object.defineProperty(node, 'type', { enumerable: false, value: 'node' });
         console.log('Clone iterations: ' + cloneCounter + '\nObject: ' + core.toString());
@@ -251,7 +272,7 @@ noodle.node = {
             var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
 
             noodle.global.active.socketEl = e.target;
-            var port = nodeNoodle.port.getObj(nodeNoodle, noodle.global.active.socketEl.parentElement);
+            var port = noodle.global.active.socketEl.parentElement.obj;
             var portNoodle = noodle.expr.eval(noodle, port.noodleExp); //Should we use nodeNoodle rather than noodle here?
 
             noodle.global.active.pullWire = portNoodle.wire.new(portNoodle);
@@ -259,8 +280,8 @@ noodle.node = {
             noodle.events.toolBox.pullWire(e); //To avoid awkward start
             noodle.events.mousemove.setActiveTool(noodle.events.toolBox.pullWire);
             $('.socket').mouseup(function (e) {
-                var pullPort = noodle.port.getObj(noodle, noodle.global.active.socketEl.parentElement);
-                var targetPort = noodle.port.getObj(noodle, e.target.parentElement);
+                var pullPort = noodle.global.active.socketEl.parentElement.obj;
+                var targetPort = e.target.parentElement.obj;
 
                 //If ports are different or allowed to short, connect them
                 if (pullPort !== targetPort || pullPort.shortable) {

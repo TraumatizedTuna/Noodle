@@ -65,67 +65,67 @@ noodle.object = {
         return obj0 - obj1;
     },
 
-    standardize(noodle, obj, parNode) { //TODO: Dynamically figure out parent node
-        if (obj != null && obj != undefined) {
-            if (typeof obj != 'object' && typeof obj != 'function')
+    standardize(args) { //TODO: Dynamically figure out parent node
+        if (args.obj != null && args.obj != undefined) {
+            if (typeof args.obj != 'object' && typeof args.obj != 'function')
                 return;
-            //Set parNode of obj{
-            if (parNode == undefined || parNode.type != 'node') {
-                parNode = obj;
-                while (parNode.parent != undefined && parNode.type != 'node') {
-                    parNode = parNode.parent;
+            //Set args.parNode of args.obj{
+            if (args.parNode == undefined || args.parNode.type != 'node') {
+                args.parNode = args.obj;
+                while (args.parNode.parent != undefined && args.parNode.type != 'node') {
+                    args.parNode = args.parNode.parent;
                 }
             }
-            if (parNode.type != 'node')
-                parNode = undefined;
-            Object.defineProperty(obj, 'parNode', { enumerable: false, value: parNode });
-            //obj.parNode = parNode;
+            if (args.parNode.type != 'node')
+                args.parNode = undefined;
+            Object.defineProperty(args.obj, 'parNode', { enumerable: false, value: args.parNode });
+            //args.obj.parNode = args.parNode;
             //}
 
-            //Set type of obj
-            if (obj.type == undefined && typeof obj == 'object') {
-                Object.defineProperty(obj, 'type', { enumerable: false, value: 'obj' });
+            //Set type of args.obj
+            if (args.obj.type == undefined && typeof args.obj == 'object') {
+                Object.defineProperty(args.obj, 'type', { enumerable: false, value: 'obj' });
             }
 
             //Set parent of properties
-            for (var i in obj) {
-                if (typeof obj[i] === 'object' && obj[i] !== null && obj[i] !== undefined && i !== 'parent' && i !== 'parNode') {
-                    //If obj[i].parent is already defined, Object.defineproprty() won't work
-                    if (obj[i].parent === undefined) {
-                        Object.defineProperty(obj[i], 'parent', { enumerable: false, value: obj });
+            for (var i in args.obj) {
+                if (typeof args.obj[i] === 'object' && args.obj[i] !== null && args.obj[i] !== undefined && i !== 'parent' && i !== 'parNode') {
+                    //If args.obj[i].parent is already defined, Object.defineproprty() won't work
+                    if (args.obj[i].parent === undefined) {
+                        Object.defineProperty(args.obj[i], 'parent', { enumerable: false, value: args.obj });
                     }
                     else {
-                        obj[i].parent = obj;
+                        args.obj[i].parent = args.obj;
                     }
                 }
             }
 
-            //Set noodleExp of obj
-            var noodleExp = obj.noodleExp || noodle.expr.defaultNoodle(noodle, obj);
-            Object.defineProperty(obj, 'noodleExp', { enumerable: false, value: noodleExp });
+            //Set noodleExp of args.obj
+            var noodleExp = args.obj.noodleExp || args.noodle.expr.defaultNoodle(args.noodle, args.obj);
+            Object.defineProperty(args.obj, 'noodleExp', { enumerable: false, value: noodleExp });
         }
     },
 
     deepStandardize(noodle, obj, parNode, clone = {}, map = {}) {
-        noodle.object.clonePlus(
-            noodle,
-            obj,
-            clone,
-            map,
-            [],
-            [],
-            [],
-            [],
-            function (noodle, obj, clone, flatList, flatClone, map, parNode) {
+        noodle.object.clonePlus({
+            noodle: noodle,
+            obj: obj,
+            clone: clone,
+            map: map,
+            flatList: [],
+            flatClone: [],
+            flatMap: [],
+            path: [],
+            func: function (noodle, obj, clone, flatList, flatClone, map, parNode) {
                 noodle.object.standardize(noodle, obj, parNode);
             }, //func
-            function (noodle, obj) {
+            cond: function (noodle, obj) {
                 if (obj != undefined && obj != null)
                     return obj.type != 'expr';
                 return false;
             }, //cond
-            parNode
-        );
+            parNode: parNode
+        });
     },
 
     toStr(noodle, obj, depth = 3, indent = '') {
@@ -161,6 +161,16 @@ noodle.object = {
             return flatList;
         }
         return [obj]; //In case obj is a primitive type
+    },
+
+    shallowClone(args) {
+        if (args.clone === undefined)
+            args.clone = {};
+
+        for (var i in args.obj) {
+            args.clone[i] = args.obj[i];
+        }
+        return args;
     },
 
     //Turns clone into a deep clone of obj. flatList and flatClone are optional but should have same length, preferably 0
@@ -283,85 +293,76 @@ noodle.object = {
         return obj;
     },
     //Same as clone but applies all arguments except func and cond to func and cond. Stops recursion if cond returns false
-    clonePlus(noodle, obj, clone, map = {}, flatList = [], flatClone = [], flatMap = [], path = [], func = function () { }, cond = function () { return true; }) {
+    //Arguments: noodle, obj, clone, map = {}, flatList =[], flatClone =[], flatMap =[], path =[], func = function () { }, cond = function () { return true; }
+    clonePlus(args) {
         //Add unpassed parameters to arguments{
-        [arguments[2], arguments[3], arguments[4], arguments[5], arguments[6], arguments[7], arguments[8], arguments[9]] = [clone, map, flatList, flatClone, flatMap, path, func, cond];
-        if (arguments.length < 10) //This condition is necessary since arguments might be longer than 8
-            arguments.length = 10;
-        //}
-
-        var args = Array.from(arguments);
-        args.splice(7, 2);
-        if (!cond.apply(undefined, args)) {
-            return obj;
+        if (!args.cond(args)) {
+            return args.obj;
         }
-        func.apply(undefined, args);
+        args.func(args);
 
-        if (obj != undefined && typeof obj == 'object') {
-            //If clone is undefined, make it an empty array or object
-            if (clone == undefined) {
-                if (obj.constructor === Array) {
-                    clone = [];
+        if (args.obj != undefined && typeof args.obj == 'object') {
+            //If args.clone is undefined, make it an empty array or object
+            if (args.clone === undefined) {
+                if (args.obj.constructor === Array) {
+                    args.clone = [];
                 }
                 else {
-                    clone = {};
+                    args.clone = {};
                 }
             }
-            flatList.push(obj);
-            flatClone.push(clone);
-            flatMap.push(path);
-            //Go through obj to clone all its properties
-            for (var i in obj) {
-                [...path] = path;
-                path.push(i);
-                var flatInd = flatList.indexOf(obj[i]);
-                //If we've found a new object, add it to flatList and clone it to clone and flatClone
+            args.flatList.push(args.obj);
+            flatargs.clone.push(args.clone);
+            flatargs.map.push(args.path);
+            //Go through args.obj to args.clone all its properties
+            for (var i in args.obj) {
+                [...args.path] = args.path;
+                args.path.push(i);
+                var flatInd = args.flatList.indexOf(args.obj[i]);
+                //If we've found a new args.object, add it to args.flatList and args.clone it to args.clone and flatargs.clone
                 if (flatInd == -1) {
-                    //Set up map[i]{
-                    var mapVal;
+                    //Set up args.map[i]{
+                    var mapVal
                     var isObj = true;
-                    if (obj[i] != undefined) {
-                        if (obj[i].constructor === Array)
-                            mapVal = new Array(obj[i].length);
-                        else if (typeof obj[i] === 'object')
+                    if (args.obj[i] != undefined) {
+                        if (args.obj[i].constructor === Array)
+                            mapVal = new Array(args.obj[i].length);
+                        else if (typeof args.obj[i] === 'args.object')
                             mapVal = {};
                         else {
-                            mapVal = obj[i];
-                            isObj = false;
+                            mapVal = args.obj[i];
+                            isargs.obj = false;
                         }
                     }
                     else {
-                        mapVal = obj[i];
-                        isObj = false;
+                        mapVal = args.obj[i];
+                        isargs.obj = false;
                     }
-                    map[i] = { recog: false, val: mapVal, isObj: isObj };
+                    args.map[i] = { recog: false, val: mapVal, isObj: isObj };
                     //}
-                    //clone[i] = clone[i] || {};
-                    [...args] = arguments; //TODO: Guess I could place this line outside the loop?
+                    //args.clone[i] = args.clone[i] || {};
+                    newArgs = args.noodle.object.shallowClone({ noodle: args.noodle, obj: args, clone: {} }); //TODO: Guess I could place this line outside the loop?
 
-                    args[1] = obj[i];
-                    args[2] = clone[i];
-                    args[3] = map[i].val;
-                    if (args[3] === null) {
-                        var apa = 'prutt';
-                    }
-                    clone[i] = noodle.object.clonePlus.apply(undefined, args); //This works because flatList gets updated
+                    newArgs.obj = args.obj[i];
+                    newArgs.clone = args.clone[i];
+                    newArgs.map = args.map[i].val;
+                    args.clone[i] = args.noodle.object.clonePlus.apply(undefined, newArgs); //This works because args.flatList gets updated
 
                 }
-                //If we've seen obj[i] before, add the clone of it to clone
+                //If we've seen args.obj[i] before, add the args.clone of it to args.clone
                 else {
-                    clone[i] = flatClone[flatInd];
-                    map[i] = { recog: true, path: flatMap[flatInd] };
+                    args.clone[i] = args.flatClone[flatInd];
+                    args.map[i] = { recog: true, path: args.flatMap[flatInd] };
                 }
             }
-            return clone;
+            return args.clone;
         }
-        clone = obj;
-        //Can't do map = {...} since the reference must be kept
-        /*map.recog = false;
-        map.val = clone;
-        map.isObj = false;*/
-        return obj;
+        args.clone = args.obj;
+        //Can't do args.map = {...} since the reference must be kept
+        /*args.map.recog = false;
+        args.map.val = args.clone;
+        args.map.isObj = false;*/
+        return args.obj;
     },
 
     /*map(noodle, obj, map = {}){
@@ -473,7 +474,13 @@ noodle.object = {
         }
     },
 
-    random(noodle, contProb = 0.8, mem = [], drawProb = 0.5, types = ['object', 'array', 'string', 'number']) {
+    random(args) {
+        var noodle = args.noodle;
+        var contprob = args.contProb || 0.7;
+        var mem = args.mem = args.mem || [];
+        var drawProb = args.drawProb || 0.5;
+        var types = args.types || ['object', 'array', 'string', 'number'];
+
         var obj = {};
 
         while (Math.random() < contProb) {
@@ -513,5 +520,59 @@ noodle.object = {
             html += '</div>';
         }
         return html;
+    },
+
+    serialize(args) {
+        var noodle = args.noodle;
+        var obj = args.obj;
+        var idMap = args.idMap || {};
+
+        if (obj === null) {
+            return { serType: 'null', val: null, obj: null };
+        }
+
+        var serialized;
+        //Make sure obj has an id
+        noodle.ids.addIfAbsent({ noodle: noodle, obj: obj });
+
+        //If obj isn't in idMap, add it
+        if (idMap[obj.meta.id] === undefined) {
+            //TODO: Non-enumerable stuff
+            serialized = { serType: 'object', val: {}, obj: obj };
+            idMap[obj.meta.id] = serialized;
+            for (var i in obj) {
+                serialized.val[i] = noodle.any.serialize({ noodle: noodle, obj: obj[i], idMap: idMap }).serialized;
+            }
+        }
+        //If obj is already in idMap, just add its id
+        else {
+            serialized = { serType: 'id', val: obj.meta.id, obj: obj };
+        }
+
+        return { serialized: serialized, idMap: idMap };
+    },
+
+    toDataStr(args) {
+        var noodle = args.noodle;
+        if (args.serialized && args.idMap) {
+            var serialized = args.serialized;
+            var idMap = args.idMap;
+        }
+        else
+            var { serialized: serialized, idMap: idMap } = noodle.any.serialize(args);
+
+        var str = 'object(';
+
+        for (var i in serialized.val) {
+            var child = serialized.val[i];
+            str += i + ':' + noodle.any.toDataStr({
+                noodle: noodle,
+                obj: child.obj,
+                serialized: child,
+                idMap: idMap
+            }).str;
+        }
+
+        return { str: str + ')' };
     }
 };

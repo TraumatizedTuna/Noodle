@@ -4,7 +4,10 @@ noodle.string = {
         return str.substr(0, str.length - amount);
     },
 
-    random(noodle, contProb = 0.7) {
+    random(args) {
+        var noodle = args.noodle;
+        var contprob = args.contProb || 0.7;
+
         var str = '';
         var chars = 'abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ0123456789§½!"#¤%&/()=+?´`@£${[]}\¨^~'+"'"+'*<>|,;.:-_';
         while (Math.random() < contProb) {
@@ -12,4 +15,18 @@ noodle.string = {
         }
         return str;
     },
+    serialize(args) {
+        return {
+            serialized: {
+                serType: 'string',
+                val: args.obj,
+                obj: args.obj,
+                idMap: args.idMap || {}
+            }
+        };
+    },
+    toDataStr(args) {
+        var obj = args.obj;
+        return { str: 'string(' + obj + ')' };
+    }
 };
