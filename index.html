@@ -38,6 +38,7 @@
     <script src="Scripts/NoodleObject/Types/Obj.js"></script>
     <script src="Scripts/NoodleObject/Types/Array.js"></script>
     <script src="Scripts/NoodleObject/Types/String.js"></script>
+    <script src="Scripts/NoodleObject/Types/Number.js"></script>
     <script src="Scripts/NoodleObject/Types/SortedList.js"></script>
     <script src="Scripts/NoodleObject/cookie.js"></script>
 
@@ -101,7 +102,7 @@
 
         var simp = {c: []};
         simp.c.push(simp);
-        var sClone = noodle.obj.clonePlus(noodle, simp, {}, {})
+        var sClone = noodle.object.clonePlus(noodle, simp, {}, {})
 
 
 
@@ -111,21 +112,21 @@
         obj.d = obj;
         obj.b[2].r = obj;
 
-        var flat = noodle.obj.flatList(noodle, obj);
+        var flat = noodle.object.flatList(noodle, obj);
 
-        var clone = noodle.obj.clone(noodle, obj);
+        var clone = noodle.object.clone(noodle, obj);
 
         var obj1 = {a: 3};
         obj1.b = obj1;
 
-        var clone1 = noodle.obj.clone(noodle, obj1);
+        var clone1 = noodle.object.clone(noodle, obj1);
 
 
         var map = {};
 
-        noodle.obj.clonePlus(noodle, obj, {}, map);
+        noodle.object.clonePlus(noodle, obj, {}, map);
 
-        var gClone = noodle.obj.guidedClone(noodle, map);
+        var gClone = noodle.object.guidedClone(noodle, map);
 
         //}*/
 
