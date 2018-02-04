@@ -214,6 +214,14 @@ var nodeTypes = {
             outPorts: {
                 value: noodle.port.new(noodle, 'value', 'any', false)
             },
+            subNodes: {
+                in: [
+                    {
+                        label: 'code',
+                        node: nodeTypes.Code(noodle)
+                    }
+                ]
+            },
             func: function (node) {
                 var core = node.core;
                 core.outPorts.value.value = eval(core.inPorts.code.value);
@@ -491,6 +499,33 @@ var nodeTypes = {
                 }
             ],
             htmlContent: '<input type="text" class="textDbInput" style="width: 100%">'
+        };
+        return noodle.node.new(noodle, core, label, pos);
+        /* var node = noodle.node.new(noodle, core, label, pos);
+        for (var i in node) {
+            this[i] = node[i];
+        } */
+    },
+    Serialize: function (noodle, label, pos, noodleExp) {
+        var core = {
+            name: 'Serialize',
+            color: 'brown',
+            inPorts: {
+                code: noodle.port.new(noodle, 'anything', 'any', true)
+            },
+            outPorts: {
+                value: noodle.port.new(noodle, 'value', 'string', false)
+            },
+            func: function (node) {
+                var core = node.core;
+                core.outPorts.value.value = serializeZ(core.inPorts.code.value);
+            },
+            data: {
+                code: '',
+            },
+            resetFuncs: [
+            ],
+            htmlContent: ''
         };
         return noodle.node.new(noodle, core, label, pos);
         /* var node = noodle.node.new(noodle, core, label, pos);

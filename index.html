@@ -22,6 +22,14 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-language_tools.js"></script>
+    <script src="Assets/serialijse.bundle.min.js"></script>
+    <script>
+        var serialize = serialijse.serialize;
+        var deserialize = serialijse.deserialize;
+        var declarePersistable = serialijse.declarePersistable;
+        var serializeZ = serialijse.serializeZ;
+        var deserializeZ = serialijse.deserializeZ;
+    </script>
 
     <link href='https://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Raleway:300' rel='stylesheet' type='text/css'>
@@ -35,8 +43,10 @@
     <script src="Scripts/NoodleObject/Types/Port.js"></script>
     <script src="Scripts/NoodleObject/Types/Wire.js"></script>
     <script src="Scripts/NoodleObject/Types/Expr.js"></script>
+    <script src="Scripts/NoodleObject/Types/Any.js"></script>
     <script src="Scripts/NoodleObject/Types/Obj.js"></script>
     <script src="Scripts/NoodleObject/Types/Array.js"></script>
+    <script src="Scripts/NoodleObject/Types/Function.js"></script>
     <script src="Scripts/NoodleObject/Types/String.js"></script>
     <script src="Scripts/NoodleObject/Types/Number.js"></script>
     <script src="Scripts/NoodleObject/Types/SortedList.js"></script>
@@ -78,15 +88,14 @@
         <input type="number" value="0.5" onchange="updateWireStyle()" id="hanLen" class="hoverSelect">
 
         <div class="dataBox textDb" id="db0">
-            <input type="text" class="textDbInput"> </div>
+            <input type="text" class="textDbInput">
+        </div>
         <button onclick="go()">Run JS</button>
 
     </div>
 
 
     <script>
-
-
         //{
         var mainCont = document.getElementById("mainCont0");
         var nodeBoard = document.getElementById("nodeCanvas");
@@ -132,8 +141,8 @@
 
 
 
-        
-        
+
+
         container.wires = [];
         go();
         function go() {

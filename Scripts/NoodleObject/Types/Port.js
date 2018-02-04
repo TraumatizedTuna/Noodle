@@ -54,6 +54,7 @@ noodle.port = {
             //Insert port frame
             node.html.getElementsByClassName(inOrOut + 'Ports')[0].insertAdjacentHTML('beforeend', '<div class="port ' + inOrOut + 'put" id="p' + port.id + '"></div><br>');
             port.html = document.getElementById('p' + port.id);
+            port.html.obj = port;
             //Insert interiror in frame
             portNoodle[port.type].renderInterior(noodle, port, noodle, inOrOut + 'put', node, inOrOut);
 

@@ -1,19 +1,37 @@
 noodle.ids = {
     //Lists describing free ids
-    freeList: {
-        obj: [0],
-        node: [0],
-        port: [0],
-        wire: [0]
-    },
+    freeList: [0],
+    objsById: {},
 
     add(obj) {
-        var objNoodle = noodle.expr.eval(noodle, obj.noodleExp);
-        objNoodle[obj.type].objsById[obj.id] = obj;
+        //var objNoodle = noodle.expr.eval(noodle, obj.noodleExp) || noodle; //TODO: Kinda ugly
+        noodle.ids.objsById[obj.id] = obj;
+    },
+
+    addIfAbsent(args) {
+        var noodle = args.noodle;
+        var obj = args.obj;
+
+        var hadId = true;
+        if ((typeof obj === 'object' && obj !== null) || typeof obj === 'function') {
+            if (obj.meta === undefined) {
+                Object.defineProperty(obj, 'meta', { enumerable: false, value: {} });
+            }
+
+            if (obj.meta.id === undefined) {
+                obj.meta.id = noodle.ids.firstFree();
+                noodle.ids.add(obj);
+                hadId = false;
+            }
+        }
+        else
+            hadId = false;
+
+        return { obj: obj, hadId: hadId };
     },
 
     //Gives you a free id from ids
-    firstFree(ids = noodle.ids.freeList.obj) {
+    firstFree(ids = noodle.ids.freeList) {
         if (ids.length > 1) {
             return ids.pop();
         }

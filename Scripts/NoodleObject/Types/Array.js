@@ -18,12 +18,18 @@ noodle.array={
         return list;
     },
 
-    random(noodle, contProb = 0.5, mem = [], drawProb = 0.5, types = ['object', 'array', 'string', 'number']) {
+    random(args) {
+        var noodle = args.noodle;
+        var contprob = args.contProb || 0.7;
+        var mem = args.mem = args.mem || [];
+        var drawProb = args.drawProb || 0.5;
+        var types = args.types || ['object', 'array', 'string', 'number'];
+
         var arr = [];
 
         while (Math.random() < contProb) {
             var type = types[Math.floor(Math.random() * types.length)];
-            arr.push(noodle[type].random(noodle));
+            arr.push(noodle[type].random(args));
         }
         return arr;
     }
