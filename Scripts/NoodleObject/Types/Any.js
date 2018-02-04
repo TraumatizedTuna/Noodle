@@ -6,16 +6,47 @@ noodle.any = {
         var type = types[Math.floor(Math.random() * types.length)];
         return noodle[type].random(args);
     },
+    getType(args) {
+        var noodle = args.noodle;
+        var obj = args.obj;
+
+        if (obj && (typeof obj === 'object' || typeof obj === 'function')) {
+            return { type: obj.type || typeof obj };
+        }
+
+        return { type: typeof obj };
+    },
+    hasAnyType(args) {
+        var noodle = args.noodle;
+        var val = args.val;
+        var types = args.types;
+
+        var type;
+
+        if (val && (typeof val === 'object' || typeof val === 'function')) {
+            type = val.type;
+            if (types.indexof(type) !== -1)
+                return { hasType: true, type: type };
+        }
+
+        type = typeof val;
+        if (types.indexof(type) !== -1)
+            return { hasType: true, type: type };
+
+        return { hasType: types.indexof('any') !== -1, type: 'any' };
+
+    },
     propByType(args) {
         var noodle = args.noodle;
         var obj = args.obj;
         var key = args.key;
+        var errIfAny = args.errIfAny;
 
         var type;
         var propPar;
         var prop;
 
-        if (obj) {
+        if (obj && (typeof obj === 'object' || typeof obj === 'function')) {
             type = obj.type;
             propPar = noodle[type];
         }
@@ -28,11 +59,20 @@ noodle.any = {
             if (propPar)
                 prop = propPar[key];
             if (!prop) {
-                type = 'any';
-                prop = noodle.any[key];
+                if (typeof obj !== 'object' && typeof obj !== 'function') {
+                    type = 'prim';
+                    prop = noodle.prim[key];
+                }
+                if (!prop) {
+                    type = 'any';
+                    prop = noodle.any[key];
+                    if (errIfAny) {
+                        throw 'error thingy: Had to use "any" as type for ' + obj + '\nkey: ' + key;
+                    }
+                }
             }
         }
-
+        //console.log(obj);
         return { prop: prop, type: type }; //TODO? Rename type to usefulType or something?
     },
     serialize(args) {
@@ -43,11 +83,23 @@ noodle.any = {
         if (obj.type === 'wire') {
             var a = 'aap';
         }*/
-        var serialize = noodle.any.propByType({
+        var { prop: serialize, type: type } = noodle.any.propByType({
             noodle: noodle,
             obj: obj,
-            key: 'serialize'
-        }).prop;
+            key: 'serialize',
+            errIfAny: true
+        });
+
+        if (type === 'any') {
+            return {
+                serialized: {
+                    serType: 'any',
+                    val: args.obj,
+                    obj: args.obj,
+                    idMap: args.idMap || {}
+                }
+            };
+        }
 
         return { serialized: serialize(args).serialized, idMap: idMap }; //TODO? Is this shallow cloning stupid? Should idMap come from serialize?
     },
@@ -67,5 +119,15 @@ noodle.any = {
         }).prop;
 
         return { str: toDataStr(args).str };
+    },
+    reduceErrVal(args) {
+        var errVal = args.errVal;
+
+        return noodle.any.propByType({
+            noodle: noodle,
+            obj: errVal,
+            key: 'reduceErrVal'
+        }).prop(args);
+
     }
 }

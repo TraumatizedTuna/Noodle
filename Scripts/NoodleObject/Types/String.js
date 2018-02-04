@@ -6,10 +6,10 @@ noodle.string = {
 
     random(args) {
         var noodle = args.noodle;
-        var contprob = args.contProb || 0.7;
+        var contProb = args.contProb || 0.7;
 
         var str = '';
-        var chars = 'abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ0123456789§½!"#¤%&/()=+?´`@£${[]}\¨^~'+"'"+'*<>|,;.:-_';
+        var chars = 'abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ0123456789§½!"#¤%&/()=+?´`@£${[]}\¨^~' + "'" + '*<>|,;.:-_';
         while (Math.random() < contProb) {
             str += chars[Math.floor(Math.random() * chars.length)];
         }
@@ -27,6 +27,30 @@ noodle.string = {
     },
     toDataStr(args) {
         var obj = args.obj;
-        return { str: 'string(' + obj + ')' };
+        return { str: 'string' + obj.length + '|' + obj };
+    },
+    reduceErrVal(args) {
+        var noodle = args.noodle;
+        var func = args.func;
+        var key = args.key;
+        var testArgs = args.testArgs || {};
+        var types = args.randArgs.types;
+        var errVal = args.errVal;
+
+        while (errVal.length > 0) {
+            errVal = errVal.substr(0, errVal.length - 1);
+            testArgs[key] = errVal;
+            try {
+                func(testArgs);
+                errVal = args.errVal.substr(0, errVal.length + 1);
+                break;
+            }
+            catch (e) {
+                args.error = e;
+            }
+        }
+
+        args.errVal = errVal;
+        return args;
     }
 };

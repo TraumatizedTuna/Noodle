@@ -15,7 +15,14 @@ noodle.ids = {
         var hadId = true;
         if ((typeof obj === 'object' && obj !== null) || typeof obj === 'function') {
             if (obj.meta === undefined) {
-                Object.defineProperty(obj, 'meta', { enumerable: false, value: {} });
+                try {
+                    Object.defineProperty(obj, 'meta', { enumerable: false, value: {} });
+                }
+                catch (e) {
+                    e.message += '\n\nObj: ' + obj;
+                    //throw e;
+                    obj.meta = {};
+                }
             }
 
             if (obj.meta.id === undefined) {

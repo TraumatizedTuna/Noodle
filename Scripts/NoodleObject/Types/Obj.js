@@ -116,12 +116,13 @@ noodle.object = {
             flatClone: [],
             flatMap: [],
             path: [],
-            func: function (noodle, obj, clone, flatList, flatClone, map, parNode) {
-                noodle.object.standardize(noodle, obj, parNode);
+            func: function (args) {
+                noodle.object.standardize(args);
             }, //func
-            cond: function (noodle, obj) {
-                if (obj != undefined && obj != null)
-                    return obj.type != 'expr';
+            cond: function (args) {
+                var obj = args.obj;
+                if (obj !== undefined && obj !== null)
+                    return obj.type !== 'expr';
                 return false;
             }, //cond
             parNode: parNode
@@ -295,7 +296,7 @@ noodle.object = {
     //Same as clone but applies all arguments except func and cond to func and cond. Stops recursion if cond returns false
     //Arguments: noodle, obj, clone, map = {}, flatList =[], flatClone =[], flatMap =[], path =[], func = function () { }, cond = function () { return true; }
     clonePlus(args) {
-        //Add unpassed parameters to arguments{
+        
         if (!args.cond(args)) {
             return args.obj;
         }
@@ -312,8 +313,8 @@ noodle.object = {
                 }
             }
             args.flatList.push(args.obj);
-            flatargs.clone.push(args.clone);
-            flatargs.map.push(args.path);
+            args.flatClone.push(args.clone);
+            args.flatMap.push(args.path);
             //Go through args.obj to args.clone all its properties
             for (var i in args.obj) {
                 [...args.path] = args.path;
@@ -331,22 +332,22 @@ noodle.object = {
                             mapVal = {};
                         else {
                             mapVal = args.obj[i];
-                            isargs.obj = false;
+                            isObj = false;
                         }
                     }
                     else {
                         mapVal = args.obj[i];
-                        isargs.obj = false;
+                        isObj = false;
                     }
                     args.map[i] = { recog: false, val: mapVal, isObj: isObj };
                     //}
                     //args.clone[i] = args.clone[i] || {};
-                    newArgs = args.noodle.object.shallowClone({ noodle: args.noodle, obj: args, clone: {} }); //TODO: Guess I could place this line outside the loop?
+                    var newArgs = args.noodle.object.shallowClone({ noodle: args.noodle, obj: args, clone: {} }).clone; //TODO: Guess I could place this line outside the loop?
 
                     newArgs.obj = args.obj[i];
                     newArgs.clone = args.clone[i];
                     newArgs.map = args.map[i].val;
-                    args.clone[i] = args.noodle.object.clonePlus.apply(undefined, newArgs); //This works because args.flatList gets updated
+                    args.clone[i] = args.noodle.object.clonePlus(newArgs); //This works because args.flatList gets updated
 
                 }
                 //If we've seen args.obj[i] before, add the args.clone of it to args.clone
@@ -476,7 +477,7 @@ noodle.object = {
 
     random(args) {
         var noodle = args.noodle;
-        var contprob = args.contProb || 0.7;
+        var contProb = args.contProb || 0.7;
         var mem = args.mem = args.mem || [];
         var drawProb = args.drawProb || 0.5;
         var types = args.types || ['object', 'array', 'string', 'number'];
@@ -485,8 +486,8 @@ noodle.object = {
 
         while (Math.random() < contProb) {
             var type = types[Math.floor(Math.random() * types.length)];
-            var key = noodle.string.random(noodle, contProb);
-            obj[key] = noodle[type].random(noodle, contProb);
+            var key = noodle.string.random(args);
+            obj[key] = noodle[type].random(args);
         }
         return obj;
     },
@@ -525,7 +526,7 @@ noodle.object = {
     serialize(args) {
         var noodle = args.noodle;
         var obj = args.obj;
-        var idMap = args.idMap || {};
+        var idMap = args.idMap = args.idMap || {};
 
         if (obj === null) {
             return { serType: 'null', val: null, obj: null };
@@ -553,15 +554,18 @@ noodle.object = {
     },
 
     toDataStr(args) {
+        //Vars from args{
         var noodle = args.noodle;
+        //If the object has already been serialized and has an idMap, use those. Otherwise, serialize
         if (args.serialized && args.idMap) {
             var serialized = args.serialized;
             var idMap = args.idMap;
         }
         else
             var { serialized: serialized, idMap: idMap } = noodle.any.serialize(args);
+        //}
 
-        var str = 'object(';
+        var str = '';
 
         for (var i in serialized.val) {
             var child = serialized.val[i];
@@ -572,7 +576,50 @@ noodle.object = {
                 idMap: idMap
             }).str;
         }
+        str = 'object' + str.length + '|' + str;
 
-        return { str: str + ')' };
+        return { str: str };
+    },
+
+    reduceErrVal(args) {
+        var noodle = args.noodle;
+        var func = args.func;
+        var key = args.key;
+        var testArgs = args.testArgs || {};
+        var types = args.randArgs.types;
+        var errVal = args.errVal;
+
+        //Loop to find if any of the children of errVal is enough to cause the error
+        for (var i in errVal) {
+            var errChild = errVal[i];
+            //If errChild has a legal type
+            if (types && noodle.any.hasAnyType({ noodle: noodle, val: errChild, types: types }).hasType) {
+
+                testArgs[key] = errChild;
+                try {
+                    func(testArgs);
+                    errVal[i] = undefined;
+                    testArgs[key] = errVal;
+                    //Try to remove errChild, otherWise reduce it
+                    try {
+                        func(testArgs);
+                        //If there's no error without errChild, add it back
+                        errVal[i] = errChild;
+                        args.errVal = errVal;
+                    }
+                    //If we get an error without errChild
+                    catch (e) {
+                        args.error = e;
+                    }
+
+                } catch (e) {
+                    args.error = e;
+                    args.errVal = errChild;
+                    return noodle.any.reduceErrVal(args);
+                }
+            }
+        }
+
+        return args;
     }
 };
