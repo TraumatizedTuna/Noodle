@@ -1,11 +1,11 @@
-noodle.any = {
+noodle.any = new class extends Object {
     random(args) {
         var noodle = args.noodle;
         var types = args.types || ['object', 'array', 'string', 'number'];
 
         var type = types[Math.floor(Math.random() * types.length)];
         return noodle[type].random(args);
-    },
+    }
     getType(args) {
         var noodle = args.noodle;
         var obj = args.obj;
@@ -15,7 +15,7 @@ noodle.any = {
         }
 
         return { type: typeof obj };
-    },
+    }
     hasAnyType(args) {
         var noodle = args.noodle;
         var val = args.val;
@@ -35,7 +35,7 @@ noodle.any = {
 
         return { hasType: types.indexof('any') !== -1, type: 'any' };
 
-    },
+    }
     propByType(args) {
         var noodle = args.noodle;
         var obj = args.obj;
@@ -74,35 +74,38 @@ noodle.any = {
         }
         //console.log(obj);
         return { prop: prop, type: type }; //TODO? Rename type to usefulType or something?
-    },
+    }
     serialize(args) {
         var noodle = args.noodle;
-        var obj = args.obj;
+        var val = args.val;
         var idMap = args.idMap = args.idMap || {};
         /*
-        if (obj.type === 'wire') {
+        if (val.type === 'wire') {
             var a = 'aap';
-        }*/
+        }*//*
         var { prop: serialize, type: type } = noodle.any.propByType({
             noodle: noodle,
-            obj: obj,
+            val: val,
             key: 'serialize',
             errIfAny: true
-        });
+        });*/
 
-        if (type === 'any') {
+        var type = typeof val;
+        //if (type === 'any') {
+        if (['null', 'undefined', 'number', 'symbol'].indexOf(type) !== -1) {
+            var constrName = type.substr(0, 1).toUpperCase() + type.substr(1);
             return {
                 serialized: {
-                    serType: 'any',
-                    val: args.obj,
-                    obj: args.obj,
+                    serType: constrName,
+                    //constr: eval(constrName),
+                    val: args.val,
                     idMap: args.idMap || {}
                 }
             };
         }
 
-        return { serialized: serialize(args).serialized, idMap: idMap }; //TODO? Is this shallow cloning stupid? Should idMap come from serialize?
-    },
+        return val.serialize(args);//{ serialized: serialize(args).serialized, idMap: idMap }; //TODO? Is this shallow cloning stupid? Should idMap come from serialize?
+    }
     toDataStr(args) {
         var noodle = args.noodle;
         var obj = args.obj;
@@ -119,7 +122,7 @@ noodle.any = {
         }).prop;
 
         return { str: toDataStr(args).str };
-    },
+    }
     reduceErrVal(args) {
         var errVal = args.errVal;
 
@@ -130,4 +133,4 @@ noodle.any = {
         }).prop(args);
 
     }
-}
+}();

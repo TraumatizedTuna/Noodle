@@ -19,7 +19,7 @@ var nodeTypes = {
             htmlContent: ''
         };
         //TODO: Check if this is window?
-        return noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, core: core, pos: pos });
         /* var node = noodle.node.new(noodle, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
@@ -562,4 +562,44 @@ nodeTypes.Test = function (noodle, label, pos, noodleExp) {
     for (var i in node) {
         this[i] = node[i];
     } */
+};
+
+
+noodle.nodeTypes = {
+    Text: class extends noodle.Node {
+        constructor(args) {
+            args.core = {
+                name: 'Text',
+                color: 'grey',
+                inPorts: [
+                ],
+                outPorts: [
+                    noodle.port.new(noodle, 'value', 'text', false)
+                ],
+                func: function (node) {
+                    var core = node.core;
+                    //core.data.text = core.inPorts[0].value;
+                    core.outPorts[0].value = core.data.text;
+                },
+                data: {
+                    text: "",
+                    updateOutPort(core) {
+                        core.outPorts[0].value = core.data.text;
+                    }
+                },
+                resetFuncs: [
+                    function () {
+                        $('.textDbInput').change(defTextDbInputChange);
+                    }
+                ],
+                htmlContent: '<input type="text" class="textDbInput">'
+            };
+            super(args);
+            
+            /*var node = noodle.node.new(noodle, core, label, pos);
+            for (var i in node) {
+                this[i] = node[i];
+            }*/
+        }
+    }
 };

@@ -3,7 +3,7 @@ noodle.function = {
         var noodle = args.noodle;
         var obj = args.obj;
         var idMap = args.idMap = args.idMap || {};
-        
+
 
         var serialized;
         //Make sure obj has an id
@@ -84,8 +84,15 @@ noodle.function = {
 
         if (args.errVal === undefined)
             args.errVal = noodle.function.findError(args).errVal;
-        
+
         noodle.any.reduceErrVal(args);
         return args;
     }
 }
+
+Object.defineProperties(Function.prototype, {
+    add: {
+        enumerable: false,
+        value: Object.add
+    }
+});

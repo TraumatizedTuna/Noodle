@@ -13,3 +13,5 @@ var noodle = {
         return noodle.expr.eval(noodle, obj.noodleExp);
     }
 }
+
+noodle.constructor.defineProperty(noodle, 'name', { enumerable: false, value: 'noodle' });

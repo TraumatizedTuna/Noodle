@@ -6,6 +6,7 @@
     <meta charset="utf-8">
 
     <title>Noodle</title>
+    <link rel="shortcut icon" href="Assets/favicon.ico">
 
     <link rel="stylesheet" href="Assets/reset.css">
     <link rel="stylesheet" href="Assets/style.css">
@@ -30,20 +31,21 @@
     <!-- Local scripts -->
     <script src="Scripts/NoodleObject/noodle.js"></script>
 
-    <script src="Scripts/NoodleObject/Types/nodeTypes.js"></script>
 
-    <script src="Scripts/NoodleObject/Types/Node.js"></script>
-    <script src="Scripts/NoodleObject/Types/Port.js"></script>
-    <script src="Scripts/NoodleObject/Types/Wire.js"></script>
-    <script src="Scripts/NoodleObject/Types/Expr.js"></script>
     <script src="Scripts/NoodleObject/Types/Any.js"></script>
-    <script src="Scripts/NoodleObject/Types/Obj.js"></script>
-    <script src="Scripts/NoodleObject/Types/Array.js"></script>
-    <script src="Scripts/NoodleObject/Types/Function.js"></script>
     <script src="Scripts/NoodleObject/Types/Primitive.js"></script>
     <script src="Scripts/NoodleObject/Types/String.js"></script>
     <script src="Scripts/NoodleObject/Types/Number.js"></script>
     <script src="Scripts/NoodleObject/Types/Undefined.js"></script>
+    <script src="Scripts/NoodleObject/Types/Obj.js"></script>
+    <script src="Scripts/NoodleObject/Types/Array.js"></script>
+    <script src="Scripts/NoodleObject/Types/Function.js"></script>
+    <script src="Scripts/NoodleObject/Types/Container.js"></script>
+    <script src="Scripts/NoodleObject/Types/Node.js"></script>
+    <script src="Scripts/NoodleObject/Types/nodeTypes.js"></script>
+    <script src="Scripts/NoodleObject/Types/Port.js"></script>
+    <script src="Scripts/NoodleObject/Types/Wire.js"></script>
+    <script src="Scripts/NoodleObject/Types/Expr.js"></script>
     <script src="Scripts/NoodleObject/Types/SortedList.js"></script>
     <script src="Scripts/NoodleObject/cookie.js"></script>
 
@@ -96,7 +98,8 @@
         var nodeBoard = document.getElementById("nodeCanvas");
         var wireBoard = document.getElementById("wireBoard0"); //TODO: wireBoard should be auto generated
         var container = {
-            html: mainCont
+            html: mainCont,
+            noodle: noodle
         };
         mainCont.obj = container;
 

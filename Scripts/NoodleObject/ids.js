@@ -10,31 +10,31 @@ noodle.ids = {
 
     addIfAbsent(args) {
         var noodle = args.noodle;
-        var obj = args.obj;
+        var val = args.val;
 
         var hadId = true;
-        if ((typeof obj === 'object' && obj !== null) || typeof obj === 'function') {
-            if (obj.meta === undefined) {
+        if ((typeof val === 'object' && val !== null) || typeof val === 'function') {
+            if (val.meta === undefined) {
                 try {
-                    Object.defineProperty(obj, 'meta', { enumerable: false, value: {} });
+                    Object.defineProperty(val, 'meta', { enumerable: false, value: {} });
                 }
                 catch (e) {
-                    e.message += '\n\nObj: ' + obj;
+                    e.message += '\n\nval: ' + val;
                     //throw e;
-                    obj.meta = {};
+                    val.meta = {};
                 }
             }
 
-            if (obj.meta.id === undefined) {
-                obj.meta.id = noodle.ids.firstFree();
-                noodle.ids.add(obj);
+            if (val.meta.id === undefined) {
+                val.meta.id = noodle.ids.firstFree();
+                noodle.ids.add(val);
                 hadId = false;
             }
         }
         else
             hadId = false;
 
-        return { obj: obj, hadId: hadId };
+        return { val: val, hadId: hadId };
     },
 
     //Gives you a free id from ids
