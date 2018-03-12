@@ -13,3 +13,17 @@ noodle.files = {
         return fileData;
     }
 };
+
+
+Object.defineProperty(CSSStyleSheet.prototype, 'serialize', { enumerable: false, writable: true, configurable: true, value: function () { return { serialized: undefined }; } });
+
+noodle.object.shallowClone({
+    noodle: noodle,
+    obj: Object.prototype,
+    clone: HTMLDivElement.prototype
+});
+noodle.object.shallowClone({
+    noodle: noodle,
+    obj: Object,
+    clone: HTMLDivElement
+});

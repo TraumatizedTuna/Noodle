@@ -6,6 +6,7 @@
     <meta charset="utf-8">
 
     <title>Noodle</title>
+    <link rel="shortcut icon" href="Assets/favicon.ico">
 
     <link rel="stylesheet" href="Assets/reset.css">
     <link rel="stylesheet" href="Assets/style.css">
@@ -22,14 +23,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-language_tools.js"></script>
-    <script src="Assets/serialijse.bundle.min.js"></script>
-    <script>
-        var serialize = serialijse.serialize;
-        var deserialize = serialijse.deserialize;
-        var declarePersistable = serialijse.declarePersistable;
-        var serializeZ = serialijse.serializeZ;
-        var deserializeZ = serialijse.deserializeZ;
-    </script>
+
 
     <link href='https://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Raleway:300' rel='stylesheet' type='text/css'>
@@ -37,18 +31,21 @@
     <!-- Local scripts -->
     <script src="Scripts/NoodleObject/noodle.js"></script>
 
-    <script src="Scripts/NoodleObject/Types/nodeTypes.js"></script>
 
-    <script src="Scripts/NoodleObject/Types/Node.js"></script>
-    <script src="Scripts/NoodleObject/Types/Port.js"></script>
-    <script src="Scripts/NoodleObject/Types/Wire.js"></script>
-    <script src="Scripts/NoodleObject/Types/Expr.js"></script>
     <script src="Scripts/NoodleObject/Types/Any.js"></script>
+    <script src="Scripts/NoodleObject/Types/Primitive.js"></script>
+    <script src="Scripts/NoodleObject/Types/String.js"></script>
+    <script src="Scripts/NoodleObject/Types/Number.js"></script>
+    <script src="Scripts/NoodleObject/Types/Undefined.js"></script>
     <script src="Scripts/NoodleObject/Types/Obj.js"></script>
     <script src="Scripts/NoodleObject/Types/Array.js"></script>
     <script src="Scripts/NoodleObject/Types/Function.js"></script>
-    <script src="Scripts/NoodleObject/Types/String.js"></script>
-    <script src="Scripts/NoodleObject/Types/Number.js"></script>
+    <script src="Scripts/NoodleObject/Types/Container.js"></script>
+    <script src="Scripts/NoodleObject/Types/Node.js"></script>
+    <script src="Scripts/NoodleObject/Types/nodeTypes.js"></script>
+    <script src="Scripts/NoodleObject/Types/Port.js"></script>
+    <script src="Scripts/NoodleObject/Types/Wire.js"></script>
+    <script src="Scripts/NoodleObject/Types/Expr.js"></script>
     <script src="Scripts/NoodleObject/Types/SortedList.js"></script>
     <script src="Scripts/NoodleObject/cookie.js"></script>
 
@@ -100,9 +97,10 @@
         var mainCont = document.getElementById("mainCont0");
         var nodeBoard = document.getElementById("nodeCanvas");
         var wireBoard = document.getElementById("wireBoard0"); //TODO: wireBoard should be auto generated
-        var container = {
-            html: mainCont
-        };
+        var container = new Container({
+            html: mainCont,
+            noodle: noodle
+        });
         mainCont.obj = container;
 
 
@@ -156,6 +154,7 @@
             noodle.node.add(noodle, container, nodeTypes.Dummy, '', { x: 10, y: 500 });
             noodle.node.add(noodle, container, nodeTypes.Code, '', { x: 200, y: 200 });
             noodle.node.add(noodle, container, nodeTypes.NodeCreator, '', { x: 900, y: 100 });
+            noodle.object.deepStandardize({ noodle: noodle, val: container });
 
             calcTime = new Date().getTime() - startTime;
             console.log('Render time: ' + calcTime);

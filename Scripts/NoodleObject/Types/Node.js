@@ -1,10 +1,13 @@
-noodle.node = {
+noodle.node = new class extends noodle.object.constructor {
+    constructor() {
+        super();
+    }
     //Data{
 
     //Set to true to render nodes in parallell. Causes issues if a wire is trying to connect to unfinished node
-    async: false,
+    //get async() { return false; }
 
-    objsById: {},
+    //objsById: {}
 
     //}
 
@@ -12,42 +15,40 @@ noodle.node = {
     //Functions{
     //TODO: What if node is already rendered?
     setDefaultPorts(noodle, node) {
-        var inports = node.core.inPorts;
+        var inPorts = node.core.inPorts;
         var outPorts = node.core.outPorts;
-
+        /*
         outPorts.meta = outPorts.meta || {};
-        outPorts.meta.node = noodle.port.new(noodle, 'node', 'node', false, [], node);
-    },
-    setBoard(el) { //Never used - should it be removed?
-        $.get('Html/nodeBoard.html', function (data) {
-            el.innerHTML = data;
-        });
-    },
+        outPorts.meta.node = noodle.port.new(noodle, 'node', 'node', false, [], node);*/
+    }
 
     //TODO: Add container parameter whenever add is called
     //Adds new node, sets it up properly and renders it
+
     add(noodle, container, constr, label, pos, noodleExp) {
-        var node = constr(noodle, label, pos, noodleExp);
+        var node = constr(noodle, container, label, pos, noodleExp);
         container.forest.push(node);
-        var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
+        var nodeNoodle = node.noodle || noodle.expr.eval(noodle, node.noodleExp);
         nodeNoodle.node.render(node, container);
         nodeNoodle.graphics.transformable.setActive(nodeNoodle, node.html); //Should this be inside render?
 
         return node;
-    },
-    new(noodle, core, label = '', pos = { x: 0, y: 0 }, noodleExp = noodle.expr.fromObj(noodle, noodle)) {
+    }
+    new(noodle, container, core, label = '', pos = { x: 0, y: 0 }, noodleExp = noodle.expr.fromObj(noodle, noodle)) {
         //Properties{
         cloneCounter = 0;
         //var newCoreExp = noodle.object.clone(noodle, core, {});
-        var node = {
+        var node = new noodle.Node({
             label: label,
             core: core,
             pos: pos,
             startPos: { x: pos.x, y: pos.y }, //Have to clone it to avoid weird stuff
             noodleExp: noodleExp,
             useNoodle: false,
-            rendered: false
-        };
+            rendered: false,
+            noodle: noodle,
+            meta: { container: container }
+        });
 
         node.mode = 0;
         node.editMode = {
@@ -70,7 +71,7 @@ noodle.node = {
         }
 
         noodle.node.setDefaultPorts(noodle, node);
-        Object.defineProperty(node, 'type', { enumerable: false, value: 'node' });
+        Object.defineProperty(node, 'type', { enumerable: false, writable: true, configurable: true, value: 'node' });
         console.log('Clone iterations: ' + cloneCounter + '\nObject: ' + core.toString());
 
         //}
@@ -87,10 +88,10 @@ noodle.node = {
         node.core.outPorts = noodle.expr.evalAll(noodle, node.core.outPorts);*/
         //}
 
-        noodle.object.deepStandardize(noodle, node, node);
+        noodle.object.deepStandardize({ noodle: noodle, val: node, parNode: node });
 
         return node;
-    },
+    }
 
     newExpr(noodle, name, func, inPortExps = [], outPortExps = [], data, resetFuncs, color, htmlContent) {
         var nodeExp = noodle.expr.new(
@@ -115,10 +116,10 @@ noodle.node = {
         );
         nodeExp.name = name;
         return nodeExp;
-    },
+    }
     //Renders node in container
     render(node, container) { //TODO: Noodle
-        var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
+        var nodeNoodle = node.noodle || noodle.expr.eval(noodle, node.noodleExp);
         var nodeId = nodeNoodle.ids.firstFree(nodeNoodle.ids.freeList.node);
         //TODO: Put all the stuff back into success to allow async
         $.ajax({
@@ -157,7 +158,7 @@ noodle.node = {
 
             }
         });
-    },
+    }
     renderInterior(noodle, node, nodeNoodle = noodle) {
         node.html.insertAdjacentHTML('beforeend', '<div class="portContainer">\n            <div class="inPorts" ></div >\n            <div class="outPorts"></div>\n</div ><div class="nodeContent"></div><br><a style="background-color: rgba(255, 255, 255, 0.5)"> id: ' + node.id + '</a>');
 
@@ -198,22 +199,22 @@ noodle.node = {
         }
 
         node.rendered = true;
-    },
+    }
 
     //Cuts all wires connected to node
     disconnect(noodle, node) { // Seems like this function is never used
         noodle.node.forEachPort(node.core, noodle.port.cut);
-    },
+    }
 
     //Gets js node from html element
     getObj(noodle, nodeEl) {
         return noodle.node.objsById[nodeEl.id];
-    },
+    }
 
     //Executes node and nodes connected to out ports
     execute(node) {
         if (node.rendered) {
-            var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
+            var nodeNoodle = node.noodle;//noodle.expr.eval(noodle, node.noodleExp);
             node.core.func(node);
             var outPorts = node.core.outPorts;
 
@@ -235,7 +236,7 @@ noodle.node = {
 
             f(noodle, node.core.outPorts);
         }
-    },
+    }
 
     //Runs func with each port of core
     forEachPort(core, func) {
@@ -252,11 +253,11 @@ noodle.node = {
             f(core.inPorts[i], core, func);
         for (var i in core.outPorts)
             f(core.outPorts[i], core, func);
-    },
+    }
 
     //Renders all ports of node
     renderPorts(node) {
-        var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
+        var nodeNoodle = node.noodle;
         for (var i in node.core.inPorts)
             nodeNoodle.port.render(node, node.core.inPorts[i]);
 
@@ -264,12 +265,12 @@ noodle.node = {
             nodeNoodle.port.render(node, node.core.outPorts[i]);
 
         nodeNoodle.node.forEachPort(node.core, nodeNoodle.port.renderVal);
-    },
+    }
 
     //Makes sure that a new wire will be pulled on mousemove and connected or deleted on mouseup
     setSockEv(node) {
         $('.socket').unbind().mousedown(function (e) { //TODO: Only set this event for children of node.html
-            var nodeNoodle = noodle.expr.eval(noodle, node.noodleExp);
+            var nodeNoodle = node.noodle;//noodle.expr.eval(noodle, node.noodleExp);
 
             noodle.global.active.socketEl = e.target;
             var port = noodle.global.active.socketEl.parentElement.obj;
@@ -310,4 +311,87 @@ noodle.node = {
         });
     }
     //}
-};
+}();
+noodle.node.async = false;
+noodle.node.objsById = {};
+
+
+noodle.Node = class extends Object {
+    //noodle, objMeta, [container], [core]
+    constructor(args) {
+        super();
+        var { noodle: noodle, objMeta: meta, container: container, core: core, pos: pos } = args;
+        meta = meta || {};
+        meta.container = meta.container || new Container({ noodle: noodle });
+        this.core = core = core || {};
+        core.resetFuncs = core.resetFuncs || [];
+        //core.outPorts = core.outPorts || [];
+
+        this.pos = pos || { x: 0, y: 0 };
+
+        this.addMeta({ meta: meta }); //TODO: this.constructor.addMeta?
+        this.meta.id = noodle.ids.firstFree()
+
+        this.in = { ports: core.inPorts || [] };
+        this.out = { ports: core.outPorts || [] };
+        this.label = core.name;
+        this.parNode = this;
+        this.startPos = {};
+
+        var ports = this.ports.all;
+        for (var i in ports) {
+            var port = ports[i];
+            port.meta.parNode = this;
+        }
+
+    }
+    get ports() {
+        var ports = {
+            get all() {
+                var node = this.meta.parent;
+                return node.in.ports.concat(node.out.ports);
+            },
+            in: this.in.ports,
+            out: this.out.ports
+        };
+        ports.addMeta({ meta: { parent: this } });
+        return ports;
+    }
+    set ports(ports) {
+        this.in.ports = ports.in;
+        this.out.ports = ports.out;
+    }
+
+    get noodle() {
+        return this.meta.container.noodle;
+    }
+    render(args) {
+        return this.noodle.node.render(this, this.container);
+    }
+    toString(args) {
+        var str = 'Node ' + this.label + ', Id: ' + this.meta.id;
+        return str;
+    }
+}
+
+Object.defineProperties(noodle.Node, {
+    meta: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: {
+            parent: noodle
+        }
+    },
+    name: {
+        enumerable: false,
+        get: function () {
+            var name = 'Node';
+            var par = this.meta.parent;
+            if (par) {
+                name = par.name + '.' + name;
+            }
+            return name;
+        }
+    }
+});

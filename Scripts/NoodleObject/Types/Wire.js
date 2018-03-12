@@ -20,7 +20,7 @@ noodle.wire = {
             rendered: false,
             noodle: noodle,
         };
-        Object.defineProperty(wire, 'type', {enumerable: false, value: 'wire'});
+        Object.defineProperty(wire, 'type', { enumerable: false, writable: true, configurable: true, value: 'wire'});
         wire.noodleExp = noodle.expr.defaultNoodle(noodle, wire)
         //noodle.object.deepStandardize(noodle, wire); //This line shouldn't do any difference but I guess I should check why it crashes
         container.wires.push(wire);
@@ -33,7 +33,7 @@ noodle.wire = {
 
     //Connects ports p0 and p1 with wire
     connect(p0, p1, wire, noodle) {
-        var wireNoodle = noodle.getNoodle(noodle, wire);
+        var wireNoodle = wire.noodle;//noodle.getNoodle(noodle, wire);
         //Set up objects so ports contain wire{
         //Set indices of wire in the ports
         wire.p0Ind = p0.wires.length;
@@ -46,8 +46,8 @@ noodle.wire = {
         wire.port0 = p0;
         wire.port1 = p1;
 
-        wire.node0 = p0.parNode;
-        wire.node1 = p1.parNode;
+        wire.node0 = p0.meta.parNode;
+        wire.node1 = p1.meta.parNode;
         //}
 
         if (!wire.rendered) {
@@ -56,7 +56,8 @@ noodle.wire = {
 
         wireNoodle.wire.update(wire);
         if (wire.port0.rendered)
-            noodle.getNoodle(noodle, wire.node0).node.execute(wire.node0);
+            //noodle.getNoodle(noodle, wire.node0).
+            wire.node0.noodle.node.execute(wire.node0);
     },
 
     //Sets up wire html and renders wire to wireBoard
@@ -114,7 +115,7 @@ noodle.wire = {
         var wireEl = document.getElementById(wire.id);
         wire.noodle.wire.objsById[wireEl.id] = undefined;
         wireEl.remove();
-        wire.noodle.ids.forget(wire.noodle.ids.freeList.wire, parseInt(wire.id.substr(1), 10), true);
+        wire.noodle.ids.forget(wire.noodle.ids.freeList, parseInt(wire.id.substr(1), 10), true);
     },
 
     //Makes sure that wires know their indices in wire lists of their parent ports

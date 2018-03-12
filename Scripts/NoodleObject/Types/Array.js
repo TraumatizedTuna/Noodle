@@ -20,7 +20,7 @@ noodle.array={
 
     random(args) {
         var noodle = args.noodle;
-        var contprob = args.contProb || 0.7;
+        var contProb = args.contProb || 0.7;
         var mem = args.mem = args.mem || [];
         var drawProb = args.drawProb || 0.5;
         var types = args.types || ['object', 'array', 'string', 'number'];
@@ -34,3 +34,25 @@ noodle.array={
         return arr;
     }
 };
+
+
+Object.defineProperties(Array, {
+    defineProperty: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: Object.defineProperty
+    },
+    defineProperties: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: Object.defineProperties
+    },
+    getOwnPropertyDescriptor: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: Object.getOwnPropertyDescriptor
+    }
+});

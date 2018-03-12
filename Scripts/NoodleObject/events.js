@@ -34,8 +34,8 @@ noodle.events = {
                 //var height = 100 * (e.pageY - nodeRect.top) / parRect.width;
                 noodle.global.active.nodeEl.style.height = height + 'px';//'vw';
             }
-            noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.inPorts);
-            noodle.port.updateWires(noodle.node.getObj(noodle, noodle.global.active.nodeEl).core.outPorts);
+            noodle.port.updateWires(noodle.global.active.nodeEl.obj.core.inPorts);
+            noodle.port.updateWires(noodle.global.active.nodeEl.obj.core.outPorts);
         },
         move(e) {
             var startPos = noodle.graphics.transformable.startPos;
