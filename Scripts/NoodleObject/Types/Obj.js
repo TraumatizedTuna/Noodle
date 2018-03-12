@@ -66,48 +66,69 @@ noodle.object = new class extends noodle.any.constructor {
     }
 
     standardize(args) { //TODO: Dynamically figure out parent node
-        if (args.obj != null && args.obj != undefined) {
-            if (typeof args.obj != 'object' && typeof args.obj != 'function')
+        var { noodle: noodle, obj: val } = args;
+        if (val !== null && val !== undefined) {
+            if (typeof val !== 'object' && typeof val !== 'function')
                 return;
-            //Set args.parNode of args.obj{
+            /*
+            //Set args.parNode of val{
             if (args.parNode == undefined || args.parNode.type != 'node') {
-                args.parNode = args.obj;
-                while (args.parNode.parent != undefined && args.parNode.type != 'node') {
+                args.parNode = val;
+                while (args.parNode.parent !== undefined && args.parNode.type !== 'node' && args.parNode.parent !== val) {
                     args.parNode = args.parNode.parent;
                 }
             }
             if (args.parNode.type != 'node')
                 args.parNode = undefined;
-            Object.defineProperty(args.obj, 'parNode', { enumerable: false, value: args.parNode });
-            //args.obj.parNode = args.parNode;
-            //}
 
-            //Set type of args.obj
-            if (args.obj.type == undefined && typeof args.obj == 'object') {
-                Object.defineProperty(args.obj, 'type', { enumerable: false, value: 'obj' });
+            if (val.meta && val.meta.id === 9)
+                var a = 42;
+            val.addMeta({ parNode: args.parNode });
+            //val.parNode = args.parNode;
+            //}*/
+            if (Object.isExtensible(val)) {
+                /*
+                //If val has neither value nor getter for parNode
+                if (!val.hasValOrGetter('parNode')) {
+                    (val.constructor.defineProperty || Object.defineProperty)(val, 'parNode', {
+                        enumerable: false,
+                        get: function () {
+                            if (this.parent)
+                                return this.parent.parNode;
+                        }
+                    });
+                }
+                */
+                //Set type of val
+                if (val.type == undefined && typeof val == 'object') {
+                    Object.defineProperty(val, 'type', { enumerable: false, writable: true, configurable: true, value: 'obj' });
+                }
+                //Set noodleExp of val
+                var noodleExp = val.noodleExp || args.noodle.expr.defaultNoodle(args.noodle, child);
+                Object.defineProperty(val, 'noodleExp', { enumerable: false, writable: true, configurable: true, value: noodleExp });
             }
-
             //Set parent of properties
-            for (var i in args.obj) {
-                if (typeof args.obj[i] === 'object' && args.obj[i] !== null && args.obj[i] !== undefined && i !== 'parent' && i !== 'parNode') {
-                    //If args.obj[i].parent is already defined, Object.defineproprty() won't work
-                    if (args.obj[i].parent === undefined) {
-                        Object.defineProperty(args.obj[i], 'parent', { enumerable: false, value: args.obj });
+            for (var i in val) {
+                var child = val[i];
+                if (typeof child === 'object' && child !== null && child !== undefined && i !== 'parent' && i !== 'parNode' && Object.isExtensible(child)) {
+                    //If val.parent is already defined, Object.defineProperty() won't work
+                    if (child.parent === undefined) {
+                        Object.defineProperty(child, 'parent', { enumerable: false, writable: true, configurable: true, value: val });
                     }
                     else {
-                        args.obj[i].parent = args.obj;
+                        child.parent = val;
                     }
                 }
             }
 
-            //Set noodleExp of args.obj
-            var noodleExp = args.obj.noodleExp || args.noodle.expr.defaultNoodle(args.noodle, args.obj);
-            Object.defineProperty(args.obj, 'noodleExp', { enumerable: false, value: noodleExp });
         }
     }
 
-    deepStandardize(noodle, obj, parNode, clone = {}, map = {}) {
-        noodle.object.clonePlus({
+    deepStandardize(args) {
+        var { noodle: noodle, val: val, parNode: parNode, clone: clone, map: map } = args;
+        clone = clone || {};
+        map = map || {};
+        /*noodle.object.clonePlus({
             noodle: noodle,
             obj: obj,
             clone: clone,
@@ -126,7 +147,25 @@ noodle.object = new class extends noodle.any.constructor {
                 return false;
             }, //cond
             parNode: parNode
+        });*/
+
+        var serial = val.serialize({
+            noodle: noodle,
+            idMap: noodle.ids.objsById
         });
+        //throw new Error();
+        for (var i in serial.idMap) {
+            noodle.any.callFunc({
+                noodle: noodle,
+                val: serial.idMap[i].val,
+                funcName: 'standardize',
+                args: {
+                    noodle: noodle,
+                    parNode: parNode
+                }
+            });
+
+        }
     }
 
     toStr(noodle, obj, depth = 3, indent = '') {
@@ -534,17 +573,19 @@ noodle.object = new class extends noodle.any.constructor {
 
         var serialized;
         //Make sure val has an id
-        noodle.ids.addIfAbsent({ noodle: noodle, val: val });
+        var id = noodle.ids.addIfAbsent({ noodle: noodle, val: val }).id;
 
         //If val isn't in idMap, add it
-        if (idMap[val.meta.id] === undefined) {
+        if (idMap[id] === undefined) {
             //TODO: Non-enumerable stuff
             serialized = { serType: 'Object', obj: {}, val: val };
-            idMap[val.meta.id] = serialized;
+            idMap[id] = serialized;
             for (var i in val) {
-                var child = val[i];
-                //serialized.val[i] = child.serialize(args);
-                serialized.obj[i] = noodle.any.serialize({ noodle: noodle, val: child, idMap: idMap }).serialized;
+                if (i !== undefined) { //TODO? Is this ugly?
+                    var child = val[i];
+                    //serialized.val[i] = child.serialize(args);
+                    serialized.obj[i] = noodle.any.serialize({ noodle: noodle, val: child, idMap: idMap }).serialized;
+                }
             }
         }
         //If val is already in idMap, just add its id
@@ -631,9 +672,11 @@ noodle.object = new class extends noodle.any.constructor {
 Object.defineProperties(Object.prototype, {
     addMeta: {
         enumerable: false,
+        writable: true,
+        configurable: true,
         value(args) {
             if (this.meta === undefined) {
-                this.constructor.defineProperty(this, 'meta', { enumerable: false, value: {} });
+                this.constructor.defineProperty(this, 'meta', { enumerable: false, writable: true, configurable: true, value: {} });
             }
             for (var i in args.meta) {
                 this.meta[i] = args.meta[i];
@@ -642,6 +685,8 @@ Object.defineProperties(Object.prototype, {
     },
     serialize: {
         enumerable: false,
+        writable: true,
+        configurable: true,
         value: function (args = {}) {
             args.val = args.val || this;
             args.noodle = args.noodle || args.val.noodle || noodle;
@@ -651,11 +696,24 @@ Object.defineProperties(Object.prototype, {
     },
     toDataStr: {
         enumerable: false,
+        writable: true,
+        configurable: true,
         value(args = {}) {
             args.val = args.val || this;
             args.noodle = args.noodle || args.val.noodle || noodle;
 
             return noodle.object.toDataStr(args);
+        }
+    },
+    standardize: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value(args) {
+            args.obj = args.obj || this;
+            args.noodle = args.noodle || args.val.noodle || noodle;
+
+            return noodle.object.standardize(args);
         }
     },
     /*
@@ -666,15 +724,47 @@ Object.defineProperties(Object.prototype, {
             var constr = this.constructor;
             if (enumerable === undefined) {
                 for (var i of props.constructor.getOwnPropertyNames(props)) {
-                    constr.defineProperty(this, i, { enumerable: props.propertyIsEnumerable(i), value: props[i] });
+                    constr.defineProperty(this, i, { enumerable: props.propertyIsEnumerable(i), writable: true, configurable: true, value: props[i] });
                 }
             }
 
             else
                 for (var i in props) {
-                    constr.defineProperty(this, i, { enumerable: enumerable, value: props[i] });
+                    constr.defineProperty(this, i, { enumerable: enumerable, writable: true, configurable: true, value: props[i] });
                 }
         }
     }*/
+    hasValOrGetter: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value(key) {
+            var constr;
+            //TODO?
+            if (this.constructor.getOwnPropertyDescriptor)
+                constr = this.constructor;
+            else
+                constr = Object;
+
+            var propDesc = constr.getOwnPropertyDescriptor(this, key);
+            return ((propDesc && propDesc.get) || this[key]) != undefined;
+        }
+    },
+    concat: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value(obj) {
+            //TODO: Handle identical keys?
+            var cat = {};
+            for (var i in this) {
+                cat[i] = this[i];
+            }
+            for (var i in obj) {
+                cat[i] = obj[i];
+            }
+            return cat;
+        }
+    }
 });
 

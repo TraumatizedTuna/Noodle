@@ -89,10 +89,22 @@ noodle.any = new class extends Object {
             key: 'serialize',
             errIfAny: true
         });*/
-
+        /*if (val === undefined) {
+            var same = true;
+            for (var i in args) {
+                if (args[i] !== oldArgs[i]) {
+                    same = false;
+                    break;
+                }
+            }
+            console.log(same);
+            oldArgs = args;
+        }*/
         var type = typeof val;
+        if (type === undefined)
+            type = 'undefined';
         //if (type === 'any') {
-        if (['null', 'undefined', 'number', 'symbol'].indexOf(type) !== -1) {
+        if (['undefined', 'number', 'symbol'].indexOf(type) !== -1 || val === null || !val.serialize) {
             var constrName = type.substr(0, 1).toUpperCase() + type.substr(1);
             return {
                 serialized: {
@@ -103,8 +115,10 @@ noodle.any = new class extends Object {
                 }
             };
         }
-
+        if (val === this)
+            return noodle.object.serialize(args);
         return val.serialize(args);//{ serialized: serialize(args).serialized, idMap: idMap }; //TODO? Is this shallow cloning stupid? Should idMap come from serialize?
+
     }
     toDataStr(args) {
         var noodle = args.noodle;
@@ -133,4 +147,27 @@ noodle.any = new class extends Object {
         }).prop(args);
 
     }
+    callFunc(args) {
+        var { noodle: noodle, val: val, funcName: funcName, args: subArgs } = args;
+
+        var type = typeof val;
+        if (type === undefined)
+            type = 'undefined';
+        if (['undefined', 'number', 'symbol'].indexOf(type) !== -1 || val === null || !val[funcName]) {
+            //var constrName = type.substr(0, 1).toUpperCase() + type.substr(1);
+            if (noodle[type] && noodle[type][funcName]) {
+                return noodle[type][funcName](subArgs);
+            }
+            if (noodle.prim[funcName]) {
+                return noodle.prim[funcName](subArgs);
+            }
+            if (noodle.any[funcName]) {
+                return noodle.any[funcName](subArgs);
+            }
+            throw new TypeError("Cannot find function '" + funcName + "' for type '" + type + "' in noodle object with id " + noodle.meta.id);
+        }
+        return val[funcName](subArgs);
+    }
 }();
+
+var oldArgs = {};

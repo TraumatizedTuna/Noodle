@@ -1,6 +1,6 @@
 var nodeTypes = {
     //Add(...){...} doesn't work since it's a constructor
-    Add: function (noodle, label, pos, noodleExp) {
+    Add: function (noodle, container, label, pos, noodleExp) {
         var core = {
             name: 'add',
             color: 'yellow',
@@ -19,13 +19,13 @@ var nodeTypes = {
             htmlContent: ''
         };
         //TODO: Check if this is window?
-        return new noodle.Node({ noodle: noodle, core: core, pos: pos });
-        /* var node = noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
         } */
     },
-    Value: function (noodle, label, pos, noodleExp) {
+    Value: function (noodle, container, label, pos, noodleExp) {
         var core = {
             name: 'Value',
             color: 'blue',
@@ -41,13 +41,13 @@ var nodeTypes = {
             resetFuncs: [],
             htmlContent: noodle.files.getFile('Html/valueNode.html')
         };
-        return noodle.node.new(noodle, core, label, pos);
-        /* var node = noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
         } */
     },
-    Text: function (noodle, label, pos, noodleExp) {
+    Text: function (noodle, container, label, pos, noodleExp) {
         var core = {
             name: 'Text',
             color: 'grey',
@@ -74,13 +74,13 @@ var nodeTypes = {
             ],
             htmlContent: '<input type="text" class="textDbInput">'
         };
-        return noodle.node.new(noodle, core, label, pos);
-        /* var node = noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
         } */
     },
-    Color: function (noodle, label, pos, noodleExp) {
+    Color: function (noodle, container, label, pos, noodleExp) {
         var core = {
             name: 'Color',
             color: 'grey',
@@ -107,13 +107,13 @@ var nodeTypes = {
             ],
             htmlContent: '<input type="color" class="colorPicker">'
         };
-        return noodle.node.new(noodle, core, label, pos);
-        /* var node = noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
         } */
     },
-    Code: function (noodle, label, pos, noodleExp) {
+    Code: function (noodle, container, label, pos, noodleExp) {
         var core = {
             name: 'Code',
             color: '#1E1438',
@@ -198,13 +198,13 @@ var nodeTypes = {
             ],
             htmlContent: '<div class="editor" style="width: 500px; height: 250px"></div>'
         };
-        return noodle.node.new(noodle, core, label, pos);
-        /* var node = noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
         } */
     },
-    Eval: function (noodle, label, pos, noodleExp) {
+    Eval: function (noodle, container, label, pos, noodleExp) {
         var core = {
             name: 'Eval',
             color: 'green',
@@ -233,13 +233,13 @@ var nodeTypes = {
             ],
             htmlContent: ''
         };
-        return noodle.node.new(noodle, core, label, pos);
-        /* var node = noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
         } */
     },
-    Html: function (noodle, label, pos, noodleExp) {
+    Html: function (noodle, container, label, pos, noodleExp) {
         var core = {
             name: 'Html',
             color: 'Darkgrey',
@@ -270,13 +270,13 @@ var nodeTypes = {
             ],
             htmlContent: '<div class="renderBox"></div>'
         };
-        return noodle.node.new(noodle, core, label, pos);
-        /* var node = noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
         } */
     },
-    NodeCreator: function (noodle, label, pos, noodleExp) {
+    NodeCreator: function (noodle, container, label, pos, noodleExp) {
         var core = {
             name: 'NodeCreator',
             color: 'orange',
@@ -336,13 +336,13 @@ var nodeTypes = {
             ],
             htmlContent: noodle.files.getFile('Html/Nodes/nodeCreator.html')
         };
-        return noodle.node.new(noodle, core, label, pos);
-        /* var node = noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
         } */
     },
-    Object: function (noodle, label, pos, noodleExp) {
+    Object: function (noodle, container, label, pos, noodleExp) {
         var core = {
             name: 'Object',
             color: 'magenta',
@@ -393,15 +393,15 @@ var nodeTypes = {
             ],
             htmlContent: '<div class="renderBox"></div>'
         };
-        return noodle.node.new(noodle, core, label, pos);
-        /* var node = noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
         } */
     },
 
 
-    Cookie: function (noodle, label, pos, noodleExp) {
+    Cookie: function (noodle, container, label, pos, noodleExp) {
         var core = {
             name: 'Cookie',
             color: 'cyan',
@@ -428,14 +428,14 @@ var nodeTypes = {
             ],
             htmlContent: ''
         };
-        return noodle.node.new(noodle, core, label, pos);
-        /* var node = noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
         } */
     },
 
-    Container: function (noodle, label, pos, noodleExp) {
+    Container: function (noodle, container, label, pos, noodleExp) {
         var core = {
             name: 'Container',
             color: 'rgba(64,64,64,0.4)',
@@ -466,13 +466,13 @@ var nodeTypes = {
             ],
             htmlContent: '<div class="container"></div>'
         };
-        return noodle.node.new(noodle, core, label, pos);
-        /* var node = noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
         } */
     },
-    Dummy: function (noodle, label, pos, noodleExp) {
+    Dummy: function (noodle, container, label, pos, noodleExp) {
         var core = {
             name: 'Dummy',
             color: 'white',
@@ -500,13 +500,13 @@ var nodeTypes = {
             ],
             htmlContent: '<input type="text" class="textDbInput" style="width: 100%">'
         };
-        return noodle.node.new(noodle, core, label, pos);
-        /* var node = noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
         } */
     },
-    Serialize: function (noodle, label, pos, noodleExp) {
+    Serialize: function (noodle, container, label, pos, noodleExp) {
         var core = {
             name: 'Serialize',
             color: 'brown',
@@ -527,14 +527,14 @@ var nodeTypes = {
             ],
             htmlContent: ''
         };
-        return noodle.node.new(noodle, core, label, pos);
-        /* var node = noodle.node.new(noodle, core, label, pos);
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
         } */
     }
 };
-nodeTypes.Test = function (noodle, label, pos, noodleExp) {
+nodeTypes.Test = function (noodle, container, label, pos, noodleExp) {
     var core = {
         name: 'Test',
         color: 'white',
@@ -557,8 +557,8 @@ nodeTypes.Test = function (noodle, label, pos, noodleExp) {
         ],
         htmlContent: ''
     };
-    return noodle.node.new(noodle, core, label, pos);
-    /* var node = noodle.node.new(noodle, core, label, pos);
+    return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+    /* var node = noodle.node.new(noodle, container, core, label, pos);
     for (var i in node) {
         this[i] = node[i];
     } */
@@ -596,7 +596,7 @@ noodle.nodeTypes = {
             };
             super(args);
             
-            /*var node = noodle.node.new(noodle, core, label, pos);
+            /*var node = noodle.node.new(noodle, container, core, label, pos);
             for (var i in node) {
                 this[i] = node[i];
             }*/

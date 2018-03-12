@@ -8,7 +8,7 @@ noodle.sList = {
             list: iterable,
             compare: compare
         };
-        Object.defineProperty(sList, 'type', {enumerable: false, value: 'sList'});
+        Object.defineProperty(sList, 'type', { enumerable: false, writable: true, configurable: true, value: 'sList'});
         sList.noodleExp = noodleExp || noodle.expr.defaultNoodle(noodle, sList);
         return sList;
     },

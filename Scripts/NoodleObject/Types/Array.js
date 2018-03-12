@@ -34,3 +34,25 @@ noodle.array={
         return arr;
     }
 };
+
+
+Object.defineProperties(Array, {
+    defineProperty: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: Object.defineProperty
+    },
+    defineProperties: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: Object.defineProperties
+    },
+    getOwnPropertyDescriptor: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: Object.getOwnPropertyDescriptor
+    }
+});

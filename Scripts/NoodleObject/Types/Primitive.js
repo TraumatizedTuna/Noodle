@@ -22,11 +22,12 @@ noodle.constructor.defineProperty(
     noodle,
     'Prim',
     {
+        enumerable: true,
         set: function (p) {
             for (var c of [Boolean, Number, String, Symbol]) {
                 for (var i in p) {
                     var prop = p[i];
-                    Object.defineProperty(c.prototype, i, { value: prop, enumerable: false });
+                    Object.defineProperty(c.prototype, i, { enumerable: false, writable: true, configurable: true, value: prop });
                 }
             }
         },

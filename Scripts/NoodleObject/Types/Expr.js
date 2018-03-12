@@ -17,7 +17,7 @@ noodle.expr = {
             ans: ans,
             state: state
         };
-        Object.defineProperty(expr, 'type', {enumerable: false, value: 'expr'});
+        Object.defineProperty(expr, 'type', { enumerable: false, writable: true, configurable: true, value: 'expr'});
         return expr;
     },
 

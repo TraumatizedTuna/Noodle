@@ -12,11 +12,14 @@ noodle.ids = {
         var noodle = args.noodle;
         var val = args.val;
 
+        var id;
         var hadId = true;
+        var hasId = true;
+        //If val is non-null object or function
         if ((typeof val === 'object' && val !== null) || typeof val === 'function') {
             if (val.meta === undefined) {
                 try {
-                    Object.defineProperty(val, 'meta', { enumerable: false, value: {} });
+                    Object.defineProperty(val, 'meta', { enumerable: false, writable: true, configurable: true, value: {} });
                 }
                 catch (e) {
                     e.message += '\n\nval: ' + val;
@@ -24,17 +27,27 @@ noodle.ids = {
                     val.meta = {};
                 }
             }
-
-            if (val.meta.id === undefined) {
-                val.meta.id = noodle.ids.firstFree();
-                noodle.ids.add(val);
-                hadId = false;
+            if (val.meta !== undefined) {
+                //If there's no id, add one
+                if (val.meta.id === undefined) {
+                    val.meta.id = noodle.ids.firstFree();
+                    noodle.ids.add(val);
+                    hadId = false;
+                }
+                id = val.meta.id;
+            }
+            //If meta couldn't be added to val
+            else {
+                id = noodle.ids.firstFree();
+                hadId = hasId = false;
             }
         }
-        else
-            hadId = false;
+        else {
+            id = noodle.ids.firstFree();
+            hadId = hasId = false;
+        }
 
-        return { val: val, hadId: hadId };
+        return { val: val, id: id, hasId: hasId, hadId: hadId };
     },
 
     //Gives you a free id from ids

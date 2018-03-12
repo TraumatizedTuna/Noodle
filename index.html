@@ -97,10 +97,10 @@
         var mainCont = document.getElementById("mainCont0");
         var nodeBoard = document.getElementById("nodeCanvas");
         var wireBoard = document.getElementById("wireBoard0"); //TODO: wireBoard should be auto generated
-        var container = {
+        var container = new Container({
             html: mainCont,
             noodle: noodle
-        };
+        });
         mainCont.obj = container;
 
 
@@ -142,7 +142,7 @@
 
 
         container.wires = [];
-        go();
+        //go();
         function go() {
             var startTime = 0;
             var calcTime = 0;
@@ -154,6 +154,7 @@
             noodle.node.add(noodle, container, nodeTypes.Dummy, '', { x: 10, y: 500 });
             noodle.node.add(noodle, container, nodeTypes.Code, '', { x: 200, y: 200 });
             noodle.node.add(noodle, container, nodeTypes.NodeCreator, '', { x: 900, y: 100 });
+            noodle.object.deepStandardize({ noodle: noodle, val: container });
 
             calcTime = new Date().getTime() - startTime;
             console.log('Render time: ' + calcTime);

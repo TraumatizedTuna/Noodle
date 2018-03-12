@@ -19,8 +19,8 @@ noodle.string = {
         return {
             serialized: {
                 serType: 'string',
-                val: args.obj,
-                obj: args.obj,
+                val: args.val,
+                obj: args.val,
                 idMap: args.idMap || {}
             }
         };

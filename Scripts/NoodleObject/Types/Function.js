@@ -1,26 +1,26 @@
 noodle.function = {
     serialize(args) {
         var noodle = args.noodle;
-        var obj = args.obj;
+        var val = args.val;
         var idMap = args.idMap = args.idMap || {};
 
 
         var serialized;
-        //Make sure obj has an id
-        noodle.ids.addIfAbsent({ noodle: noodle, obj: obj });
+        //Make sure val has an id
+        noodle.ids.addIfAbsent({ noodle: noodle, val: val });
 
-        //If obj isn't in idMap, add it
-        if (idMap[obj.meta.id] === undefined) {
+        //If val isn't in idMap, add it
+        if (idMap[val.meta.id] === undefined) {
             //TODO: Non-enumerable stuff
-            serialized = { serType: 'function', val: {}, obj: obj };
-            idMap[obj.meta.id] = serialized;
-            for (var i in obj) {
-                serialized.val[i] = noodle.any.serialize({ noodle: noodle, obj: obj[i], idMap: idMap }).serialized;
+            serialized = { serType: 'function', val: {}, val: val };
+            idMap[val.meta.id] = serialized;
+            for (var i in val) {
+                serialized.val[i] = noodle.any.serialize({ noodle: noodle, val: val[i], idMap: idMap }).serialized;
             }
         }
-        //If obj is already in idMap, just add its id
+        //If val is already in idMap, just add its id
         else {
-            serialized = { serType: 'id', val: obj.meta.id, obj: obj };
+            serialized = { serType: 'id', obj: val.meta.id, val: val };
         }
 
         return { serialized: serialized, idMap: idMap };
@@ -87,12 +87,112 @@ noodle.function = {
 
         noodle.any.reduceErrVal(args);
         return args;
+    },
+    quickTest(args) {
+        var { noodle: noodle, val: val, testArgs: testArgs, valConstr: valConstr, key: key } = args;
+        testArgs = testArgs || { noodle: noodle };
+        valConstr = valConstr || Object;
+
+        var testVal = new valConstr();
+        testArgs[key] = testVal;
+        try {
+            val(testArgs);
+        }
+        catch (e) {
+            return { error: e, value: testVal };
+        }
+
+        testVal.a = 3;
+        try {
+            val(testArgs);
+        }
+        catch (e) {
+            return { error: e, value: testVal };
+        }
+
+        testVal[0] = 42;
+        try {
+            val(testArgs);
+        }
+        catch (e) {
+            return { error: e, value: testVal };
+        }
+
+        testVal.b = 'foty-two';
+        try {
+            val(testArgs);
+        }
+        catch (e) {
+            return { error: e, value: testVal };
+        }
+
+        testVal.c = {};
+        try {
+            val(testArgs);
+        }
+        catch (e) {
+            return { error: e, value: testVal };
+        }
+
+        testVal.d = [];
+
+        testVal.c = testVal;
+        try {
+            val(testArgs);
+        }
+        catch (e) {
+            return { error: e, value: testVal };
+        }
+
+        testVal.d.push(testVal);
+        try {
+            val(testArgs);
+        }
+        catch (e) {
+            return { error: e, value: testVal };
+        }
+
+        testVal.e = { x: 42, y: testVal, z: [7] };
+        testVal.e.z.push(testVal.e);
+        try {
+            val(testArgs);
+        }
+        catch (e) {
+            return { error: e, value: testVal };
+        }
+
     }
 }
 
 Object.defineProperties(Function.prototype, {
-    add: {
+    quickTest: {
         enumerable: false,
-        value: Object.add
+        writable: true,
+        configurable: true,
+        value(args) {
+            args.val = this;
+            return args.noodle.function.quickTest(args);
+        }
+    }
+});
+
+Object.defineProperties(Function, {
+    defineProperty: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: Object.defineProperty
+    },
+    defineProperties: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: Object.defineProperties
+    },
+    getOwnPropertyDescriptor: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value: Object.getOwnPropertyDescriptor
     }
 });
