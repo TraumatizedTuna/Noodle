@@ -15,7 +15,7 @@ noodle.files = {
 };
 
 
-Object.defineProperty(CSSStyleSheet.prototype, 'serialize', { enumerable: false, writable: true, configurable: true, value: function () { return { serialized: undefined }; } });
+//Object.defineProperty(CSSStyleSheet.prototype, 'toSerial', { enumerable: false, writable: true, configurable: true, value: function () { return { serialized: undefined }; } });
 
 noodle.object.shallowClone({
     noodle: noodle,

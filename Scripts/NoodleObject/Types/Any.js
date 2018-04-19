@@ -75,7 +75,7 @@ noodle.any = new class extends Object {
         //console.log(obj);
         return { prop: prop, type: type }; //TODO? Rename type to usefulType or something?
     }
-    serialize(args) {
+    _toSerial(args) {
         var noodle = args.noodle;
         var val = args.val;
         var idMap = args.idMap = args.idMap || {};
@@ -83,10 +83,10 @@ noodle.any = new class extends Object {
         if (val.type === 'wire') {
             var a = 'aap';
         }*//*
-        var { prop: serialize, type: type } = noodle.any.propByType({
+        var { prop: toSerial, type: type } = noodle.any.propByType({
             noodle: noodle,
             val: val,
-            key: 'serialize',
+            key: 'toSerial',
             errIfAny: true
         });*/
         /*if (val === undefined) {
@@ -100,42 +100,63 @@ noodle.any = new class extends Object {
             console.log(same);
             oldArgs = args;
         }*/
+
+
         var type = typeof val;
         if (type === undefined)
             type = 'undefined';
         //if (type === 'any') {
-        if (['undefined', 'number', 'symbol'].indexOf(type) !== -1 || val === null || !val.serialize) {
+        if (['undefined', 'number', 'symbol'].indexOf(type) !== -1 || val === null || !val.toSerial) {
             var constrName = type.substr(0, 1).toUpperCase() + type.substr(1);
             return {
                 serialized: {
-                    serType: constrName,
+                    serType: type,
                     //constr: eval(constrName),
                     val: args.val,
-                    idMap: args.idMap || {}
+                    idMap: args.idMap || {},
+                    id: 0 //TODO: This feels stupid
                 }
             };
         }
         if (val === this)
-            return noodle.object.serialize(args);
-        return val.serialize(args);//{ serialized: serialize(args).serialized, idMap: idMap }; //TODO? Is this shallow cloning stupid? Should idMap come from serialize?
+            return noodle.object.toSerial(args);
 
+        //if (val.constructor === CSSStyleSheet)
+        //debugger;
+        var ser = val.__proto__.toSerial(args);//{ serialized: toSerial(args).serialized, idMap: idMap }; //TODO? Is this shallow cloning stupid? Should idMap come from toSerial?
+        if (ser === undefined)
+            throw new Error('toSerial function for ' + val.constructor + ' returned undefined.\nFunction: ' + val.toSerial)
+        return ser;
     }
-    toDataStr(args) {
-        var noodle = args.noodle;
-        var obj = args.obj;
-        var serialized = args.serialized;
+    _toDataStr(args) {
+        var { noodle: noodle, val: val, obj: obj, serialized: serialized } = args;
 
         if (serialized !== undefined && serialized.serType === 'id') {
-            return { str: 'id(' + serialized.val + ')' };
+            return { str: 'Id' + serialized.id + '|' };
         }
 
-        var toDataStr = noodle.any.propByType({
-            noodle: noodle,
-            obj: obj,
-            key: 'toDataStr'
-        }).prop;
+        var type = typeof val;
+        if (type === undefined)
+            type = 'undefined';
+        //if (type === 'any') {
+        if (['undefined', 'number', 'symbol'].indexOf(type) !== -1 || val === null || !val.toSerial) {
+            var toDataStr = noodle[serialized.serType]._toDataStr;
+            return { str: toDataStr(args).str };
+        }
+        return val.toDataStr(args);
 
-        return { str: toDataStr(args).str };
+    }
+    _fromDataStr(args) {
+        var { noodle: noodle, str: str } = args;
+        var i = str.search(/\d/g); //i = index of first digit   TODO: Stupid to assume all ids are numbers
+        if (i === -1)
+            debugger;
+        args.constr = eval(str.substr(0, i));
+
+
+        args.str = str.substr(i);
+
+        return args.constr.fromDataStr(args);
     }
     reduceErrVal(args) {
         var errVal = args.errVal;
@@ -168,6 +189,25 @@ noodle.any = new class extends Object {
         }
         return val[funcName](subArgs);
     }
+    _constructorOf(args) {
+        var { noodle: noodle, val: val } = args;
+        if (val === null) {
+            return Object;
+        }
+
+        switch (typeof val) {
+            case 'undefined':
+                return Undefined;
+            case 'number':
+                return Number;
+            case 'symbol':
+                return Symbol;
+            default:
+                return val.constructor || Any;
+        }
+    }
 }();
 
 var oldArgs = {};
+
+var Any = Object.__proto__;

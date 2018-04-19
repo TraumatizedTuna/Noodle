@@ -506,9 +506,9 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
-    Serialize: function (noodle, container, label, pos, noodleExp) {
+    toSerial: function (noodle, container, label, pos, noodleExp) {
         var core = {
-            name: 'Serialize',
+            name: 'toSerial',
             color: 'brown',
             inPorts: {
                 code: noodle.port.new(noodle, 'anything', 'any', true)
@@ -518,7 +518,7 @@ var nodeTypes = {
             },
             func: function (node) {
                 var core = node.core;
-                core.outPorts.value.value = serializeZ(core.inPorts.code.value);
+                core.outPorts.value.value = toSerialZ(core.inPorts.code.value);
             },
             data: {
                 code: '',

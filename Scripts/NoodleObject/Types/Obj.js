@@ -108,17 +108,21 @@ noodle.object = new class extends noodle.any.constructor {
                 Object.defineProperty(val, 'noodleExp', { enumerable: false, writable: true, configurable: true, value: noodleExp });
             }
             //Set parent of properties
+            var getDescr = val.constructor.getOwnPropertyDescriptor || Object.getOwnPropertyDescriptor;
             for (var i in val) {
-                var child = val[i];
-                if (typeof child === 'object' && child !== null && child !== undefined && i !== 'parent' && i !== 'parNode' && Object.isExtensible(child)) {
-                    //If val.parent is already defined, Object.defineProperty() won't work
-                    if (child.parent === undefined) {
-                        Object.defineProperty(child, 'parent', { enumerable: false, writable: true, configurable: true, value: val });
+                var descr = getDescr(val, i) || getDescr(val.__proto__, i);
+                if (descr)
+                    for (var child of [descr.value, descr.get, descr.set]) {
+                        if ((typeof child === 'object' || typeof child === 'function') && child !== null && child !== undefined && i !== 'parent' && i !== 'parNode' && Object.isExtensible(child)) {
+                            //If val.parent is already defined, Object.defineProperty() won't work
+                            if (child.parent === undefined) {
+                                Object.defineProperty(child, 'parent', { enumerable: false, writable: true, configurable: true, value: val });
+                            }
+                            else {
+                                child.parent = val;
+                            }
+                        }
                     }
-                    else {
-                        child.parent = val;
-                    }
-                }
             }
 
         }
@@ -149,7 +153,7 @@ noodle.object = new class extends noodle.any.constructor {
             parNode: parNode
         });*/
 
-        var serial = val.serialize({
+        var serial = val.toSerial({
             noodle: noodle,
             idMap: noodle.ids.objsById
         });
@@ -562,13 +566,13 @@ noodle.object = new class extends noodle.any.constructor {
         return html;
     }
 
-    serialize(args) {
+    _toSerial(args) {
         var noodle = args.noodle;
         var val = args.val;
         var idMap = args.idMap = args.idMap || {};
 
         if (val === null) {
-            return { serType: 'null', obj: null, val: null };
+            return { serType: 'null', obj: null, val: null, id: 0 }; //TODO: Bad solution to the undefined id problem?
         }
 
         var serialized;
@@ -578,50 +582,113 @@ noodle.object = new class extends noodle.any.constructor {
         //If val isn't in idMap, add it
         if (idMap[id] === undefined) {
             //TODO: Non-enumerable stuff
-            serialized = { serType: 'Object', obj: {}, val: val };
+            serialized = {
+                serType: val.constructor.name.toLowerCase(), obj: {}, val: val, getters: {}, setters: {}, id: id
+            };
             idMap[id] = serialized;
             for (var i in val) {
                 if (i !== undefined) { //TODO? Is this ugly?
-                    var child = val[i];
-                    //serialized.val[i] = child.serialize(args);
-                    serialized.obj[i] = noodle.any.serialize({ noodle: noodle, val: child, idMap: idMap }).serialized;
+                    var getDescr = val.constructor.getOwnPropertyDescriptor || Object.getOwnPropertyDescriptor;
+                    var descr = getDescr(val, i) || getDescr(val.__proto__, i);
+                    if (descr && (descr.get || descr.set)) {
+                        if (descr.get) {
+                            serialized.getters[i] = noodle.function._toSerial({ noodle: noodle, val: descr.get, idMap: idMap });
+                        }
+                        if (descr.set) {
+                            serialized.setters[i] = noodle.function._toSerial({ noodle: noodle, val: descr.set, idMap: idMap });
+                        }
+                    }
+                    else {
+                        var child = val[i];
+                        //serialized.val[i] = child.toSerial(args);
+                        serialized.obj[i] = noodle.any._toSerial({ noodle: noodle, val: child, idMap: idMap }).serialized;
+                        if (serialized.obj[i] === undefined) {
+                            throw new Error('toSerial failed');
+                        }
+                    }
                 }
             }
         }
         //If val is already in idMap, just add its id
         else {
-            serialized = { serType: 'id', obj: val.meta.id, val: val };
+            serialized = { serType: 'id', obj: val.meta.id, val: val, id: id };
         }
 
         return { serialized: serialized, idMap: idMap };
     }
 
-    toDataStr(args) {
+    _toDataStr(args) {
         //Vars from args{
         var noodle = args.noodle;
-        //If the object has already been serialized and has an idMap, use those. Otherwise, serialize
+        //If the object has already been serialized and has an idMap, use those. Otherwise, toSerial
         if (args.serialized && args.idMap) {
             var serialized = args.serialized;
             var idMap = args.idMap;
         }
         else
-            var { serialized: serialized, idMap: idMap } = noodle.any.serialize(args);
+            var { serialized: serialized, idMap: idMap } = noodle.any._toSerial(args);
         //}
 
         var str = '';
 
         for (var i in serialized.obj) {
             var child = serialized.obj[i];
-            str += i + ':' + noodle.any.toDataStr({
+            if (!child)
+                debugger;
+            str += i + ':' + noodle.any._toDataStr({
                 noodle: noodle,
+                val: child.val,
                 obj: child.obj,
                 serialized: child,
                 idMap: idMap
             }).str;
         }
-        str = serialized.val.constructor.name + str.length + '|' + str;
+        str = (args.constr || noodle.any._constructorOf({
+            noodle: noodle,
+            val: serialized.val
+            //TODO: Seems like null pops up here sometimes
+        })).name + serialized.id + '|' + str.length + '|' + str;
 
-        return { str: str };
+        return { str: str, idMap: idMap, noodle: noodle };
+    }
+
+    _fromDataStr(args) {
+        args.idMap = args.idMap || {};
+        var { noodle: noodle, str: str, val, constr: constr, idMap: idMap } = args;
+        args.val = val = val || new constr(); //TODO: What about {}?
+        if (str.length < 200)
+            console.log('\n\n\n\n\n'+str);
+        //Example: str == "42|26|a:String5|hellob:Number(7)y:Boolean1|"
+        var i = str.indexOf('|'); //i == 2
+        var id = str.substr(0, i); //id == 42
+        idMap[id] = val;
+
+        str = str.substr(i + 1); //str == "26|a:String5|hellob:Number(7)y:Boolean1|"
+        if (str.length < 20000)
+            console.log('\n' + str);
+        i = str.indexOf('|'); //i == 2
+        var length = parseInt(str.substr(0, i)); //length == 26
+        str = str.substr(i + 1);
+        var strRest = str.substr(length); //strRest == "y:Boolean1|"
+        str = str.substr(0, length); //str == "a:String5|hellob:Number(7)"
+
+        var oldStrs = [];
+        while (str) {
+            oldStrs.push(str);
+            if (str.substr(0,21) === 'click:Array6522|235|0')
+                debugger;
+            i = str.indexOf(':'); //i == 1
+            var key = str.substr(0, i); //key == "a"
+            args.str = str;
+            args.str = str.substr(i + 1); //args.str == "String5|hellob:Number(7)"
+            args.val = undefined;
+            if (args.str === 'er0|')
+                debugger;
+            var { val: prop, strRest: str } = noodle.any._fromDataStr(args); //str == "b:Number(7)"
+            val[key] = prop; //val.a == "hello"
+        }
+
+        return { noodle: noodle, val: val, strRest: strRest };
     }
 
     reduceErrVal(args) {
@@ -667,6 +734,17 @@ noodle.object = new class extends noodle.any.constructor {
     }
 }();
 
+var args = {
+    get str() {
+        return this._str;
+    },
+    set str(val) {
+        this._str = val;
+        /*if (val === '0|')
+            debugger;*/
+    },
+    noodle:noodle
+};
 
 
 Object.defineProperties(Object.prototype, {
@@ -683,7 +761,7 @@ Object.defineProperties(Object.prototype, {
             }
         }
     },
-    serialize: {
+    toSerial: {
         enumerable: false,
         writable: true,
         configurable: true,
@@ -691,7 +769,7 @@ Object.defineProperties(Object.prototype, {
             args.val = args.val || this;
             args.noodle = args.noodle || args.val.noodle || noodle;
 
-            return noodle.object.serialize(args);
+            return noodle.object._toSerial(args);
         }
     },
     toDataStr: {
@@ -699,10 +777,10 @@ Object.defineProperties(Object.prototype, {
         writable: true,
         configurable: true,
         value(args = {}) {
-            args.val = args.val || this;
+            args.val = this;
             args.noodle = args.noodle || args.val.noodle || noodle;
 
-            return noodle.object.toDataStr(args);
+            return noodle.object._toDataStr(args);
         }
     },
     standardize: {
@@ -768,3 +846,13 @@ Object.defineProperties(Object.prototype, {
     }
 });
 
+Object.defineProperties(Object, {
+    fromDataStr: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value(args) {
+            return args.noodle.object._fromDataStr(args);
+        }
+    }
+});
