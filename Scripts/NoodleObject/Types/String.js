@@ -1,8 +1,8 @@
-noodle.string = {
+noodle.string = new class extends noodle.prim.constructor {
     //Removes amount chars at end of str
     trimEnd(str, amount) {
         return str.substr(0, str.length - amount);
-    },
+    }
 
     random(args) {
         var noodle = args.noodle;
@@ -14,7 +14,7 @@ noodle.string = {
             str += chars[Math.floor(Math.random() * chars.length)];
         }
         return str;
-    },
+    }
     _toSerial(args) {
         return {
             serialized: {
@@ -24,11 +24,11 @@ noodle.string = {
                 idMap: args.idMap || {}
             }
         };
-    },
+    }
     _toDataStr(args) {
         var val = args.val;
         return { str: 'String' + val.length + '|' + val, noodle: args.noodle };
-    },
+    }
     _fromDataStr(args) {
         args.idMap = args.idMap || {};
         var { noodle: noodle, str: str, val, constr: constr, idMap: idMap } = args;
@@ -42,7 +42,7 @@ noodle.string = {
 
         return { val: str.substr(0, length), strRest: str.substr(length) };
 
-    },
+    }
     reduceErrVal(args) {
         var noodle = args.noodle;
         var func = args.func;
@@ -67,9 +67,10 @@ noodle.string = {
         args.errVal = errVal;
         return args;
     }
-};
+}();
 
 String.prototype.__proto__ = Prim.prototype;
+String.__proto__ = Prim;
 
 Object.defineProperties(String.prototype, {
     toDataStr: {

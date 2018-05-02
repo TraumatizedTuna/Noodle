@@ -35,7 +35,7 @@ noodle.element = new class extends noodle.object.constructor {
 
         return { str: str, idMap: idMap };
     }
-    _fromDataStr(args) {
+    /*_fromDataStr(args) {
         args.idMap = args.idMap || {};
         var { noodle: noodle, str: str, val, constr: constr, idMap: idMap } = args;
 
@@ -63,7 +63,7 @@ noodle.element = new class extends noodle.object.constructor {
         }
 
         return { noodle: noodle, val: val, strRest: strRest };
-    }
+    }*/
 }();
 noodle.element.dataStrExcl = {
     classList: true,
@@ -73,7 +73,7 @@ noodle.element.dataStrExcl = {
 
 }
 
-Object.defineProperties(Element.prototype, {
+/*Object.defineProperties(Element.prototype, {
     toDataStr: {
         enumerable: false,
         writable: true,
@@ -85,7 +85,15 @@ Object.defineProperties(Element.prototype, {
             return noodle.element._toDataStr(args);
         }
     }
-});
+});*/
+
+HTMLDivElement.prototype.constructor = undefined;
+
+Element.prototype.constructor = function (doc = document) {
+    debugger;
+    /*var tagName = this.constructor.name.substr(4).split('Element')[0].toLowerCase();
+    doc.createElement(tagName);*/
+};
 
 Object.defineProperties(Element, {
     fromDataStr: {
@@ -94,6 +102,20 @@ Object.defineProperties(Element, {
         configurable: true,
         value(args) {
             return args.noodle.element._fromDataStr(args);
+        }
+    }
+});
+
+Object.defineProperties(Element.prototype, {
+    toDataStr: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value(args = {}) {
+            args.val = this;
+            args.noodle = args.noodle || args.val.noodle || noodle;
+
+            return noodle.element._toDataStr(args);
         }
     }
 });

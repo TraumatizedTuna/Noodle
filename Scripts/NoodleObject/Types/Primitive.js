@@ -11,9 +11,18 @@ noodle.prim = new class extends noodle.any.constructor {
         };
     }
     _toDataStr(args) {
-        var val = args.obj;
-        var str = val.toString;
-        return { str: 'string' + str.length + '|' + str };
+        var val = args.val;
+        var str = val + '';
+        var constrName;
+        try {
+            constrName = val.constructor.name;
+        }
+        catch (e) {}
+        if (!constrName) {
+            constrName = typeof val;
+            constrName = constrName[0].toUpperCase() + constrName.substr(1);
+        }
+        return { str: constrName + str.length + '|' + str };
     }
     _fromDataStr(args) {
         args.idMap = args.idMap || {};
@@ -51,6 +60,12 @@ class Prim{
         args.noodle = args.noodle || args.val.noodle || noodle;
 
         return noodle.prim._toSerial(args);
+    }
+    toDataStr(args = {}) {
+        args.val = this;
+        args.noodle = args.noodle || args.val.noodle || noodle;
+
+        return noodle.prim._toDataStr(args);
     }
 }
 //Prim.prototype.__proto__ = Any.prototype;

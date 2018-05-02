@@ -567,28 +567,49 @@ noodle.object = new class extends noodle.any.constructor {
     }
 
     _toSerial(args) {
-        var noodle = args.noodle;
-        var val = args.val;
-        var idMap = args.idMap = args.idMap || {};
+        args.idMap = args.idMap || {};
+        args.anonIdMap = args.anonIdMap || {};
+        args.anonFreeIds = args.anonFreeIds || [0];
+
+        var { noodle: noodle, val: val, idMap: idMap, anonIdMap: anonIdMap, anonFreeIds: anonFreeIds } = args;
 
         if (val === null) {
             return { serType: 'null', obj: null, val: null, id: 0 }; //TODO: Bad solution to the undefined id problem?
         }
 
         var serialized;
-        //Make sure val has an id
-        var id = noodle.ids.addIfAbsent({ noodle: noodle, val: val }).id;
 
+
+        if (val.constructor === DOMStringMap) {
+            var a = 42;
+        }
+
+        //Make sure val has an id
+        var { id: id, hasId: hasId } = noodle.ids.addIfAbsent({ noodle: noodle, val: val });
+
+        //If val isn't extensible and thus can't keep track of its id
+        if (!hasId) {
+            //First, try to find it in the map of anonymos ids
+            for (var i in anonIdMap) {
+                if (anonIdMap[i] === val) {
+                    serialized = { serType: 'id', obj: i, val: val, id: id };
+                    return { serialized: serialized, obj: id, val: val, id: id };
+                }
+            }
+            //Add val to anonymos ids
+            var id = noodle.ids.firstFree(anonFreeIds);
+            idMap = anonIdMap;
+        }
         //If val isn't in idMap, add it
         if (idMap[id] === undefined) {
             //TODO: Non-enumerable stuff
             serialized = {
-                serType: val.constructor.name.toLowerCase(), obj: {}, val: val, getters: {}, setters: {}, id: id
+                serType: (val.constructor || Object).name.toLowerCase(), obj: {}, val: val, getters: { }, setters: { }, id: id
             };
             idMap[id] = serialized;
             for (var i in val) {
                 if (i !== undefined) { //TODO? Is this ugly?
-                    var getDescr = val.constructor.getOwnPropertyDescriptor || Object.getOwnPropertyDescriptor;
+                    var getDescr = (val.constructor || Object).getOwnPropertyDescriptor || Object.getOwnPropertyDescriptor;
                     var descr = getDescr(val, i) || getDescr(val.__proto__, i);
                     if (descr && (descr.get || descr.set)) {
                         if (descr.get) {
@@ -611,10 +632,10 @@ noodle.object = new class extends noodle.any.constructor {
         }
         //If val is already in idMap, just add its id
         else {
-            serialized = { serType: 'id', obj: val.meta.id, val: val, id: id };
+            serialized = { serType: 'id', obj: id, val: val, id: id };
         }
 
-        return { serialized: serialized, idMap: idMap };
+        return { serialized: serialized, idMap: args.idMap, anonIdMap: anonIdMap };
     }
 
     _toDataStr(args) {
@@ -657,7 +678,7 @@ noodle.object = new class extends noodle.any.constructor {
         var { noodle: noodle, str: str, val, constr: constr, idMap: idMap } = args;
         args.val = val = val || new constr(); //TODO: What about {}?
         if (str.length < 200)
-            console.log('\n\n\n\n\n'+str);
+            console.log('\n\n\n\n\n' + str);
         //Example: str == "42|26|a:String5|hellob:Number(7)y:Boolean1|"
         var i = str.indexOf('|'); //i == 2
         var id = str.substr(0, i); //id == 42
@@ -675,7 +696,7 @@ noodle.object = new class extends noodle.any.constructor {
         var oldStrs = [];
         while (str) {
             oldStrs.push(str);
-            if (str.substr(0,21) === 'click:Array6522|235|0')
+            if (str.substr(0, 21) === 'click:Array6522|235|0')
                 debugger;
             i = str.indexOf(':'); //i == 1
             var key = str.substr(0, i); //key == "a"
@@ -743,7 +764,7 @@ var args = {
         /*if (val === '0|')
             debugger;*/
     },
-    noodle:noodle
+    noodle: noodle
 };
 
 

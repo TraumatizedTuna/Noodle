@@ -125,7 +125,7 @@ noodle.any = new class extends Object {
         //debugger;
         var ser = val.__proto__.toSerial(args);//{ serialized: toSerial(args).serialized, idMap: idMap }; //TODO? Is this shallow cloning stupid? Should idMap come from toSerial?
         if (ser === undefined)
-            throw new Error('toSerial function for ' + val.constructor + ' returned undefined.\nFunction: ' + val.toSerial)
+            throw new Error('toSerial function for ' + val.constructor.name + ' returned undefined.\nFunction: ' + val.toSerial)
         return ser;
     }
     _toDataStr(args) {

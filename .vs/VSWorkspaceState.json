@@ -1,11 +1,13 @@
 {
   "ExpandedNodes": [
     "",
+    "\\Assets",
     "\\Browser",
+    "\\Html",
     "\\Scripts",
     "\\Scripts\\NoodleObject",
     "\\Scripts\\NoodleObject\\Types"
   ],
-  "SelectedNode": "\\index.html",
+  "SelectedNode": "\\Scripts\\NoodleObject\\Types\\Element.js",
   "PreviewInSolutionExplorer": false
 }

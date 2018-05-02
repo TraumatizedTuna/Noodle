@@ -1,4 +1,4 @@
-noodle.number = {
+noodle.number = new class extends noodle.prim.constructor{
     random(args) {
         var noodle = args.noodle;
         var contProb = args.contProb || 0.8;
@@ -9,7 +9,7 @@ noodle.number = {
             num += Math.random();
         }
         return num;
-    },
+    }
     _toSerial(args) {
         return {
             serialized: {
@@ -19,12 +19,12 @@ noodle.number = {
                 idMap: args.idMap || {}
             }
         };
-    },
+    }
     _toDataStr(args) {
         var obj = args.obj;
         args.str = 'Number' + args.val + '|';
         return args;
-    },
+    }
     _fromDataStr(args) {
         args.idMap = args.idMap || {};
         var { noodle: noodle, str: str, val, constr: constr, idMap: idMap } = args;
@@ -38,7 +38,7 @@ noodle.number = {
         console.warn('num');
         return { val: val, strRest: str };
 
-    },
+    }
     reduceErrVal(args) {
         var noodle = args.noodle;
         var func = args.func;
@@ -90,9 +90,10 @@ noodle.number = {
         args.errVal = errVal;
         return args;
     }
-};
+}();
 
 Number.prototype.__proto__ = Prim.prototype;
+Number.__proto__ = Prim;
 
 Object.defineProperties(Number.prototype, {
     toDataStr: {
