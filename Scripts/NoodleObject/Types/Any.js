@@ -148,10 +148,25 @@ noodle.any = new class extends Object {
     }
     _fromDataStr(args) {
         var { noodle: noodle, str: str } = args;
-        var i = str.search(/\d/g); //i = index of first digit   TODO: Stupid to assume all ids are numbers
+        var i = str.search(/\d|-/g); //i = index of first digit   TODO: Stupid to assume all ids are numbers
         if (i === -1)
             debugger;
-        args.constr = eval(str.substr(0, i));
+        args.constr = undefined;
+        var e;
+        try {
+            args.constr = str.substr(0, i).eval();
+        }
+        catch (e) {
+        }
+
+        switch (typeof args.constr) {
+            case 'function':
+            case 'object':
+                break;
+            default:
+                args.constr = Object;
+                console.warn('Invalid constructor. Using Object instead.\nError: ' + e);
+        }
 
 
         args.str = str.substr(i);

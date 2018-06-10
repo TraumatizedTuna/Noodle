@@ -12,7 +12,7 @@ noodle.undefined = new class extends noodle.prim.constructor{
         };
     }
     _toDataStr(args) {
-        return { noodle: args.noodle, str: 'Undefined0' };
+        return { noodle: args.noodle, str: 'Undefined0|' };
     }
 } ();
 

@@ -35,7 +35,7 @@ noodle.number = new class extends noodle.prim.constructor{
         var val = parseInt(str.substr(0, i)); //val == 42
 
         str = str.substr(i + 1); //str == "b:Number7|y:Boolean1|"
-        console.warn('num');
+        
         return { val: val, strRest: str };
 
     }

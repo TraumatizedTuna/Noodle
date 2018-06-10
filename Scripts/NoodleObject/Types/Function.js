@@ -27,7 +27,7 @@ noodle.function = {
     },
     _toDataStr(args) {
         //Vars from args{
-        var noodle = args.noodle;
+        var { noodle: noodle } = args;
         //If the function has already been serialized and has an idMap, use those. Otherwise, toSerial
         if (args.serialized && args.idMap) {
             var serialized = args.serialized;
@@ -37,8 +37,19 @@ noodle.function = {
             var { serialized: serialized, idMap: idMap } = noodle.any.toSerial(args);
         //}
 
-        var mainStr = serialized.val.toString();
-        mainStr = mainStr.substr(mainStr.indexOf('('));
+        if (serialized.val.isNative()) {
+            try {
+                eval('var a= ' + serialized.val.evalableName);
+            }
+            catch (e) {
+                console.warn('evalableName "' + evalableName + '"' + " could not be evaled. If you know you'll be able to eval it when parse your data string it's fine.\n\nError: " + e);
+            }
+            var mainStr = '.' + serialized.val.evalableName;
+        }
+        else {
+            var mainStr = serialized.val.toString(); //TODO? What if .toString is overridden?
+            mainStr = mainStr.substr(mainStr.indexOf('('));
+        }
 
         args.constr = { name: '' };
         args.serialized = serialized;
@@ -57,7 +68,14 @@ noodle.function = {
         str = str.substr(i);
         args.str = str.substr(length)
         str = str.substr(0, length);
-        args.val = eval('function f' + str + ';f;');
+
+        //'.' in the beginning of the function content means it is native code
+        if (str[0] === '.') {
+            eval('args.val= ' + str.substr(1) + ';');
+        }
+        else {
+            args.val = eval('function f' + str + ';f;');
+        }
 
         return noodle.object._fromDataStr(args);
     },
@@ -190,6 +208,19 @@ Object.defineProperties(Function.prototype, {
             args.noodle = args.noodle || args.val.noodle || noodle;
 
             return noodle.function._toDataStr(args);
+        }
+    },
+
+    isNative: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value() {
+            //Modified code from Yong's answer at https://stackoverflow.com/questions/6598945/detect-if-function-is-native-to-browser?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+
+            return !!this
+                && (this === Function.prototype
+                    || /^\s*function\s*(\b[a-z$_][a-z0-9$_]*\b)*\s*\((|([a-z$_][a-z0-9$_]*)(\s*,[a-z$_][a-z0-9$_]*)*)\)\s*{\s*\[native code\]\s*}\s*$/i.test(String(this)));
         }
     }
 });

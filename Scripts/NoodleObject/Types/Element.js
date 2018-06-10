@@ -14,6 +14,10 @@ noodle.element = new class extends noodle.object.constructor {
         var str = '';
 
         for (var i in serialized.obj) {
+
+            /*if (i === 'dataset')
+                debugger;*/
+
             var child = serialized.obj[i];
             if (!noodle.element.dataStrExcl[i] && child !== null && child !== '') {
                 if (!child)
@@ -35,7 +39,9 @@ noodle.element = new class extends noodle.object.constructor {
 
         return { str: str, idMap: idMap };
     }
-    /*_fromDataStr(args) {
+    _fromDataStr(args) {
+        //console.log('noodle.element.fromDataStr');
+
         args.idMap = args.idMap || {};
         var { noodle: noodle, str: str, val, constr: constr, idMap: idMap } = args;
 
@@ -50,20 +56,22 @@ noodle.element = new class extends noodle.object.constructor {
         str = str.substr(i + 1); //str == "26|a:String5|hellob:Number(7)y:Boolean1|"
         i = str.indexOf('|'); //i == 2
         var length = parseInt(str.substr(0, i)); //length == 26
+        str = str.substr(i + 1);
         var strRest = str.substr(length); //strRest == "y:Boolean1|"
-        str = str.substr(i + 1, length); //str == "a:String5|hellob:Number(7)"
+        str = str.substr(0, length); //str == "a:String5|hellob:Number(7)"
 
         while (str) {
             i = str.indexOf(':'); //i == 1
             var key = str.substr(0, i); //key == "a"
+
             args.str = str.substr(i + 1); //args.str == "String5|hellob:Number(7)"
             args.val = undefined;
             var { val: prop, strRest: str } = noodle.any._fromDataStr(args); //str == "b:Number(7)"
-            val[key] = prop; //val.a == "hello"
+            Object.defineProperty(val, key, { value: prop }); //val.a == "hello"
         }
 
         return { noodle: noodle, val: val, strRest: strRest };
-    }*/
+    }
 }();
 noodle.element.dataStrExcl = {
     classList: true,
@@ -87,7 +95,8 @@ noodle.element.dataStrExcl = {
     }
 });*/
 
-HTMLDivElement.prototype.constructor = undefined;
+//HTMLDivElement.prototype.constructor = undefined;
+
 
 Element.prototype.constructor = function (doc = document) {
     debugger;
@@ -119,5 +128,3 @@ Object.defineProperties(Element.prototype, {
         }
     }
 });
-
-Node.__proto__.__proto__ = Object;

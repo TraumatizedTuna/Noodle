@@ -604,7 +604,7 @@ noodle.object = new class extends noodle.any.constructor {
         if (idMap[id] === undefined) {
             //TODO: Non-enumerable stuff
             serialized = {
-                serType: (val.constructor || Object).name.toLowerCase(), obj: {}, val: val, getters: { }, setters: { }, id: id
+                serType: (val.constructor || Object).name.toLowerCase(), obj: {}, val: val, getters: {}, setters: {}, id: id
             };
             idMap[id] = serialized;
             for (var i in val) {
@@ -654,8 +654,8 @@ noodle.object = new class extends noodle.any.constructor {
 
         for (var i in serialized.obj) {
             var child = serialized.obj[i];
-            if (!child)
-                debugger;
+            /*if (!child || i === 'html')
+                debugger;*/
             str += i + ':' + noodle.any._toDataStr({
                 noodle: noodle,
                 val: child.val,
@@ -676,17 +676,20 @@ noodle.object = new class extends noodle.any.constructor {
     _fromDataStr(args) {
         args.idMap = args.idMap || {};
         var { noodle: noodle, str: str, val, constr: constr, idMap: idMap } = args;
-        args.val = val = val || new constr(); //TODO: What about {}?
-        if (str.length < 200)
-            console.log('\n\n\n\n\n' + str);
+        try {
+            args.val = val = val || new constr.prototype.constructor(); //TODO: What about {}?
+        }
+        catch (e) {
+            args.val = val = {};
+            val.__proto__ = constr.prototype;
+        }
         //Example: str == "42|26|a:String5|hellob:Number(7)y:Boolean1|"
         var i = str.indexOf('|'); //i == 2
         var id = str.substr(0, i); //id == 42
         idMap[id] = val;
 
         str = str.substr(i + 1); //str == "26|a:String5|hellob:Number(7)y:Boolean1|"
-        if (str.length < 20000)
-            console.log('\n' + str);
+        
         i = str.indexOf('|'); //i == 2
         var length = parseInt(str.substr(0, i)); //length == 26
         str = str.substr(i + 1);
@@ -703,10 +706,17 @@ noodle.object = new class extends noodle.any.constructor {
             args.str = str;
             args.str = str.substr(i + 1); //args.str == "String5|hellob:Number(7)"
             args.val = undefined;
-            if (args.str === 'er0|')
-                debugger;
+
+           // if (args.str.substr(0,)==='')
             var { val: prop, strRest: str } = noodle.any._fromDataStr(args); //str == "b:Number(7)"
-            val[key] = prop; //val.a == "hello"
+            //val[key] = prop; //val.a == "hello"
+
+            (constr.defineProperty || Object.defineProperty)(val, key, { value: prop });
+
+
+            if (oldStrs[oldStrs.length - 1] === str) {
+                debugger;
+            }
         }
 
         return { noodle: noodle, val: val, strRest: strRest };
@@ -863,6 +873,15 @@ Object.defineProperties(Object.prototype, {
                 cat[i] = obj[i];
             }
             return cat;
+        }
+    },
+    evalableName: {
+        enumerable: false,
+
+        get() {
+            console.warn('Returned .name for ' + this + '\nname: "' + this.name + '"');
+
+            return this.name;
         }
     }
 });

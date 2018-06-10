@@ -83,6 +83,14 @@ Object.defineProperties(String.prototype, {
 
             return noodle.string._toDataStr(args);
         }
+    },
+    eval: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value() {
+            return eval(this.valueOf());
+        }
     }
 });
 
