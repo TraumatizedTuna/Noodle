@@ -1,4 +1,4 @@
-body{
+body {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -7,7 +7,7 @@ body{
     user-select: none;
 }
 
-.hoverSelect:hover{
+.hoverSelect:hover {
     -moz-user-select: -moz-all;
     -khtml-user-select: all;
     -webkit-user-select: all;
@@ -15,42 +15,36 @@ body{
     user-select: auto;
 }
 
-.container{
+.container {
     width: 100%;
     height: 100%;
     background-color: #e0ddb6;
     background-color: #584156;
 }
 
-.mainContainer{
+.mainContainer {
     height: 1000px;
 }
 
-#nodeCanvas{
+#nodeCanvas {
     position: absolute;
     top: 0;
     width: 100%;
     height: 100%;
-    
     z-index: 2;
-    
     backface-visibility: hidden;
-    
     pointer-events: none;
-    
-    
 }
 
-#wireBoard0{
+#wireBoard0 {
     position: absolute;
     top: -1;
     left: 0;
-    
     height: 1px;
     overflow: visible;
 }
 
-.node{
+.node {
     background-color: hsl(208, 100%, 80%);
     opacity: 0.9;
     border-radius: 8px;
@@ -58,32 +52,27 @@ body{
     border-style: solid;
     border-color: #777777;
     overflow: visible;
-    
     z-index: 3;
-    
     position: absolute;
     float: left;
     margin: 2px;
     padding-bottom: 8px;
-    
-    
     min-width: 128px;
     min-height: 32px;
-    
     pointer-events: all;
 }
 
-.node.selected{
-    border-color: #ff5800;
-    border-width: 3px;
-}
+    .node.selected {
+        border-color: #ff5800;
+        border-width: 3px;
+    }
 
-.node.active{
-    border-color: #f3ff68;
-    opacity: 1;
-}
+    .node.active {
+        border-color: #f3ff68;
+        opacity: 1;
+    }
 
-.nodeContent{
+.nodeContent {
     margin: 2px;
     margin-top: 22px;
     background-color: rgba(255, 255, 255, 0.26);
@@ -95,7 +84,7 @@ body{
     bottom: 0;
 }
 
-#plus{
+#plus {
     background-color: #ffd800;
     border-radius: 50%;
     font-size: 32px;
@@ -104,63 +93,64 @@ body{
     float: left;
     width: 32px;
     height: 32px;
-    
     transition-duration: 2s;
-    
     cursor: pointer;
 }
 
-#plus:hover{
-    background-color: #ffee6d;
-    color: #a86e00;
-    transition-duration: .2s;
-}
+    #plus:hover {
+        background-color: #ffee6d;
+        color: #a86e00;
+        transition-duration: .2s;
+    }
 
 
 
-.nodeTopBtn{
+.nodeTopBtn {
     font-family: sans-serif;
     font-weight: 900;
     font-size: 16px;
     margin-right: 5px;
-    
     float: right;
-    
     cursor: default;
     transition-duration: 2s;
 }
 
-.nodeTopBtn:hover{
-    color: #0088ff;
-    transition-duration: .4s;
-}
+    .nodeTopBtn:hover {
+        color: #0088ff;
+        transition-duration: .4s;
+    }
 
-.btnClose{
-    
+.btnClose {
     margin-right: 22px;
-    
     transition-duration: 2s;
 }
-.btnMaximize{
+
+.btnMaximize {
     float: right;
-    
 }
 
-.btnClose:hover{
+.btnClose:hover {
     color: red;
     transition-duration: .4s;
 }
 
 
-.wire{
+.wire {
     z-index: 1;
     pointer-events: all;
 }
 
 
-.prop{
+.prop {
     background-color: rgba(240, 248, 255, 0.35);
     margin-left: 16px
 }
 
 
+#posShowEl {
+    width: 1px;
+    height: 1px;
+    position: absolute;
+    left:0px;
+    top:0px;
+}

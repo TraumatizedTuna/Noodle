@@ -41,8 +41,8 @@ noodle.node = new class extends noodle.object.constructor {
         var node = new noodle.Node({
             label: label,
             core: core,
-            pos: pos,
-            startPos: { x: pos.x, y: pos.y }, //Have to clone it to avoid weird stuff
+            pos: new Pos(),
+            startPos: new Pos(pos), //Have to clone it to avoid weird stuff
             noodleExp: noodleExp,
             useNoodle: false,
             rendered: false,
@@ -82,7 +82,7 @@ noodle.node = new class extends noodle.object.constructor {
             function (port, core) {
                 port.noodleExp.args[1] = port;
             }
-        )
+        );
 
         /*node.core.inPorts = noodle.expr.evalAll(noodle, node.core.inPorts);
         node.core.outPorts = noodle.expr.evalAll(noodle, node.core.outPorts);*/
@@ -327,7 +327,7 @@ noodle.Node = class extends Object {
         core.resetFuncs = core.resetFuncs || [];
         //core.outPorts = core.outPorts || [];
 
-        this.pos = pos || { x: 0, y: 0 };
+        this.pos = new Pos(pos || { x: 0, y: 0 });
 
         this.addMeta({ meta: meta }); //TODO: this.constructor.addMeta?
         this.meta.id = noodle.ids.firstFree()
@@ -336,7 +336,7 @@ noodle.Node = class extends Object {
         this.out = { ports: core.outPorts || [] };
         this.label = core.name;
         this.parNode = this;
-        this.startPos = {};
+        this.startPos = new Pos();
 
         var ports = this.ports.all;
         for (var i in ports) {

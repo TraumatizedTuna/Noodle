@@ -106,10 +106,9 @@ noodle.graphics = {
             noodle.graphics.transformable.offsetX = left - e.pageX; //Might cause problems with automatic positioning?
             noodle.graphics.transformable.offsetY = top - e.pageY;
 
-            for (var nodeEl of noodle.global.selected.nodeEls) {
-                var node = nodeEl.obj;
-                node.startPos.x = node.pos.x;
-                node.startPos.y = node.pos.y;
+            for (var selNodeEl of noodle.global.selected.nodeEls) {
+                var selNode = selNodeEl.obj;
+                selNode.startPos.assign(selNode.pos);
             }
 
             noodle.graphics.transformable.startPos.x = e.pageX;
