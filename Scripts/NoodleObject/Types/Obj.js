@@ -11,16 +11,36 @@ noodle.object = new class extends noodle.any.constructor {
     equals(noodle, obj0, obj1, depth) {
         if (depth <= 0)
             return true;
-        if (typeof obj0 != 'object' || typeof obj1 != 'object' || obj0 == null || obj1 == null) {
-            var eq = obj0 == obj1;
+
+        if (obj0.constructor !== obj1.constructor) {
+            return false;
+        }
+
+        if (typeof obj0 != 'object' || obj0 == null || obj1 == null) {
+            var eq = obj0 == obj1 || Number.isNaN(obj0) && Number.isNaN(obj1); //NaN !== NaN
+            if (!eq) {
+                var dummy = "You may or may not want a breakpoint here to figure out what's wrong";
+            }
             return eq;
         }
-        if (Object.getOwnPropertyNames(obj0).length != Object.getOwnPropertyNames(obj1).length)
+
+        if (obj0.constructor.__proto__ === HTMLElement) {
+            return obj0.outerHTML === obj1.outerHTML;
+        }
+
+        //if (Object.getOwnPropertyNames(obj0).length != Object.getOwnPropertyNames(obj1).length)
+        if (Object.keys(obj0).length != Object.keys(obj1).length)
             return false;
 
         depth--;
         for (var i in obj0) {
-            var eq = (noodle.object.equals(noodle, obj0[i], obj1[i], depth)); //TODO: Figure out why the following if can't evaluate this stuff itself
+            try {
+                var eq = (noodle.object.equals(noodle, obj0[i], obj1[i], depth)); //TODO: Figure out why the following if can't evaluate this stuff itself
+            }
+            catch (e) {
+                console.warn("Could not compare '" + i + "' between " + obj0 + ' and ' + obj1 + '. These are thus assumed to be equal.\n' + e);
+                var eq = true;
+            }
             if (!eq)
                 return false;
         }
@@ -579,11 +599,6 @@ noodle.object = new class extends noodle.any.constructor {
 
         var serialized;
 
-
-        if (val.constructor === DOMStringMap) {
-            var a = 42;
-        }
-
         //Make sure val has an id
         var { id: id, hasId: hasId } = noodle.ids.addIfAbsent({ noodle: noodle, val: val });
 
@@ -675,9 +690,9 @@ noodle.object = new class extends noodle.any.constructor {
 
     _fromDataStr(args) {
         args.idMap = args.idMap || {};
-        var { noodle: noodle, str: str, val, constr: constr, idMap: idMap } = args;
+        var { noodle: noodle, str: str, constr: constr, idMap: idMap } = args;
         try {
-            args.val = val = val || new constr.prototype.constructor(); //TODO: What about {}?
+            var val = args.val = args.val || new constr.prototype.constructor(); //TODO: What about {}?
         }
         catch (e) {
             args.val = val = {};
@@ -699,21 +714,16 @@ noodle.object = new class extends noodle.any.constructor {
         var oldStrs = [];
         while (str) {
             oldStrs.push(str);
-            if (str.substr(0, 21) === 'click:Array6522|235|0')
-                debugger;
             i = str.indexOf(':'); //i == 1
             var key = str.substr(0, i); //key == "a"
-            args.str = str;
+            
             args.str = str.substr(i + 1); //args.str == "String5|hellob:Number(7)"
             args.val = undefined;
 
-           // if (args.str.substr(0,)==='')
             var { val: prop, strRest: str } = noodle.any._fromDataStr(args); //str == "b:Number(7)"
+
             //val[key] = prop; //val.a == "hello"
-
-            (constr.defineProperty || Object.defineProperty)(val, key, { value: prop });
-
-
+            (constr.defineProperty || Object.defineProperty)(val, key, { enumerable: true, value: prop });
             if (oldStrs[oldStrs.length - 1] === str) {
                 debugger;
             }
@@ -883,7 +893,24 @@ Object.defineProperties(Object.prototype, {
 
             return this.name;
         }
+    },
+    find: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value(key) {
+            return this[key];
+        }
+    },
+    assign: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value(key, val) {
+            this[key] = val;
+        }
     }
+
 });
 
 Object.defineProperties(Object, {

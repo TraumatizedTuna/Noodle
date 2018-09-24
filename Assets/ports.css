@@ -28,6 +28,7 @@
 
 .port.output{
     flex-direction: row-reverse;
+    text-align: right;
 }
 
 .port > *{

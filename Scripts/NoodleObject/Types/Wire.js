@@ -13,15 +13,15 @@ noodle.wire = {
     //Functions{
 
     //Returns a new, unconnected wire object
-    new(noodle) {
+    new(noodle) { //Aaah, obsolete
         var wire = {
             node0: null, port0: 0,
             node1: null, port1: 0,
             rendered: false,
-            noodle: noodle,
+            noodle: noodle
         };
-        Object.defineProperty(wire, 'type', { enumerable: false, writable: true, configurable: true, value: 'wire'});
-        wire.noodleExp = noodle.expr.defaultNoodle(noodle, wire)
+        Object.defineProperty(wire, 'type', { enumerable: false, writable: true, configurable: true, value: 'wire' });
+        wire.noodleExp = noodle.expr.defaultNoodle(noodle, wire);
         //noodle.object.deepStandardize(noodle, wire); //This line shouldn't do any difference but I guess I should check why it crashes
         container.wires.push(wire);
         var wireId = noodle.ids.firstFree(noodle.ids.freeList.wire);
@@ -50,10 +50,6 @@ noodle.wire = {
         wire.node1 = p1.meta.parNode;
         //}
 
-        if (!wire.rendered) {
-            wireNoodle.wire.render(wire);
-        }
-
         wireNoodle.wire.update(wire);
         if (wire.port0.rendered)
             //noodle.getNoodle(noodle, wire.node0).
@@ -64,7 +60,8 @@ noodle.wire = {
     render(wire) {
         wireBoard.insertAdjacentHTML('beforeend', '<path class="wire" id="' + wire.id + '" d="M10 10 C 20 20, 40 20, 50 10" stroke="white" stroke-width="3px" fill="transparent"/>');
         wire.html = document.getElementById(wire.id);
-        wire.rendered = false;
+        wire.html.obj = wire;
+        wire.rendered = true;
     },
 
     //Updates wire element using wireBetween
@@ -90,25 +87,27 @@ noodle.wire = {
     //Updates wire svg curve so it goes between positions p0 and p1
     wireBetween(p0, p1, wire) {
         var r = $('.socket').width() / 2 + parseInt($('.socket').css('borderWidth'), 10); //8; //TODO: Make this work for other socket sizes
-        wire.noodle.html.getEl(wire).attributes.d.value = wire.noodle.graphics.svg.autoBez(p0.x + r, p0.y + r, p1.x + r, p1.y + r, wire.noodle.wire.hanLen, wire.noodle.wire.slack);
+        wire.html.attributes.d.value = wire.noodle.graphics.svg.autoBez(p0.x + r, p0.y + r, p1.x + r, p1.y + r, wire.noodle.wire.hanLen, wire.noodle.wire.slack);
 
     },
 
     //Does its best to convince you that wire never existed
     cut(wire) { //Generalize so wires and nodes are removed by same function?
-        if (wire != undefined) {
-            console.log("cut");
-
-            //Remove html element
-            wire.noodle.wire.removeEl(wire);
-
-            //Remove wire from parent ports{
-            wire.port0.wires.splice(wire.p0Ind, 1);
-            wire.port1.wires.splice(wire.p1Ind, 1);
-            wire.noodle.wire.refreshPortInds(wire.port0.wires, 0);
-            wire.noodle.wire.refreshPortInds(wire.port1.wires, 1);
-            //}
+        if (!wire) {
+            console.warn('Tried to cut undefined or otherwise illegal wire.');
+            return;
         }
+        console.log("cut");
+
+        //Remove html element
+        wire.noodle.wire.removeEl(wire);
+
+        //Remove wire from parent ports{
+        wire.port0.wires.splice(wire.p0Ind, 1);
+        wire.port1.wires.splice(wire.p1Ind, 1);
+        wire.noodle.wire.refreshPortInds(wire.port0.wires, 0);
+        wire.noodle.wire.refreshPortInds(wire.port1.wires, 1);
+        //}
     },
 
     removeEl(wire) {

@@ -106,7 +106,7 @@ window.onload = function (e) {
 
             $('.wire').unbind().mouseover(function (e) {
                 if (e.which === 1)
-                    noodle.wire.cut(noodle.wire.getObj(noodle, e.target));
+                    noodle.wire.cut(e.target.obj);
             });
 
             window.onkeyup = function (e) {

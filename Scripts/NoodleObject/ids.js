@@ -92,7 +92,7 @@ noodle.ids = {
 
         //Example: str == "(42)b:Number(7)"
         var i = str.indexOf('|', 1); //i == 3
-        var id = str.substring(1, i); //id == "42"
+        var id = str.substring(0, i); //id == "42"
         var strRest = str.substr(i + 1); //strRest == b:Number(7)
 
         return { noodle: noodle, val: idMap[id], strRest: strRest };

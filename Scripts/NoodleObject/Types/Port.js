@@ -8,26 +8,14 @@ noodle.port = new class extends noodle.object.constructor {
 
         return port;
     }
-    //Returns expression to generate port
-    newExpr(noodle, name, type, isIn) {
-        var exp = noodle.expr.new(
-            noodle, //noodle
-            noodle.port.new, //function
-            noodle.expr.allFromObj(noodle, [noodle, name, type, isIn]), //args
-            null, //ans
-            noodle.expr.defaultNoodle(noodle, null) //noodleExp
-            //noodle.expr.fromObj(noodle, noodle) //noodleExp
-        );
-        return exp;
-    }
     addToPorts(node, ports, port) {
-        port.noodleExp = port.noodleExp || node.noodleExp;
-        var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
+        
+        var portNoodle = port.noodle;
 
-        ports[port.name] = port;
+        ports.assign(port.name, port);
         portNoodle.port.render(node, port);
-        port.parNode = node;
-        port.parent = ports;
+        port.meta.parNode = node;
+        port.meta.parent = ports;
     }
 
     //Renders port in node.html
@@ -45,7 +33,7 @@ noodle.port = new class extends noodle.object.constructor {
             //}
 
             //Add port to node element
-            var portNoodle = noodle.expr.eval(noodle, port.noodleExp);
+            //var portNoodle = noodle.expr.eval(noodle, port.noodleExp); //TODO: Is there any reason to do this again?
             port.id = portNoodle.ids.firstFree(portNoodle.ids.freeList.port);
             //Insert port frame
             node.html.getElementsByClassName(inOrOut + 'Ports')[0].insertAdjacentHTML('beforeend', '<div class="port ' + inOrOut + 'put" id="p' + port.id + '"></div><br>');
@@ -69,8 +57,8 @@ noodle.port = new class extends noodle.object.constructor {
     //Sets up new wire between p0 and p1 and renders it
     connect(port0, port1) {
         var port0Noodle = noodle.expr.eval(noodle, port0.noodleExp);
-        var wire = port0Noodle.wire.new(port0Noodle); //What?!
-        var wireNoodle = noodle.expr.eval(noodle, wire.noodleExp);
+        var wire = port0Noodle.wire.new(port0Noodle); //What?! //TODO: Figure out why I was confused
+        var wireNoodle = noodle.expr.eval(noodle, wire.noodleExp); //Obsolete
 
         wireNoodle.wire.connect(port0, port1, wire, noodle);
         return wire;
@@ -168,7 +156,9 @@ noodle.Port = class extends Object {
         /*if (!node) {
             console.warn('Port created without parent node')
         }*/
+        this.noodle = noodle;
         this.addMeta({ meta: { parNode: node } });
+        this.type = 'port'; //TODO: Make it non-enumerable
         for (var i in props) {
             this[i] = props[i];
         }

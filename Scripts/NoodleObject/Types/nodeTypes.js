@@ -208,12 +208,13 @@ var nodeTypes = {
         var core = {
             name: 'Eval',
             color: 'green',
-            inPorts: {
+            inPorts: new KeyedArray({
                 code: noodle.port.new(noodle, 'code', 'string', true)
-            },
-            outPorts: {
-                value: noodle.port.new(noodle, 'value', 'any', false)
-            },
+            }),
+            outPorts: new KeyedArray({
+                value: noodle.port.new(noodle, 'value', 'any', false),
+                error: noodle.port.new(noodle, 'error', 'error', false)
+            }),
             subNodes: {
                 in: [
                     {
@@ -224,14 +225,47 @@ var nodeTypes = {
             },
             func: function (node) {
                 var core = node.core;
-                core.outPorts.value.value = eval(core.inPorts.code.value);
+                if (core.inPorts.last.wires.length) { //If last port is connected
+                    noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'name', 'text', true)); //TODO: Uniqe name?
+                    noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'value', 'any', true));
+                }
+                //TODO: Output all the input values?
+                /*if (core.outPorts.last.wires.length) {
+                    noodle.port.addToPorts(node, core.outPorts, noodle.port.new(noodle, 'out', 'text', false));
+                }*/
             },
             data: {
                 code: '',
+                execute(noodle, node, nodeEl) {
+                    var core = node.core;
+                    var err = null;
+
+                    var namePort = null;
+                    var varString = '';
+                    for (var i = 1; i < core.inPorts.length; i += 2) {
+                        namePort = core.inPorts[i];
+                        varString += 'var ' + namePort.value + '=core.inPorts[' + i + '];\n';
+                    }
+                    i = namePort = undefined; //Get rid of unnecessary variables before eval
+
+                    try {
+                        core.outPorts.value.value = eval(varString + core.inPorts.code.value);
+                    }
+                    catch (e) {
+                        err = e;
+                    }
+
+                    noodle.node.execute(node);
+                }
             },
             resetFuncs: [
+                function (node, nodeEl) {
+                    nodeEl.getElementsByClassName('btn')[0].onclick = function (e) {
+                        node.core.data.execute(noodle, node, nodeEl);
+                    };
+                }
             ],
-            htmlContent: ''
+            htmlContent: '<button class="btn">Eval</button>'
         };
         return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
         /* var node = noodle.node.new(noodle, container, core, label, pos);
@@ -410,16 +444,19 @@ var nodeTypes = {
                 val: noodle.port.new(noodle, 'value', 'any', true)
             },
             outPorts: {
-                'cookie main': noodle.port.new(noodle, 'cookie main', 'object', false)
+                cookieMain: noodle.port.new(noodle, 'cookie main', 'object', false),
+                cookie: noodle.port.new(noodle, 'cookie', 'object', false)
             },
             func: function (node) {
                 var core = node.core;
-                var key = core.inPorts[0].value;
-                var val = core.inPorts[1].value;
+                var key = core.inPorts.key.value;
+                var val = core.inPorts.val.value;
                 if (key && val) {
                     noodle.cookie.set(noodle, key, val);
                 }
-                core.outPorts[0].value = noodle.cookie.get(noodle);
+                var mainCookie = noodle.cookie.get(noodle);
+                core.outPorts.cookieMain.value = mainCookie;
+                core.outPorts.cookie.value = mainCookie[key];
 
             },
             data: {
@@ -595,7 +632,7 @@ noodle.nodeTypes = {
                 htmlContent: '<input type="text" class="textDbInput">'
             };
             super(args);
-            
+
             /*var node = noodle.node.new(noodle, container, core, label, pos);
             for (var i in node) {
                 this[i] = node[i];

@@ -57,4 +57,17 @@ Object.defineProperties(Array, {
     }
 });
 
+Array.defineProperties(Array.prototype, {
+    last: {
+        enumerable: false,
+        configurable: true,
+        get() {
+            return this[this.length - 1];
+        },
+        set(el) {
+            this[this.length - 1] = el;
+        }
+    }
+});
+
 Array.__proto__ = Object;

@@ -138,7 +138,7 @@ noodle.any = new class extends Object {
         var type = typeof val;
         if (type === undefined)
             type = 'undefined';
-        //if (type === 'any') {
+        
         if (['undefined', 'number', 'symbol'].indexOf(type) !== -1 || val === null || !val.toSerial) {
             var toDataStr = noodle[serialized.serType]._toDataStr;
             return { str: toDataStr(args).str };

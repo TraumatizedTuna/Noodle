@@ -15,13 +15,13 @@ noodle.element = new class extends noodle.object.constructor {
 
         for (var i in serialized.obj) {
 
-            /*if (i === 'dataset')
-                debugger;*/
+            if (i === 'children')
+                var a = 42;
 
             var child = serialized.obj[i];
             if (!noodle.element.dataStrExcl[i] && child !== null && child !== '') {
                 if (!child)
-                    debugger;
+                    debugger; //TODO: Figure out why I want to pause here
                 str += i + ':' + noodle.any._toDataStr({
                     noodle: noodle,
                     val: child.val,
@@ -78,6 +78,13 @@ noodle.element.dataStrExcl = {
     innerHTML: true,
     parentNode: true,
     parentElement: true,
+    offsetparent: true,
+    nextElementSibling: true,
+    previousElementSibling: true,
+    nextSibling: true,
+    previousSibling: true
+    /*firstElementChild: true,
+    lastElementChild: true*/
 
 }
 
