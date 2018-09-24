@@ -5,9 +5,11 @@ noodle.ids = {
 
     add(obj) {
         //var objNoodle = noodle.expr.eval(noodle, obj.noodleExp) || noodle; //TODO: Kinda ugly
-        noodle.ids.objsById[obj.id] = obj;
+        if (obj.meta && obj.meta.id !== undefined)
+            noodle.ids.objsById[obj.meta.id] = obj;
     },
 
+    //TODO: Remove id from ids if it couldn't be added
     addIfAbsent(args) {
         var noodle = args.noodle;
         var val = args.val;
@@ -27,14 +29,20 @@ noodle.ids = {
                     val.meta = {};
                 }
             }
-            if (val.meta !== undefined) {
+            if (typeof val.meta === 'object') {
                 //If there's no id, add one
                 if (val.meta.id === undefined) {
-                    val.meta.id = noodle.ids.firstFree();
+                    val.meta.id = id = noodle.ids.firstFree();
                     noodle.ids.add(val);
                     hadId = false;
                 }
-                id = val.meta.id;
+                //If id still isn't there, let's accept that it can't be added   //TODO: Remove meta somewhere? Maybeee?
+                if (val.meta.id === undefined) {
+                    hasId = false;
+                }
+                else {
+                    id = val.meta.id;
+                }
             }
             //If meta couldn't be added to val
             else {
@@ -77,5 +85,23 @@ noodle.ids = {
         else {
             ids.push(id);
         }
+    },
+
+    _fromDataStr(args) {
+        var { noodle: noodle, str: str, idMap: idMap } = args;
+
+        //Example: str == "(42)b:Number(7)"
+        var i = str.indexOf('|', 1); //i == 3
+        var id = str.substring(1, i); //id == "42"
+        var strRest = str.substr(i + 1); //strRest == b:Number(7)
+
+        return { noodle: noodle, val: idMap[id], strRest: strRest };
     }
 };
+
+class Id extends Object {
+}
+
+Id.fromDataStr = function (args) {
+    return noodle.ids._fromDataStr(args);
+}

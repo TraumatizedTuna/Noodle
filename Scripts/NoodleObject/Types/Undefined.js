@@ -1,8 +1,8 @@
-noodle.undefined = {
+noodle.undefined = new class extends noodle.prim.constructor{
     random(args) {
         return undefined;
-    },
-    serialize(args) {
+    }
+    _toSerial(args) {
         return {
             serialized: {
                 serType: 'undefined',
@@ -10,9 +10,14 @@ noodle.undefined = {
                 idMap: args.idMap || {}
             }
         };
-    },
-    toDataStr(args) {
-        var obj = args.obj;
-        return { str: 'undefined' };
+    }
+    _toDataStr(args) {
+        return { noodle: args.noodle, str: 'Undefined0|' };
+    }
+} ();
+
+class Undefined extends Prim {
+    constructor(args) {
+        super(args);
     }
 }

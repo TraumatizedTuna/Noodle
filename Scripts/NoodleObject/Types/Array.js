@@ -56,3 +56,5 @@ Object.defineProperties(Array, {
         value: Object.getOwnPropertyDescriptor
     }
 });
+
+Array.__proto__ = Object;

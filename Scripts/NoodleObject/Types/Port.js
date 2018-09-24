@@ -78,7 +78,7 @@ noodle.port = new class extends noodle.object.constructor {
 
     //Generates html code for port
     renderInterior(noodle, port, portNoodle, classes, node, inOrOut) {
-        var code = '<div class="socket num ' + classes + '" id= "s' + port.id + '" ></div> <a class="hoverSelect">' + port.name + '</a>';
+        var code = '<div class="socket num ' + classes + '" id="s' + port.id + '" ></div> <a class="portLabel hoverSelect">' + port.name + '</a>';
 
         //TODO: Clean up
         //Add value element and finish port code{

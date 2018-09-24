@@ -1,4 +1,4 @@
-noodle.number = {
+noodle.number = new class extends noodle.prim.constructor{
     random(args) {
         var noodle = args.noodle;
         var contProb = args.contProb || 0.8;
@@ -9,8 +9,8 @@ noodle.number = {
             num += Math.random();
         }
         return num;
-    },
-    serialize(args) {
+    }
+    _toSerial(args) {
         return {
             serialized: {
                 serType: 'number',
@@ -19,11 +19,26 @@ noodle.number = {
                 idMap: args.idMap || {}
             }
         };
-    },
-    toDataStr(args) {
+    }
+    _toDataStr(args) {
         var obj = args.obj;
-        return { str: 'number(' + obj + ')' };
-    },
+        args.str = 'Number' + args.val + '|';
+        return args;
+    }
+    _fromDataStr(args) {
+        args.idMap = args.idMap || {};
+        var { noodle: noodle, str: str, val, constr: constr, idMap: idMap } = args;
+        val = "";
+
+        //Example: str == "42|b:Number7|y:Boolean1|"
+        var i = str.indexOf('|'); //i == 1
+        var val = parseInt(str.substr(0, i)); //val == 42
+
+        str = str.substr(i + 1); //str == "b:Number7|y:Boolean1|"
+        
+        return { val: val, strRest: str };
+
+    }
     reduceErrVal(args) {
         var noodle = args.noodle;
         var func = args.func;
@@ -75,4 +90,32 @@ noodle.number = {
         args.errVal = errVal;
         return args;
     }
-}
+}();
+
+Number.prototype.__proto__ = Prim.prototype;
+Number.__proto__ = Prim;
+
+Object.defineProperties(Number.prototype, {
+    toDataStr: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value(args = {}) {
+            args.val = this;
+            args.noodle = args.noodle || args.val.noodle || noodle;
+
+            return noodle.number._toDataStr(args);
+        }
+    }
+});
+
+Object.defineProperties(Number, {
+    fromDataStr: {
+        enumerable: false,
+        writable: true,
+        configurable: true,
+        value(args) {
+            return args.noodle.number._fromDataStr(args);
+        }
+    }
+});
