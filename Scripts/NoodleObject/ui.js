@@ -4,6 +4,7 @@ noodle.ui = {
             //var cont = document.getElementById("mainCont0");
             container.insertAdjacentHTML('beforeend', '<div class="menu airMenu" id="airMenu"></div>');
             var menuEl = document.getElementById("airMenu");
+            menuEl.style.zIndex = noodle.global.maxZInd++;
             menuEl.style.left = position.x - 8 + "px";
             menuEl.style.top = position.y - 8 + "px";
             menuEl.innerHTML = ''; //In case menu is opened again before it's closed
@@ -11,11 +12,11 @@ noodle.ui = {
                 menuEl.insertAdjacentHTML('beforeend', '<div class="menuRow" id="mr' + i + '">' + content[i].label + '</div>');
                 var rowEl = document.getElementById('mr' + i);
                 rowEl.obj = content[i];
-                //rowEl.onmousedown = content[i].func;
-                rowEl.onmousedown = function(e){
+                rowEl.onmousedown = content[i].func;
+                /*rowEl.onmousedown = function(e){
                     var contObj = e.target.obj;
                     noodle.expr.eval(noodle, contObj.expr);
-                };
+                };*/
             }
 
             noodle.global.active.menuEl = menuEl;
