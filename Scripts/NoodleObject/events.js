@@ -164,6 +164,36 @@ window.onload = function (e) {
         noodle.global.active.container = e.target.obj;
     });
 
+    $('*').mouseup(function (e) {
+        //Shift + right click
+        if (e.which === 3 && e.shiftKey) {
+            var oldContMenu = document.oncontextmenu;
+            document.oncontextmenu = function (e1) {
+                e1.preventDefault();
+                e1.stopPropagation();
+                document.oncontextmenu = oldContMenu;
+            };
+
+            var content = [
+                {
+                    label: 'id: ' + e.target.id,
+                    func() { }
+                },
+                {
+                    label: 'class: ' + e.target.className,
+                    func() { }
+                }
+            ];
+            var listeners = $._data(e.target, 'events');
+            for (var i in listeners) {
+                content.push({
+                    label: 'apa'
+                });
+            }
+            noodle.ui.menus.addAirMenu(mainCont, content, { x: e.pageX, y: e.pageY });
+        }
+    });
+
 
     $('.container').click(function (e) {
         var a = 3;

@@ -45,6 +45,18 @@ class KeyedArray extends Array {
                 value(val) {
                     this.assign(this.length, val);
                 }
+            },
+            getObj: {
+                enumerable: false,
+                writable: true,
+                configurable: true,
+                value() {
+                    var obj = {};
+                    for (var i in map) {
+                        obj[i.substr(3)] = map[i];
+                        return obj;
+                    }
+                }
             }
         });
 
