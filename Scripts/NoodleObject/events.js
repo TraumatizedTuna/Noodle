@@ -187,7 +187,8 @@ window.onload = function (e) {
             var listeners = $._data(e.target, 'events');
             for (var i in listeners) {
                 content.push({
-                    label: 'apa'
+                    label: i,
+                    func: listeners[i].last.handler
                 });
             }
             noodle.ui.menus.addAirMenu(mainCont, content, { x: e.pageX, y: e.pageY });

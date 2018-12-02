@@ -226,8 +226,9 @@ var nodeTypes = {
             func: function (node) {
                 var core = node.core;
                 if (core.inPorts.last.wires.length) { //If last port is connected
-                    noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'name', 'text', true, undefined, undefined, 'a')); //TODO: Uniqe name?
-                    noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'value', 'any', true));
+                    var i = (core.inPorts.length - 1) / 2;
+                    noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'name ' + i, 'text', true, undefined, undefined, 'a')); //TODO: Uniqe name?
+                    noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'value ' + i, 'any', true));
                 }
                 //TODO: Output all the input values?
                 /*if (core.outPorts.last.wires.length) {
