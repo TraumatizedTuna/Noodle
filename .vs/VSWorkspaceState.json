@@ -4,6 +4,7 @@
     "\\Assets",
     "\\Browser",
     "\\Html",
+    "\\Html\\Nodes",
     "\\Scripts",
     "\\Scripts\\NoodleObject",
     "\\Scripts\\NoodleObject\\Types"

@@ -6,8 +6,7 @@ noodle.wire = {
 
     //Slack of wire svg elements
     slack: 5,
-
-    objsById: {},
+    
     //}
 
     //Functions{
@@ -111,23 +110,16 @@ noodle.wire = {
     },
 
     removeEl(wire) {
-        var wireEl = document.getElementById(wire.id);
-        wire.noodle.wire.objsById[wireEl.id] = undefined;
+        var wireEl = wire.html;
+        
         wireEl.remove();
         wire.noodle.ids.forget(wire.noodle.ids.freeList, parseInt(wire.id.substr(1), 10), true);
     },
 
     //Makes sure that wires know their indices in wire lists of their parent ports
     refreshPortInds(wires, portType) {
-        for (var i = 0; i < wires.length; i++) {
-            //eval('container.wires[i].p' + portType + 'ind=i');
-            container.wires[i]['p' + portType + 'ind'] = i;
+        for (var i in wires) {
+            wires[i]['p' + portType + 'ind'] = i;
         }
-    },
-
-    //Returns js object of wire element
-    getObj(noodle, wireEl) {
-        return noodle.wire.objsById[wireEl.id];
     }
-    //}
 };

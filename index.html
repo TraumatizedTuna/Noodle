@@ -51,6 +51,7 @@
     <script src="Scripts/NoodleObject/Types/Node.js"></script>
     <script src="Scripts/NoodleObject/Types/nodeTypes.js"></script>
     <script src="Scripts/NoodleObject/Types/Port.js"></script>
+    <script src="Scripts/NoodleObject/Types/PortTypes.js"></script>
     <script src="Scripts/NoodleObject/Types/Wire.js"></script>
     <script src="Scripts/NoodleObject/Types/Expr.js"></script>
     <script src="Scripts/NoodleObject/Types/SortedList.js"></script>
@@ -168,16 +169,18 @@
             startTime = new Date().getTime();
             container.forest = [];
             //noodle.node.add(noodle, coreObj.Value, '', {x: 0, y: 0}),
-            noodle.node.add(noodle, container, nodeTypes.Add, '', { x: 500, y: 0 });
-            noodle.node.add(noodle, container, nodeTypes.Value, '', { x: 10, y: 200 });
-            noodle.node.add(noodle, container, nodeTypes.Dummy, '', { x: 10, y: 500 });
-            noodle.node.add(noodle, container, nodeTypes.Code, '', { x: 200, y: 200 });
-            noodle.node.add(noodle, container, nodeTypes.NodeCreator, '', { x: 900, y: 100 });
+            noodle.node.add(noodle, container, nodeTypes.IDB, '', { x: 340, y: 60 });
+            noodle.node.add(noodle, container, nodeTypes.Text, '', { x: 5, y: 50 });
+            noodle.node.add(noodle, container, nodeTypes.Text, '', { x: 5, y: 185 });
+            noodle.node.add(noodle, container, nodeTypes.Text, '', { x: 5, y: 320 });
+            noodle.node.add(noodle, container, nodeTypes.Code, '', { x: 400, y: 500 });
             noodle.object.deepStandardize({ noodle: noodle, val: container });
 
             calcTime = new Date().getTime() - startTime;
             console.log('Render time: ' + calcTime);
-            noodle.port.connect(container.forest[1].core.outPorts[0], container.forest[0].core.inPorts.term0);
+            noodle.port.connect(container.forest[1].core.outPorts[0], container.forest[0].core.inPorts.find('DB name'));
+            noodle.port.connect(container.forest[2].core.outPorts[0], container.forest[0].core.inPorts.find('store name'));
+            noodle.port.connect(container.forest[3].core.outPorts[0], container.forest[0].core.inPorts.find('key'));
         }
 
 
