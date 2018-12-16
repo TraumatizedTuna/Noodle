@@ -188,7 +188,7 @@ window.onload = function (e) {
             for (var i in listeners) {
                 content.push({
                     label: i,
-                    func: listeners[i].last.handler
+                    func: listeners[i].last.handler //TODO: Add all handlers in submenu
                 });
             }
             noodle.ui.menus.addAirMenu(mainCont, content, { x: e.pageX, y: e.pageY });

@@ -144,11 +144,14 @@ noodle.node = new class extends noodle.object.constructor {
                 node.html = document.getElementById(node.id);
                 node.html.obj = node;
 
+                node.html.getElementsByClassName('nodeTopBar')[0].insertAdjacentHTML('beforeend', node.core.name);
+
                 nodeNoodle.ids.add(node);
                 //}
                 //Set events{
-                nodeNoodle.html.firstByClass(node.html, "btnClose").onmousedown = nodeNoodle.graphics.transformable.close;
-                nodeNoodle.html.firstByClass(node.html, "btnMaximize").onmousedown = nodeNoodle.graphics.transformable.maximize;
+                nodeNoodle.html.firstByClass(node.html, "btnClose").onclick = nodeNoodle.graphics.transformable.close;
+                nodeNoodle.html.firstByClass(node.html, "btnMaximize").onclick = nodeNoodle.graphics.transformable.maximize;
+                nodeNoodle.html.firstByClass(node.html, "btnRun").onclick = function (e) { nodeNoodle.node.execute(node); };
 
                 nodeNoodle.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
                 //}

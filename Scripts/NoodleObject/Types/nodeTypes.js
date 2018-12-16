@@ -592,18 +592,39 @@ var nodeTypes = {
             //Not sure I like the async :(
             func: async function (node) {
                 var core = node.core;
-                var allDbsPort = core.outPorts.find('all DBs');
-                var allNamesPort = core.outPorts.find('all names');
+                var outPorts = core.outPorts;
 
-                const dbNames = await Dexie.getDatabaseNames();
-                var dbs = [];
-                for (var name of dbNames) {
-                    dbs.push(new Dexie(name));
+                var dbName = core.inPorts.find('DB name').value;
+                var storeName = core.inPorts.find('store name').value;
+                var key = core.inPorts.find('key').value;
+
+                var allDbsPort = outPorts.find('all DBs');
+                var allNamesPort = outPorts.find('all names');
+                var valuePort = outPorts.find('value');
+                var errorPort = outPorts.find('error');
+
+                /*
+                try {
+                    const dbNames = await Dexie.getDatabaseNames();
+                    var dbs = [];
+                    for (var name of dbNames) {
+                        dbs.push(new Dexie(name));
+                    }
+
+                    allDbsPort.value = dbs;
+                    allNamesPort.value = dbNames;
+
+                    var db = new Dexie(dbName);
+                    var store = db.table(storeName);
+                    var val = store.get(key);
+                    valuePort.value = val;
+
+                    errorPort.val = null;
+                } catch (e) {
+                    errorPort.value = e;
+                    console.error(e);
                 }
-
-                allDbsPort.value = dbs;
-                allNamesPort.value = dbNames;
-
+                
 
                 /*
                 if (core.inPorts.last.wires.length) { //If last port is connected
@@ -616,7 +637,6 @@ var nodeTypes = {
 
             },
             data: {
-                code: '',
                 write(noodle, node, nodeEl) {
                     var core = node.core;
                     var dbName = core.inPorts.find('DB name').value;
@@ -625,12 +645,18 @@ var nodeTypes = {
                     var val = core.inPorts.find('value').value;
 
                     var storeDesc = {};
-                    storeDesc[storeName] = 'key,val';
+                    storeDesc[storeName] = 'key';
 
                     var err = null;
 
-                    var db = core.data.db = core.data.db || new Dexie(dbName);
-                    db.version(1).stores(storeDesc);
+                    //var db = core.data.db = core.data.db || new Dexie(dbName);
+                    var db = core.data.db = new Dexie(dbName);
+                    /*if (db.tables.indexOf(storeName === -1)) {
+
+                    }
+                    else {
+                        db.version(1).stores(storeDesc);
+                    }
 
                     db[storeName].put({ key: key, val: val });
 
@@ -658,8 +684,88 @@ var nodeTypes = {
         for (var i in node) {
             this[i] = node[i];
         } */
-    }
-   
+    },
+    saveLoad: function (noodle, container, label, pos, noodleExp) {
+        var core = {
+            name: 'Save/Load',
+            color: 'Pink',
+            inPorts: new KeyedArray({
+                name: noodle.port.new(noodle, 'name', 'string', true),
+                value: noodle.port.new(noodle, 'value', 'any', true)
+            }),
+            outPorts: new KeyedArray({
+                value: noodle.port.new(noodle, 'value', 'any', false),
+                error: noodle.port.new(noodle, 'error', 'error', false)
+            }),
+            //Not sure I like the async :(
+            func: async function (node) {
+                var core = node.core;
+                var outPorts = core.outPorts;
+
+                var name = core.inPorts.find('name').value;
+
+                var valuePort = outPorts.find('value');
+                var errorPort = outPorts.find('error');
+
+                
+                try {
+                    var db = new Dexie('Noodle');
+                    var store = db.table('Main');
+                    var val = store.get(name);
+                    valuePort.value = val;
+
+                    errorPort.val = null;
+                } catch (e) {
+                    errorPort.value = e;
+                    console.error(e);
+                }
+                
+                
+
+
+            },
+            data: {
+                write(noodle, node, nodeEl) {
+                    var core = node.core;
+                    
+                    var name = core.inPorts.find('name').value;
+                    var val = core.inPorts.find('value').value;
+
+                    var err = null;
+
+                    const db = core.data.db = new Dexie('Noodle');
+                    if (db.tables.indexOf('Main') === -1) {
+                        db.version(1).stores({ Main: 'key' });
+                    }
+
+                    db.Main.put({ key: name, val: val });
+
+                    core.outPorts.find('error').value = err;
+                },
+                delete(noodle, node, nodeEl) {
+
+                }
+            },
+            resetFuncs: [
+                function (node, nodeEl) {
+                    nodeEl.getElementsByClassName('btnSave')[0].onclick = function (e) {
+                        node.core.data.write(noodle, node, nodeEl);
+                    };
+                    nodeEl.getElementsByClassName('btnDel')[0].onclick = function (e) {
+                        node.core.data.delete(noodle, node, nodeEl);
+                    };
+                }
+            ],
+            htmlContent: '<button class="btn btnSave">Save</button><button class="btn btnDel">Delete</button>'
+        };
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
+        for (var i in node) {
+            this[i] = node[i];
+        } */
+    },
+    
+
 };
 nodeTypes.Test = function (noodle, container, label, pos, noodleExp) {
     var core = {
