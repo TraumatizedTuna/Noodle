@@ -909,8 +909,29 @@ Object.defineProperties(Object.prototype, {
         value(key, val) {
             this[key] = val;
         }
+    },
+    priv: {
+        enumerable: false,
+        configurable: true,
+        //Temporary getter and setter to make sure that each instant gets a uniqe priv
+        get() {
+            this.constructor.defineProperty(this, 'priv', {
+                enumerable: false,
+                writable: true,
+                configurable: true,
+                value: {}
+            });
+            return this.priv;
+        },
+        set(priv) {
+            this.constructor.defineProperty(this, 'priv', {
+                enumerable: false,
+                writable: true,
+                configurable: true,
+                value: priv
+            });
+        }
     }
-
 });
 
 Object.defineProperties(Object, {

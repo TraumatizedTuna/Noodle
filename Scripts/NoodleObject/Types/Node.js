@@ -344,7 +344,9 @@ noodle.Node = class extends Object {
         var ports = this.ports.all;
         for (var i in ports) {
             var port = ports[i];
-            port.meta.parNode = this;
+            port.addMeta({
+                meta: { parNode: this }
+            });
         }
 
     }
@@ -375,7 +377,7 @@ noodle.Node = class extends Object {
         var str = 'Node ' + this.label + ', Id: ' + this.meta.id;
         return str;
     }
-}
+};
 
 Object.defineProperties(noodle.Node, {
     meta: {

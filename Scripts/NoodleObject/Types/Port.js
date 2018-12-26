@@ -9,7 +9,7 @@ noodle.port = new class extends noodle.object.constructor {
         return port;
     }
     addToPorts(node, ports, port) {
-        
+
         var portNoodle = port.noodle;
 
         ports.assign(port.name, port);
@@ -66,7 +66,7 @@ noodle.port = new class extends noodle.object.constructor {
 
     //Generates html code for port
     renderInterior(noodle, port, portNoodle, classes, node, inOrOut) {
-        var code = '<div class="socket num ' + classes + '" id="s' + port.id + '" ></div> <a class="portLabel hoverSelect">' + port.name + '</a>';
+        var code = '<div class="socket ' + classes + '" id="s' + port.id + '" ></div> <a class="portLabel hoverSelect">';
 
         //TODO: Clean up
         //Add value element and finish port code{
@@ -99,10 +99,6 @@ noodle.port = new class extends noodle.object.constructor {
         //}
     }
 
-    //Gets js port from html element
-    getObj(noodle, portEl) {
-        return noodle.port.objsById[portEl.id];
-    }
 
     //Cuts all wires connected to port
     cut(port) {
@@ -150,17 +146,44 @@ noodle.port = new class extends noodle.object.constructor {
 noodle.port.objsById = {};
 
 noodle.Port = class extends Object {
-    constructor(args) {
+    constructor(args = {}) {
         super();
-        var { noodle: noodle, node: node, props: props } = args;
-        /*if (!node) {
-            console.warn('Port created without parent node')
-        }*/
-        this.noodle = noodle;
-        this.addMeta({ meta: { parNode: node } });
-        this.type = 'port'; //TODO: Make it non-enumerable
+
+        var { props: props, color: color, defVal: defVal, wires: wires, parNode: parNode } = args;
+        props = props || {};
+        if (color === undefined && parNode) {
+            color = parNode.color;
+        }
+        if (defVal === undefined) {
+            defVal = this.defVal;
+        }
+        if (wires === undefined) {
+            wires = [];
+        }
+
+        props.isIn = props.isIn || false;
         for (var i in props) {
             this[i] = props[i];
         }
+        this.color = color || 'grey'; //TODO: AUTO???
+        this.value = this.defVal = defVal;
+        this.wires = wires;
     }
-}
+
+    set value(val) {
+        this.priv.value = val;
+    }
+    get value() {
+        return this.priv.value;
+    }
+
+};
+
+noodle.Port.defineProperties(noodle.Port.prototype, {
+    defVal: {
+        enumerable: true,
+        writable: true,
+        configurable: true,
+        value: 0
+    }
+});
