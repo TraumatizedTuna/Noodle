@@ -71,3 +71,5 @@ Array.defineProperties(Array.prototype, {
 });
 
 Array.__proto__ = Object;
+
+HTMLCollection.__proto__ = Array;

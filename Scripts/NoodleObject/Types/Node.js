@@ -270,6 +270,32 @@ noodle.node = new class extends noodle.object.constructor {
         nodeNoodle.node.forEachPort(node.core, nodeNoodle.port.renderVal);
     }
 
+    swallow(args) {
+        var { noodle: noodle, parentNode: parentNode, childNode: childNode, label: label } = args;
+        childNode.meta.parNode = parentNode;
+        var childPorts = childNode.html.getElementsByClassName('portContainer')[0];
+        var childContent = childNode.html.getElementsByClassName('nodeContent')[0];
+        var parentPorts = parentNode.html.getElementsByClassName('portContainer')[0];
+
+        //Add a container for childNode after ports of parentNode
+        parentPorts.insertAdjacentHTML('afterend', '<div class="swallowed"></div>');
+        var swallowContainer = parentNode.html.getElementsByClassName('swallowed')[0]; //TODO: Surely this will cause some trouble
+
+        //Add ports and content of childNode to swallowContainer
+        swallowContainer.appendChild(childPorts);
+        swallowContainer.appendChild(childContent);
+
+        noodle.port.updateWires(childNode.ports.all);
+
+        childNode.html.hidden = true;
+    }
+
+    unswallow(args) {
+        var { noodle: noodle, parentNode: parentNode, childNode: childNode } = args;
+        childNode.meta.parNode = undefined;
+        
+    }
+
     //Makes sure that a new wire will be pulled on mousemove and connected or deleted on mouseup
     setSockEv(node) {
         $('.socket').unbind().mousedown(function (e) { //TODO: Only set this event for children of node.html
@@ -333,7 +359,7 @@ noodle.Node = class extends Object {
         this.pos = new Pos(pos || { x: 0, y: 0 });
 
         this.addMeta({ meta: meta }); //TODO: this.constructor.addMeta?
-        this.meta.id = noodle.ids.firstFree()
+        this.meta.id = noodle.ids.firstFree();
 
         this.in = { ports: core.inPorts || [] };
         this.out = { ports: core.outPorts || [] };

@@ -84,8 +84,7 @@ body {
     border-radius: 5px;
     height: 100%;
     bottom: 0;
-    
-    }
+}
 
 #plus {
     background-color: #ffd800;
@@ -137,6 +136,11 @@ body {
     transition-duration: .4s;
 }
 
+.swallowed {
+    background-color: red;
+    flex-grow: 1;
+}
+
 
 .wire {
     z-index: 1;
@@ -154,6 +158,6 @@ body {
     width: 1px;
     height: 1px;
     position: absolute;
-    left:0px;
-    top:0px;
+    left: 0px;
+    top: 0px;
 }

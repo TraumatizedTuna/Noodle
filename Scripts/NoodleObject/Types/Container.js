@@ -6,4 +6,7 @@ class Container extends Object{
         this.noodle = args.noodle || noodle;
         this.html = args.html;
     }
+    get node() {
+        Container.defineProperty(this, 'node', { value: nodeTypes.Container })
+    }
 }
