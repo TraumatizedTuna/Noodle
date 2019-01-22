@@ -34,8 +34,8 @@ noodle.events = {
                 //var height = 100 * (e.pageY - nodeRect.top) / parRect.width;
                 noodle.global.active.nodeEl.style.height = height + 'px';//'vw';
             }
-            noodle.port.updateWires(noodle.global.active.nodeEl.obj.core.inPorts);
-            noodle.port.updateWires(noodle.global.active.nodeEl.obj.core.outPorts);
+            noodle.port.updateWires(noodle.global.active.nodeEl.obj.inPorts);
+            noodle.port.updateWires(noodle.global.active.nodeEl.obj.outPorts);
         },
         move(e) {
             var startPos = noodle.graphics.transformable.startPos;
@@ -47,8 +47,8 @@ noodle.events = {
                 nodeEl.style.top = node.pos.y + 'px';
 
                 //TODO: Update wires
-                noodle.port.updateWires(node.core.inPorts);
-                noodle.port.updateWires(node.core.outPorts);
+                noodle.port.updateWires(node.inPorts);
+                noodle.port.updateWires(node.outPorts);
             }
         },
         pullWire(e) {

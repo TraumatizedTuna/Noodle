@@ -1,6 +1,7 @@
-class Pos {
+class Pos extends Object {
     constructor(args = {}) {
         var xVal, yVal = 0;
+        super(args);
 
         Object.defineProperty(
             this,
@@ -12,7 +13,7 @@ class Pos {
                         throw new TypeError(x + ' could not be parsed to legal number');
                     }
                     if(isNaN(x)){
-                        console.warn('annoying x val')
+                        console.warn('annoying x val');
                     }
                 },
                 get: function () {

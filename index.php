@@ -94,13 +94,13 @@
             forest.push($.extend(true, {}, forest[1]));
             
             
-            forest[0].core.outPorts = [{wire: wires[0], value: 3}];
+            forest[0].outPorts = [{wire: wires[0], value: 3}];
             
-            forest[1].core.inPorts = [{name: "Term", wire: wires[0], value: 0}, {name: "Term", wire: null, value: 1}];
-            forest[1].core.outPorts = [{name: "Sum", wire: null, value: 0}];
+            forest[1].inPorts = [{name: "Term", wire: wires[0], value: 0}, {name: "Term", wire: null, value: 1}];
+            forest[1].outPorts = [{name: "Sum", wire: null, value: 0}];
             
-            forest[2].core.inPorts = [{name: "Term", wire: null, value: 0}, {name: "Term", wire: null, value: 1}];
-            forest[2].core.outPorts = [{name: "Sum", wire: null, value: 0}];
+            forest[2].inPorts = [{name: "Term", wire: null, value: 0}, {name: "Term", wire: null, value: 1}];
+            forest[2].outPorts = [{name: "Sum", wire: null, value: 0}];
             
             wires[0].node0 = forest[0];
             wires[0].node1 = forest[1];

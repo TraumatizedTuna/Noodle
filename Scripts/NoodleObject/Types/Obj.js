@@ -704,7 +704,7 @@ noodle.object = new class extends noodle.any.constructor {
         idMap[id] = val;
 
         str = str.substr(i + 1); //str == "26|a:String5|hellob:Number(7)y:Boolean1|"
-        
+
         i = str.indexOf('|'); //i == 2
         var length = parseInt(str.substr(0, i)); //length == 26
         str = str.substr(i + 1);
@@ -716,7 +716,7 @@ noodle.object = new class extends noodle.any.constructor {
             oldStrs.push(str);
             i = str.indexOf(':'); //i == 1
             var key = str.substr(0, i); //key == "a"
-            
+
             args.str = str.substr(i + 1); //args.str == "String5|hellob:Number(7)"
             args.val = undefined;
 
@@ -796,10 +796,33 @@ Object.defineProperties(Object.prototype, {
         value(args) {
             if (this.meta === undefined) {
                 this.constructor.defineProperty(this, 'meta', { enumerable: false, writable: true, configurable: true, value: {} });
+                console.warn('This should never happen.');
             }
             for (var i in args.meta) {
                 this.meta[i] = args.meta[i];
             }
+        }
+    },
+    meta: {
+        enumerable: false,
+        configurable: true,
+        get() {
+            this.meta = {};
+            return this.meta;
+        },
+        set(meta) {
+            this.constructor.defineProperty(this, 'meta', { enumerable: false, writable: true, configurable: true, value: meta });
+            Object.defineProperty(this.meta, 'id', {
+                enumerable: false,
+                configurable: true,
+                get() {
+                    this.id = noodle.ids.firstFree();
+                },
+                set(id) {
+                    //this is still container
+                    Object.defineProperty(this.meta, 'id', { enumerable: true, writable: true, configurable: true, value: id });
+                }
+            });
         }
     },
     toSerial: {

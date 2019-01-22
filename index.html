@@ -85,10 +85,10 @@
 
 
 
-    <div class="container mainContainer" id="mainCont0">
+    <!--<div class="container mainContainer" id="mainCont0">
         <svg id="wireBoard0" width="100%"></svg>
         <!--<div id="nodeCanvas"></div>-->
-
+    <!--
         <a class="hoverSelect">Slack: </a>
         <input type="number" value="5" onchange="updateWireStyle()" id="slack" class="hoverSelect">
         <a class="hoverSelect">Handle length: </a>
@@ -101,8 +101,10 @@
 
         <div id="posShowEl"></div>
 
-    </div>
+    </div>-->
 
+
+    <div id="fullscreen"></div>
 
     <script>
         if (!window.indexedDB) {
@@ -114,13 +116,15 @@
 
 
         //{
-        var mainCont = document.getElementById("mainCont0");
+        //var mainCont = document.getElementById("mainCont0");
+        var fullscreenEl = document.getElementById('fullscreen');
         var nodeBoard = document.getElementById("nodeCanvas");
         var wireBoard = document.getElementById("wireBoard0"); //TODO: wireBoard should be auto generated
         var container = new Container({
-            html: mainCont,
             noodle: noodle
         });
+        container.render({ parEl: fullscreenEl });
+        var mainCont = container.html;
         mainCont.obj = container;
 
 
@@ -178,25 +182,25 @@
 
             calcTime = new Date().getTime() - startTime;
             console.log('Render time: ' + calcTime);
-            noodle.port.connect(container.forest[1].core.outPorts[0], container.forest[0].core.inPorts.find('DB name'));
-            noodle.port.connect(container.forest[2].core.outPorts[0], container.forest[0].core.inPorts.find('store name'));
-            noodle.port.connect(container.forest[3].core.outPorts[0], container.forest[0].core.inPorts.find('key'));
+            noodle.port.connect(container.forest[1].outPorts[0], container.forest[0].inPorts.find('DB name'));
+            noodle.port.connect(container.forest[2].outPorts[0], container.forest[0].inPorts.find('store name'));
+            noodle.port.connect(container.forest[3].outPorts[0], container.forest[0].inPorts.find('key'));
         }
 
 
 
 
         /*
-        container.forest[0].core.outPorts = [{wires: [wires[0]], value: 3}];
+        container.forest[0].outPorts = [{wires: [wires[0]], value: 3}];
 
-        container.forest[1].core.inPorts = [{name: "Term", wires: [wires[0]], value: 0}, {name: "Term", wires: [], value: 1}];
-        container.forest[1].core.outPorts = [{name: "Sum", wires: [], value: 0}];
+        container.forest[1].inPorts = [{name: "Term", wires: [wires[0]], value: 0}, {name: "Term", wires: [], value: 1}];
+        container.forest[1].outPorts = [{name: "Sum", wires: [], value: 0}];
 
 
         wires[0].node0 = container.forest[0];
-        wires[0].port0 = container.forest[0].core.outPorts[0];
+        wires[0].port0 = container.forest[0].outPorts[0];
         wires[0].node1 = container.forest[1];
-        wires[0].port1 = container.forest[1].core.inPorts[0];
+        wires[0].port1 = container.forest[1].inPorts[0];
 
 
         setNodeHtml(container.forest[0]);

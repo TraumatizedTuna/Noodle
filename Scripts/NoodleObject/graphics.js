@@ -85,12 +85,12 @@ noodle.graphics = {
 
                 noodle.node.disconnect(noodle, node); //TODO: Noodle from noodle expression
                 noodle.ids.forget(noodle.ids.freeList, parseInt(node.id.substr(1), 10), true); //This needs to be before the next line, right?
-                noodle.node.forEachPort(node.core, noodle.port.forget);
+                noodle.node.forEachPort(node, noodle.port.forget);
                 container.forest.splice(container.forest.indexOf(node), 1);
 
                 nodeEl.remove();
 
-                console.info('nodeClose() - id: ' + node.id + ', name: ' + node.core.name);
+                console.info('nodeClose() - id: ' + node.id + ', name: ' + node.name);
             }
         },
         topBarFunc(e) {

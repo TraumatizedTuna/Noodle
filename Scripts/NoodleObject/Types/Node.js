@@ -15,8 +15,8 @@ noodle.node = new class extends noodle.object.constructor {
     //Functions{
     //TODO: What if node is already rendered?
     setDefaultPorts(noodle, node) {
-        var inPorts = node.core.inPorts;
-        var outPorts = node.core.outPorts;
+        var inPorts = node.inPorts;
+        var outPorts = node.outPorts;
         /*
         outPorts.meta = outPorts.meta || {};
         outPorts.meta.node = noodle.port.new(noodle, 'node', 'node', false, [], node);*/
@@ -26,7 +26,7 @@ noodle.node = new class extends noodle.object.constructor {
     //Adds new node, sets it up properly and renders it
 
     add(noodle, container, constr, label, pos, noodleExp) {
-        var node = constr(noodle, container, label, pos, noodleExp);
+        var node = constr({ noodle: noodle, container: container, label: label, pos: pos });
         container.forest.push(node);
         var nodeNoodle = node.noodle || noodle.expr.eval(noodle, node.noodleExp);
         nodeNoodle.node.render(node, container);
@@ -40,7 +40,6 @@ noodle.node = new class extends noodle.object.constructor {
         //var newCoreExp = noodle.object.clone(noodle, core, {});
         var node = new noodle.Node({
             label: label,
-            core: core,
             pos: new Pos(),
             startPos: new Pos(pos), //Have to clone it to avoid weird stuff
             noodleExp: noodleExp,
@@ -49,6 +48,11 @@ noodle.node = new class extends noodle.object.constructor {
             noodle: noodle,
             meta: { container: container }
         });
+
+        for (var i in core) {
+            node[i] = core[i];
+        }
+
 
         node.mode = 0;
         node.editMode = {
@@ -78,14 +82,14 @@ noodle.node = new class extends noodle.object.constructor {
 
         //Ports{
         noodle.node.forEachPort(
-            node.core,
+            node,
             function (port, core) {
                 port.noodleExp.args[1] = port;
             }
         );
 
-        /*node.core.inPorts = noodle.expr.evalAll(noodle, node.core.inPorts);
-        node.core.outPorts = noodle.expr.evalAll(noodle, node.core.outPorts);*/
+        /*node.inPorts = noodle.expr.evalAll(noodle, node.inPorts);
+        node.outPorts = noodle.expr.evalAll(noodle, node.outPorts);*/
         //}
 
         noodle.object.deepStandardize({ noodle: noodle, val: node, parNode: node });
@@ -121,6 +125,7 @@ noodle.node = new class extends noodle.object.constructor {
     render(node, container) { //TODO: Noodle
         var nodeNoodle = node.noodle || noodle.expr.eval(noodle, node.noodleExp);
         var nodeId = nodeNoodle.ids.firstFree(nodeNoodle.ids.freeList.node);
+        node.meta.container = container;
         //TODO: Put all the stuff back into success to allow async
         $.ajax({
             //ajax options{
@@ -133,7 +138,7 @@ noodle.node = new class extends noodle.object.constructor {
 
                 //Html text{
                 //Set color of node
-                var style = nodeNoodle.graphics.color.style(node.core.color);
+                var style = nodeNoodle.graphics.color.style(node.color);
 
                 node.id = 'n' + nodeId;
                 node.html = '<div class="node" id="n' + nodeId + '"' + style + '>' + data; //Not sure I like .html stuff
@@ -144,7 +149,7 @@ noodle.node = new class extends noodle.object.constructor {
                 node.html = document.getElementById(node.id);
                 node.html.obj = node;
 
-                node.html.getElementsByClassName('nodeTopBar')[0].insertAdjacentHTML('beforeend', node.core.name);
+                node.html.getElementsByClassName('nodeTopBar')[0].insertAdjacentHTML('beforeend', node.name);
 
                 nodeNoodle.ids.add(node);
                 //}
@@ -158,7 +163,9 @@ noodle.node = new class extends noodle.object.constructor {
 
                 nodeNoodle.node.renderInterior(noodle, node);
 
-
+                for (var f of node.renderedFuncs) {
+                    f(node);
+                }
             }
         });
     }
@@ -178,7 +185,7 @@ noodle.node = new class extends noodle.object.constructor {
             //noodle.graphics.transformable.setActive(noodle, this); //TODO: Use correct noodle
             if (!this.classList.contains('active'))
                 noodle.graphics.transformable.setActive(noodle, this, !e.shiftKey);
-        }
+        };
 
 
 
@@ -188,8 +195,9 @@ noodle.node = new class extends noodle.object.constructor {
 
         //Add content to node{
         var nodeEl = nodeNoodle.html.getEl(node);
-        if (node.core.htmlContent != undefined) {
-            nodeEl.getElementsByClassName('nodeContent')[0].innerHTML = node.core.htmlContent;
+        node.contentEl = nodeEl.getElementsByClassName('nodeContent')[0]
+        if (node.htmlContent !== undefined) {
+            node.contentEl.innerHTML = node.htmlContent;
         }
         nodeEl.style.left = node.pos.x + 'px';
         nodeEl.style.top = node.pos.y + 'px';
@@ -197,8 +205,8 @@ noodle.node = new class extends noodle.object.constructor {
         //}
 
         //Run reset functions of node
-        for (var i = 0; i < node.core.resetFuncs.length; i++) {
-            node.core.resetFuncs[i](node, nodeEl);
+        for (var i = 0; i < node.resetFuncs.length; i++) {
+            node.resetFuncs[i](node, nodeEl);
         }
 
         node.rendered = true;
@@ -206,7 +214,7 @@ noodle.node = new class extends noodle.object.constructor {
 
     //Cuts all wires connected to node
     disconnect(noodle, node) { // Seems like this function is never used
-        noodle.node.forEachPort(node.core, noodle.port.cut);
+        noodle.node.forEachPort(node, noodle.port.cut);
     }
 
     //Gets js node from html element
@@ -218,8 +226,8 @@ noodle.node = new class extends noodle.object.constructor {
     execute(node) {
         if (node.rendered) {
             var nodeNoodle = node.noodle;//noodle.expr.eval(noodle, node.noodleExp);
-            node.core.func(node);
-            var outPorts = node.core.outPorts;
+            node.func(node);
+            var outPorts = node.outPorts;
 
             var f = function (noodle, port) {
                 if (port.type === 'port') {
@@ -237,7 +245,7 @@ noodle.node = new class extends noodle.object.constructor {
                 }
             }
 
-            f(noodle, node.core.outPorts);
+            f(noodle, node.outPorts);
         }
     }
 
@@ -261,13 +269,13 @@ noodle.node = new class extends noodle.object.constructor {
     //Renders all ports of node
     renderPorts(node) {
         var nodeNoodle = node.noodle;
-        for (var i in node.core.inPorts)
-            nodeNoodle.port.render(node, node.core.inPorts[i]);
+        for (var i in node.inPorts)
+            nodeNoodle.port.render(node, node.inPorts[i]);
 
-        for (var i in node.core.outPorts)
-            nodeNoodle.port.render(node, node.core.outPorts[i]);
+        for (var i in node.outPorts)
+            nodeNoodle.port.render(node, node.outPorts[i]);
 
-        nodeNoodle.node.forEachPort(node.core, nodeNoodle.port.renderVal);
+        nodeNoodle.node.forEachPort(node, nodeNoodle.port.renderVal);
     }
 
     swallow(args) {
@@ -340,6 +348,11 @@ noodle.node = new class extends noodle.object.constructor {
         });
     }
     //}
+
+    get container() {
+        this.noodle.Node.defineProperty(this, 'container', { value: new Container() });
+        return this.container;
+    }
 }();
 noodle.node.async = false;
 noodle.node.objsById = {};
@@ -352,7 +365,11 @@ noodle.Node = class extends Object {
         var { noodle: noodle, objMeta: meta, container: container, core: core, pos: pos } = args;
         meta = meta || {};
         meta.container = meta.container || new Container({ noodle: noodle });
-        this.core = core = core || {};
+
+        this.renderedFuncs = [];
+        for (var i in core) {
+            this[i] = core[i];
+        }
         core.resetFuncs = core.resetFuncs || [];
         //core.outPorts = core.outPorts || [];
 

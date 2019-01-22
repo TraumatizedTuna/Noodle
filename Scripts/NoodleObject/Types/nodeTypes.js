@@ -13,13 +13,12 @@ var nodeTypes = {
                 noodle.port.new(noodle, 'code', 'text', false)
             ],
             func: function (node) {
-                var core = node.core;
-                var codeInPort = core.inPorts[2];
-                var outPort = core.outPorts[0];
-                var data = core.data;
+                var codeInPort = node.inPorts[2];
+                var outPort = node.outPorts[0];
+                var data = node.data;
                 var editor = ace.edit(data.edId);
-                var lang = core.inPorts[0].value;
-                var theme = core.inPorts[1].value;
+                var lang = node.inPorts[0].value;
+                var theme = node.inPorts[1].value;
 
                 if (lang) {
                     editor.getSession().setMode("ace/mode/" + lang);
@@ -44,8 +43,8 @@ var nodeTypes = {
             },
             data: {
                 code: '',
-                updateOutPort(core) {
-                    core.outPorts[0].value = core.data.text;
+                updateOutPort(node) {
+                    node.outPorts[0].value = node.data.text;
                 }
             },
             resetFuncs: [
@@ -54,7 +53,7 @@ var nodeTypes = {
 
                     var edEl = nodeEl.getElementsByClassName('editor')[0];
                     edEl.id = 'ed' + node.id.substr(1);
-                    node.core.data.edId = edEl.id;
+                    node.data.edId = edEl.id;
 
                     ace.require("ace/ext/language_tools");
                     var editor = ace.edit(edEl.id);
@@ -111,7 +110,7 @@ var nodeTypes = {
                 ]
             },
             func: function (node) {
-                var core = node.core;
+                var core = node;
                 if (core.inPorts.last.wires.length) { //If last port is connected
                     var i = (core.inPorts.length - 1) / 2;
                     noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'name ' + i, 'text', true, undefined, undefined, 'a')); //TODO: Uniqe name?
@@ -125,7 +124,7 @@ var nodeTypes = {
             data: {
                 code: '',
                 execute(noodle, node, nodeEl) {
-                    var core = node.core;
+                    var core = node;
                     var err = null;
 
                     var namePort = null;
@@ -150,7 +149,7 @@ var nodeTypes = {
             resetFuncs: [
                 function (node, nodeEl) {
                     nodeEl.getElementsByClassName('btn')[0].onclick = function (e) {
-                        node.core.data.execute(noodle, node, nodeEl);
+                        node.data.execute(noodle, node, nodeEl);
                     };
                 }
             ],
@@ -172,7 +171,7 @@ var nodeTypes = {
             outPorts: [
             ],
             func: function (node) {
-                var core = node.core;
+                var core = node;
                 var box = core.data.renderBox;
                 box.html.innerHTML = core.inPorts[0].value;
             },
@@ -181,7 +180,7 @@ var nodeTypes = {
             },
             resetFuncs: [
                 function (node, nodeEl) {
-                    var core = node.core;
+                    var core = node;
                     var box = {};
                     core.data.renderBox = box;
                     box.html = nodeEl.getElementsByClassName('renderBox')[0];
@@ -220,7 +219,7 @@ var nodeTypes = {
                 noodle.port.new(noodle, 'error stack', 'string', false)
             ],
             func: function (node) {
-                var core = node.core;
+                var core = node;
                 var name = core.inPorts.name.value;
 
                 try {
@@ -276,7 +275,7 @@ var nodeTypes = {
                 object: noodle.port.new(noodle, 'object', 'object', false)
             },
             func: function (node) {
-                var core = node.core;
+                var core = node;
                 var inPorts = core.inPorts;
                 var outPorts = core.outPorts;
                 var box = core.data.renderBox;
@@ -304,7 +303,7 @@ var nodeTypes = {
             },
             resetFuncs: [
                 function (node, nodeEl) {
-                    var core = node.core;
+                    var core = node;
                     var box = {};
                     core.data.renderBox = box;
                     box.html = nodeEl.getElementsByClassName('renderBox')[0];
@@ -337,7 +336,7 @@ var nodeTypes = {
                 cookie: noodle.port.new(noodle, 'cookie', 'object', false)
             },
             func: function (node) {
-                var core = node.core;
+                var core = node;
                 var key = core.inPorts.key.value;
                 var val = core.inPorts.val.value;
                 if (key && val) {
@@ -361,7 +360,9 @@ var nodeTypes = {
         } */
     },
 
-    Container: function (noodle, container, label, pos, noodleExp) {
+    Container: function (args) {
+        var { noodle: noodle, container: container, innerContainer: innerContainer, pos: pos, label: label } = args;
+        innerContainer = innerContainer || new Container({});
         var core = {
             name: 'Container',
             color: 'rgba(64,64,64,0.4)',
@@ -372,27 +373,31 @@ var nodeTypes = {
                 noodle.port.new(noodle, 'out', 'text', false)
             ],
             func: function (node) {
-                var core = node.core;
+
             },
             data: {
-                container: {
-                    forest: [],
-                    wires: []
-                }
+                container: innerContainer
             },
             resetFuncs: [
-                function (node, nodeEl) {
-                    var core = node.core;
-                    var container = core.data.container;
-                    container.html = nodeEl.getElementsByClassName('container')[0];
+            ],
+            renderedFuncs: [
+                function (node) {
+                    var innerContainer = node.data.container;
+                    var container = node.data.container;
+
+                    innerContainer.render({ parEl: node.contentEl });
+
+                    //The following should be obsolete
+                    /*container.html = nodeEl.getElementsByClassName('container')[0];
                     container.html.obj = container;
                     container.html.style.height = '100%';
-                    container.html.style.bottom = '0px;'; //TODO
+                    container.html.style.bottom = '0px;'; //TODO*/
                 }
-            ],
-            htmlContent: '<div class="container"></div>'
+            ]
         };
-        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        var node = new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        innerContainer.node = node;
+        return node;
         /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {
             this[i] = node[i];
@@ -409,7 +414,7 @@ var nodeTypes = {
                 noodle.port.new(noodle, 'out', 'text', false)
             ],
             func: function (node) {
-                var core = node.core;
+                var core = node;
                 if (core.inPorts[core.inPorts.length - 1].wires.length != 0) { //If last port is connected
                     noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'in', 'text', true));
                 }
@@ -421,7 +426,7 @@ var nodeTypes = {
             },
             resetFuncs: [
                 function (node) {
-                    node.core.func(node);
+                    node.func(node);
                 }
             ],
             htmlContent: '<input type="text" class="textDbInput" style="width: 100%">'
@@ -443,7 +448,7 @@ var nodeTypes = {
                 value: noodle.port.new(noodle, 'value', 'string', false)
             },
             func: function (node) {
-                var core = node.core;
+                var core = node;
                 core.outPorts.value.value = toSerialZ(core.inPorts.code.value);
             },
             data: {
@@ -478,7 +483,7 @@ var nodeTypes = {
             }),
             //Not sure I like the async :(
             func: async function (node) {
-                var core = node.core;
+                var core = node;
                 var outPorts = core.outPorts;
 
                 var dbName = core.inPorts.find('DB name').value;
@@ -525,7 +530,7 @@ var nodeTypes = {
             },
             data: {
                 write(noodle, node, nodeEl) {
-                    var core = node.core;
+                    var core = node;
                     var dbName = core.inPorts.find('DB name').value;
                     var storeName = core.inPorts.find('store name').value;
                     var key = core.inPorts.find('key').value;
@@ -560,7 +565,7 @@ var nodeTypes = {
             resetFuncs: [
                 function (node, nodeEl) {
                     nodeEl.getElementsByClassName('btn')[0].onclick = function (e) {
-                        node.core.data.write(noodle, node, nodeEl);
+                        node.data.write(noodle, node, nodeEl);
                     };
                 }
             ],
@@ -586,7 +591,7 @@ var nodeTypes = {
             }),
             //Not sure I like the async :(
             func: async function (node) {
-                var core = node.core;
+                var core = node;
                 var outPorts = core.outPorts;
 
                 var name = core.inPorts.find('name').value;
@@ -594,7 +599,7 @@ var nodeTypes = {
                 var valuePort = outPorts.find('value');
                 var errorPort = outPorts.find('error');
 
-                
+
                 try {
                     var db = new Dexie('Noodle');
                     var store = db.table('Main');
@@ -606,15 +611,15 @@ var nodeTypes = {
                     errorPort.value = e;
                     console.error(e);
                 }
-                
-                
+
+
 
 
             },
             data: {
                 write(noodle, node, nodeEl) {
-                    var core = node.core;
-                    
+                    var core = node;
+
                     var name = core.inPorts.find('name').value;
                     var val = core.inPorts.find('value').value;
 
@@ -636,10 +641,10 @@ var nodeTypes = {
             resetFuncs: [
                 function (node, nodeEl) {
                     nodeEl.getElementsByClassName('btnSave')[0].onclick = function (e) {
-                        node.core.data.write(noodle, node, nodeEl);
+                        node.data.write(noodle, node, nodeEl);
                     };
                     nodeEl.getElementsByClassName('btnDel')[0].onclick = function (e) {
-                        node.core.data.delete(noodle, node, nodeEl);
+                        node.data.delete(noodle, node, nodeEl);
                     };
                 }
             ],
@@ -651,7 +656,7 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
-    
+
 
 };
 nodeTypes.Test = function (noodle, container, label, pos, noodleExp) {
@@ -672,7 +677,7 @@ nodeTypes.Test = function (noodle, container, label, pos, noodleExp) {
         },
         resetFuncs: [
             function (node) {
-                node.core.func(node);
+                node.func(node);
             }
         ],
         htmlContent: ''
@@ -697,7 +702,7 @@ noodle.nodeTypes = {
                     noodle.port.new(noodle, 'value', 'text', false)
                 ],
                 func: function (node) {
-                    var core = node.core;
+                    var core = node;
                     //core.data.text = core.inPorts[0].value;
                     core.outPorts[0].value = core.data.text;
                 },
