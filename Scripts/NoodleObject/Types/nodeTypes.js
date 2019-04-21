@@ -1,6 +1,7 @@
 var nodeTypes = {
     //Add(...){...} doesn't work since it's a constructor
-    Code: function (noodle, container, label, pos, noodleExp) {
+    Code: function (args) {
+        var { noodle: noodle, container: container, label: label, pos: pos } = args;
         var core = {
             name: 'Code',
             color: '#1E1438',
@@ -90,7 +91,8 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
-    Eval: function (noodle, container, label, pos, noodleExp) {
+    Eval: function (args) {
+        var { noodle: noodle, container: container, label: label, pos: pos } = args;
         var core = {
             name: 'Eval',
             color: 'green',
@@ -105,7 +107,7 @@ var nodeTypes = {
                 in: [
                     {
                         label: 'code',
-                        node: nodeTypes.Code(noodle)
+                        node: nodeTypes.Code({ noodle: noodle })
                     }
                 ]
             },
@@ -161,7 +163,8 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
-    Html: function (noodle, container, label, pos, noodleExp) {
+    Html: function (args) {
+        var { noodle: noodle, container: container, label: label, pos: pos } = args;
         var core = {
             name: 'Html',
             color: 'Darkgrey',
@@ -198,7 +201,8 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
-    NodeCreator: function (noodle, container, label, pos, noodleExp) {
+    NodeCreator: function (args) {
+        var { noodle: noodle, container: container, label: label, pos: pos } = args;
         var core = {
             name: 'NodeCreator',
             color: 'orange',
@@ -264,7 +268,8 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
-    Object: function (noodle, container, label, pos, noodleExp) {
+    Object: function (args) {
+        var { noodle: noodle, container: container, label: label, pos: pos } = args;
         var core = {
             name: 'Object',
             color: 'magenta',
@@ -323,7 +328,8 @@ var nodeTypes = {
     },
 
 
-    Cookie: function (noodle, container, label, pos, noodleExp) {
+    Cookie: function (args) {
+        var { noodle: noodle, container: container, label: label, pos: pos } = args;
         var core = {
             name: 'Cookie',
             color: 'cyan',
@@ -403,7 +409,8 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
-    Dummy: function (noodle, container, label, pos, noodleExp) {
+    Dummy: function (args) {
+        var { noodle: noodle, container: container, label: label, pos: pos } = args;
         var core = {
             name: 'Dummy',
             color: 'white',
@@ -437,7 +444,8 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
-    toSerial: function (noodle, container, label, pos, noodleExp) {
+    toSerial: function (args) {
+        var { noodle: noodle, container: container, label: label, pos: pos } = args;
         var core = {
             name: 'toSerial',
             color: 'brown',
@@ -465,7 +473,8 @@ var nodeTypes = {
         } */
     },
 
-    IDB: function (noodle, container, label, pos, noodleExp) {
+    IDB: function (args) {
+        var { noodle: noodle, container: container, label: label, pos: pos } = args;
         var core = {
             name: 'IDB',
             color: 'Grey',
@@ -495,8 +504,8 @@ var nodeTypes = {
                 var valuePort = outPorts.find('value');
                 var errorPort = outPorts.find('error');
 
-                /*
-                try {
+                //Dexie
+                /*try {
                     const dbNames = await Dexie.getDatabaseNames();
                     var dbs = [];
                     for (var name of dbNames) {
@@ -523,6 +532,8 @@ var nodeTypes = {
                     noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'key', 'text', true)); //TODO: Uniqe name?
                     noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'value', 'any', true));
                 }*/
+
+                //YDN
 
                 //TODO: Output value
 
@@ -577,7 +588,8 @@ var nodeTypes = {
             this[i] = node[i];
         } */
     },
-    saveLoad: function (noodle, container, label, pos, noodleExp) {
+    saveLoad: function (args) {
+        var { noodle: noodle, container: container, label: label, pos: pos } = args;
         var core = {
             name: 'Save/Load',
             color: 'Pink',
@@ -659,7 +671,8 @@ var nodeTypes = {
 
 
 };
-nodeTypes.Test = function (noodle, container, label, pos, noodleExp) {
+nodeTypes.Test = function (args) {
+    var { noodle: noodle, container: container, label: label, pos: pos } = args;
     var core = {
         name: 'Test',
         color: 'white',

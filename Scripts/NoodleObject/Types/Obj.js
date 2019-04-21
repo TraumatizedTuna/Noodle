@@ -817,10 +817,20 @@ Object.defineProperties(Object.prototype, {
                 configurable: true,
                 get() {
                     this.id = noodle.ids.firstFree();
+                    return this.id;
                 },
+                //Eeeeh, the following comment seems to be false. I'm confused. But I'm glad it seems to be false
+                //this is still the object whose meta we're setting up. Confused? Where you might have expected this.id we'll have to use this.meta.id since this isn't the meta (unless we're talking meta meta)
                 set(id) {
-                    //this is still container
-                    Object.defineProperty(this.meta, 'id', { enumerable: true, writable: true, configurable: true, value: id });
+                    for (var i in this) {
+                        alert("Something's wrong. If you're lucky it's just a meta property that's violating my standards.\nPlease send a mail to effektgubben@gmail.com.\nIf you want to be really helpful you could press F12, hit OK, enter 'this' in the console, expand the result and send me a screenshot.");
+                        debugger;
+                        break;
+                    }
+
+
+                    Object.defineProperty(this, 'id', { enumerable: true, writable: true, configurable: true, value: id });
+                    return this.id;
                 }
             });
         }

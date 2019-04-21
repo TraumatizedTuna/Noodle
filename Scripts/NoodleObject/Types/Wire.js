@@ -47,6 +47,8 @@ noodle.wire = {
 
         wire.node0 = p0.meta.parNode;
         wire.node1 = p1.meta.parNode;
+
+        wire.wireBoard = wire.node0.meta.container.html.wireBoard;
         //}
 
         wireNoodle.wire.update(wire);
@@ -57,7 +59,7 @@ noodle.wire = {
 
     //Sets up wire html and renders wire to wireBoard
     render(wire) {
-        wireBoard.insertAdjacentHTML('beforeend', '<path class="wire" id="' + wire.id + '" d="M10 10 C 20 20, 40 20, 50 10" stroke="white" stroke-width="3px" fill="transparent"/>');
+        wire.wireBoard.insertAdjacentHTML('beforeend', '<path class="wire" id="' + wire.id + '" d="M10 10 C 20 20, 40 20, 50 10" stroke="white" stroke-width="3px" fill="transparent"/>');
         wire.html = document.getElementById(wire.id);
         wire.html.obj = wire;
         wire.rendered = true;

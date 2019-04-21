@@ -72,7 +72,7 @@ noodle.node = new class extends noodle.object.constructor {
                 else
                     args.node.editMode.enter(args);
             }
-        }
+        };
 
         noodle.node.setDefaultPorts(noodle, node);
         Object.defineProperty(node, 'type', { enumerable: false, writable: true, configurable: true, value: 'node' });
@@ -110,7 +110,7 @@ noodle.node = new class extends noodle.object.constructor {
                     data: data,
                     resetFuncs: resetFuncs,
                     htmlContent: htmlContent
-                }
+                };
             }, //func
             noodle.expr.allFromObj(noodle, [noodle, name]).concat(noodle.expr.newGenerators(noodle, [func, inPortExps, outPortExps, data, resetFuncs, color, htmlContent])), //args
             null, //ans
@@ -124,51 +124,30 @@ noodle.node = new class extends noodle.object.constructor {
     //Renders node in container
     render(node, container) { //TODO: Noodle
         var nodeNoodle = node.noodle || noodle.expr.eval(noodle, node.noodleExp);
-        var nodeId = nodeNoodle.ids.firstFree(nodeNoodle.ids.freeList.node);
         node.meta.container = container;
         //TODO: Put all the stuff back into success to allow async
-        $.ajax({
-            //ajax options{
-            async: nodeNoodle.node.async,
-            type: 'GET',
-            url: 'Html/emptyNode.html',
-            //}
-            success(data) {
+        //Html text{
+        //Set color of node
 
+        node.html.getElementsByClassName('nodeTopBar')[0].insertAdjacentHTML('beforeend', node.name);
 
-                //Html text{
-                //Set color of node
-                var style = nodeNoodle.graphics.color.style(node.color);
+        nodeNoodle.ids.add(node);
+        //}
+        //Set events{
+        nodeNoodle.html.firstByClass(node.html, "btnClose").onclick = nodeNoodle.graphics.transformable.close;
+        nodeNoodle.html.firstByClass(node.html, "btnMaximize").onclick = nodeNoodle.graphics.transformable.maximize;
+        nodeNoodle.html.firstByClass(node.html, "btnRun").onclick = function (e) { nodeNoodle.node.execute(node); };
 
-                node.id = 'n' + nodeId;
-                node.html = '<div class="node" id="n' + nodeId + '"' + style + '>' + data; //Not sure I like .html stuff
-                //}
+        nodeNoodle.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
+        //}
 
-                //Render node frame in container{
-                container.html.insertAdjacentHTML('beforeend', node.html);
-                node.html = document.getElementById(node.id);
-                node.html.obj = node;
+        nodeNoodle.node.renderInterior(noodle, node);
 
-                node.html.getElementsByClassName('nodeTopBar')[0].insertAdjacentHTML('beforeend', node.name);
-
-                nodeNoodle.ids.add(node);
-                //}
-                //Set events{
-                nodeNoodle.html.firstByClass(node.html, "btnClose").onclick = nodeNoodle.graphics.transformable.close;
-                nodeNoodle.html.firstByClass(node.html, "btnMaximize").onclick = nodeNoodle.graphics.transformable.maximize;
-                nodeNoodle.html.firstByClass(node.html, "btnRun").onclick = function (e) { nodeNoodle.node.execute(node); };
-
-                nodeNoodle.html.firstByClass(node.html, "nodeTopBar").onmousedown = nodeNoodle.graphics.transformable.topBarFunc;
-                //}
-
-                nodeNoodle.node.renderInterior(noodle, node);
-
-                for (var f of node.renderedFuncs) {
-                    f(node);
-                }
-            }
-        });
+        for (var f of node.renderedFuncs) {
+            f(node);
+        }
     }
+
     renderInterior(noodle, node, nodeNoodle = noodle) {
         node.html.insertAdjacentHTML('beforeend', '<div class="portContainer">\n            <div class="inPorts" ></div >\n            <div class="outPorts"></div>\n</div ><div class="nodeContent"></div><br><a style="background-color: rgba(255, 255, 255, 0.5)"> id: ' + node.id + '</a>');
 
@@ -205,7 +184,7 @@ noodle.node = new class extends noodle.object.constructor {
         //}
 
         //Run reset functions of node
-        for (var i = 0; i < node.resetFuncs.length; i++) {
+        for (var i in node.resetFuncs) {
             node.resetFuncs[i](node, nodeEl);
         }
 
@@ -301,7 +280,7 @@ noodle.node = new class extends noodle.object.constructor {
     unswallow(args) {
         var { noodle: noodle, parentNode: parentNode, childNode: childNode } = args;
         childNode.meta.parNode = undefined;
-        
+
     }
 
     //Makes sure that a new wire will be pulled on mousemove and connected or deleted on mouseup
@@ -313,8 +292,9 @@ noodle.node = new class extends noodle.object.constructor {
             var port = noodle.global.active.socketEl.parentElement.obj;
             var portNoodle = noodle.expr.eval(noodle, port.noodleExp); //Should we use nodeNoodle rather than noodle here?
 
-            noodle.global.active.pullWire = portNoodle.wire.new(portNoodle);
-            noodle.global.active.pullWire.noodle.wire.render(noodle.global.active.pullWire);
+            var pullWire = noodle.global.active.pullWire = portNoodle.wire.new(portNoodle);
+            pullWire.wireBoard = node.meta.container.html.wireBoard;
+            pullWire.noodle.wire.render(pullWire);
             noodle.events.toolBox.pullWire(e); //To avoid awkward start
             noodle.events.mousemove.setActiveTool(noodle.events.toolBox.pullWire);
             $('.socket').mouseup(function (e) {
@@ -344,7 +324,7 @@ noodle.node = new class extends noodle.object.constructor {
                 noodle.events.defMouseup();
                 $('.socket').mouseup(null); //TODO: This doesn't look good
                 document.onmouseup = noodle.events.defMouseup;
-            }
+            };
         });
     }
     //}
@@ -376,7 +356,7 @@ noodle.Node = class extends Object {
         this.pos = new Pos(pos || { x: 0, y: 0 });
 
         this.addMeta({ meta: meta }); //TODO: this.constructor.addMeta?
-        this.meta.id = noodle.ids.firstFree();
+        //this.meta.id = noodle.ids.firstFree();
 
         this.in = { ports: core.inPorts || [] };
         this.out = { ports: core.outPorts || [] };
@@ -412,6 +392,25 @@ noodle.Node = class extends Object {
 
     get noodle() {
         return this.meta.container.noodle;
+    }
+    set noodle(noodle) {
+        Object.defineProperty(this, 'noodle', { writable: true, configurable: true, value: noodle });
+        return noodle;
+    }
+    get html() {
+        var noodle = this.noodle;
+        var style = noodle.graphics.color.style(this.color);
+
+
+        var code = '<div class="node" id="n' + this.meta.id + '"' + style + '>' + noodle.html.emptyNodeCode;
+
+        this.html = noodle.html.new({ noodle: noodle, code: code });
+        this.html.obj = this;
+        return this.html;
+    }
+    set html(el){
+        Object.defineProperty(this, 'html', { writable: true, configurable: true, value: el });
+        return el;
     }
     render(args) {
         return this.noodle.node.render(this, this.container);

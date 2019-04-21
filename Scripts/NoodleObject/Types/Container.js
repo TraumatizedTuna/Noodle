@@ -28,8 +28,9 @@ class Container extends Object {
                 parEl.appendChild(this.html);
             }
             else {
-                parEl.insertAdjacentHTML('beforeend', '<div class="container mainContainer" id=' + this.meta.id + '><div class="btnFullscreen"></div></div>');
+                parEl.insertAdjacentHTML('beforeend', '<div class="container mainContainer" id=' + this.meta.id + '><svg id="wireBoard' + this.meta.id + '" width="100%"></svg><div class="btnFullscreen"></div></div>');
                 this.html = parEl.childNodes.item(this.meta.id);
+                this.html.wireBoard = this.html.childNodes.item('wireBoard' + this.meta.id);
                 this.html.btnFs = this.html.getElementsByClassName('btnFullscreen')[0];
                 this.html.btnFs.onclick = function () {
                     return this.parentElement.obj.toggleFullscreen();
@@ -72,4 +73,5 @@ class Container extends Object {
     set node(node) {
         Container.defineProperty(this, 'node', { value: node });
     }
+
 }

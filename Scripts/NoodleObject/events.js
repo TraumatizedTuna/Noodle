@@ -98,7 +98,9 @@ document.onmouseup = noodle.events.defMouseup;
 
 window.onload = function (e) {
     var a = 3;
+    
     document.onkeydown = function (e) {
+
         if (e.ctrlKey) {
             //setActiveTool(toolBox.cut)
             //mainCont
@@ -146,6 +148,7 @@ window.onload = function (e) {
                             null,
                             noodle.expr.fromObj(noodle),
                             noodle.expr.alwaysReady
+                            
                         )
                     });
                 }
@@ -158,6 +161,7 @@ window.onload = function (e) {
             case 88: //X
                 noodle.graphics.transformable.close();
         }
+    
     };
 
     $(document).on('click', '.container', function (e) {

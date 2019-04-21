@@ -19,7 +19,8 @@
 
     <!-- import external stuff -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+    <!-- <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script> -->
+    <script src="ydn.db-iswu-core-e-qry-dev.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-language_tools.js"></script>
@@ -49,10 +50,9 @@
     <script src="Scripts/NoodleObject/Types/Function.js"></script>
     <script src="Scripts/NoodleObject/Types/Container.js"></script>
     <script src="Scripts/NoodleObject/Types/Node.js"></script>
-    <script src="Scripts/NoodleObject/Types/nodeTypes.js"></script>
     <script src="Scripts/NoodleObject/Types/Port.js"></script>
-    <script src="Scripts/NoodleObject/Types/PortTypes.js"></script>
     <script src="Scripts/NoodleObject/Types/Wire.js"></script>
+    <script src="Scripts/NoodleObject/Types/nodeTypes.js"></script>
     <script src="Scripts/NoodleObject/Types/Expr.js"></script>
     <script src="Scripts/NoodleObject/Types/SortedList.js"></script>
     <script src="Scripts/NoodleObject/Types/Position.js"></script>
@@ -110,8 +110,27 @@
         if (!window.indexedDB) {
             alert("Your browser doesn't seem to have very good IndexedDB support. Don't expect save/load features to work properly.");
         }
-        
 
+
+        //Load html code for empty node
+        var a = {
+
+            f() {
+                $.ajax({
+                    //ajax options{
+                    async: false,
+                    type: 'GET',
+                    url: 'Html/emptyNode.html',
+                    //}
+                    success(data) {
+                        noodle.html.emptyNodeCode = data; //Not sure I like .html stuff
+                        //}
+                        //alert('Empty node loaded');
+                    }
+                });
+            }
+        };
+        a.f();
 
 
 

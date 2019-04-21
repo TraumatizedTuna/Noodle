@@ -66,12 +66,12 @@ noodle.port = new class extends noodle.object.constructor {
 
     //Generates html code for port
     renderInterior(noodle, port, portNoodle, classes, node, inOrOut) {
-        var code = '<div class="socket ' + classes + '" id="s' + port.id + '" ></div> <a class="portLabel hoverSelect">';
+        var code = '<div class="socket ' + classes + '" id="s' + port.id + '" ></div> <a class="portLabel hoverSelect">' + port.name;
 
         //TODO: Clean up
         //Add value element and finish port code{
 
-        code += '<a class="hoverSelect" id="val' + port.id + '"><br>';
+        code += '<a class="hoverSelect" id="val' + port.id + '"></a><br>';
         port.valId = 'val' + port.id;
         //}
 
@@ -129,7 +129,7 @@ noodle.port = new class extends noodle.object.constructor {
             if (port.type === 'port')
                 for (var j in port.wires) {
                     var wire = port.wires[j];
-                    if (wire != null) //Should this be in more places?
+                    if (wire != null) //Should this be in more places? Would I want !==?
                         wire.noodle.wire.update(wire);
                 }
             else {
