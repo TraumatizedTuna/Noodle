@@ -53,7 +53,7 @@ var nodeTypes = {
                     //$('.textDbInput').change(defTextDbInputChange);
 
                     var edEl = nodeEl.getElementsByClassName('editor')[0];
-                    edEl.id = 'ed' + node.id.substr(1);
+                    edEl.id = 'ed' + node.meta.id; //TODO: Generate new id?
                     node.data.edId = edEl.id;
 
                     ace.require("ace/ext/language_tools");
@@ -136,9 +136,16 @@ var nodeTypes = {
                         varString += 'var ' + namePort.value + '=core.inPorts[' + (i + 1) + '].value;\n';
                     }
                     i = namePort = undefined; //Get rid of unnecessary variables before eval
-
                     try {
-                        core.outPorts.find('value').value = eval(varString + core.inPorts.find('code').value);
+                        eval(varString);
+                    }
+                    catch (e) {
+                        //err will be overwritten if there's an error when evaluating the expression but that should be fine since that one's probably more interesting
+                        err = e;
+                        e.message += '. This error was caused by incorrect variable input.';
+                    }
+                    try {
+                        core.outPorts.find('value').value = eval(core.inPorts.find('code').value);
                     }
                     catch (e) {
                         err = e;
@@ -504,6 +511,8 @@ var nodeTypes = {
                 var valuePort = outPorts.find('value');
                 var errorPort = outPorts.find('error');
 
+                var err = null;
+
                 //Dexie
                 /*try {
                     const dbNames = await Dexie.getDatabaseNames();
@@ -527,23 +536,44 @@ var nodeTypes = {
                 }
                 
 
+                */
+
+
+                //YDN
+                var db = new ydn.db.Storage(dbName, node.data.schema);
+                db.onReady(function () {
+                    node.data.readItems.key = key;
+                    var df = db.values('store0');
+                    df.done(node.data.readItems);
+                    df.fail(function (e) {
+                        err = e;
+                    });
+                    errorPort.value = err;
+                });
+
+
                 /*
                 if (core.inPorts.last.wires.length) { //If last port is connected
                     noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'key', 'text', true)); //TODO: Uniqe name?
                     noodle.port.addToPorts(node, core.inPorts, noodle.port.new(noodle, 'value', 'any', true));
                 }*/
 
-                //YDN
 
                 //TODO: Output value
 
 
             },
             data: {
+                schema: {
+                    stores: [{
+                        name: 'store0',
+                        keyPath: 'key'
+                    }]
+                },
                 write(noodle, node, nodeEl) {
                     var core = node;
                     var dbName = core.inPorts.find('DB name').value;
-                    var storeName = core.inPorts.find('store name').value;
+                    var storeName = 'store0';//core.inPorts.find('store name').value;
                     var key = core.inPorts.find('key').value;
                     var val = core.inPorts.find('value').value;
 
@@ -552,25 +582,28 @@ var nodeTypes = {
 
                     var err = null;
 
-                    //var db = core.data.db = core.data.db || new Dexie(dbName);
-                    var db = core.data.db = new Dexie(dbName);
-                    /*if (db.tables.indexOf(storeName === -1)) {
 
+                    /**
+                     * Create and initialize the database. Depending on platform, this will
+                     * create IndexedDB or WebSql or even localStorage storage mechanism.
+                     */
+                    var db = new ydn.db.Storage(dbName, node.data.schema);
+                    db.onReady(function () {
+                        db.put(storeName, { val: val, key: key });
+                    });
+
+                },
+                readItems(items) {
+                    var thisFunc = arguments.callee;
+                    var node = thisFunc.node;
+                    var key = thisFunc.key;
+                    var valPort = node.outPorts.find('value');
+                    for (var i of items) {
+                        if (i.key === key) {
+                            valPort.value = i.val;
+                            node.noodle.port.propagate({ noodle: node.noodle, port: valPort });
+                        }
                     }
-                    else {
-                        db.version(1).stores(storeDesc);
-                    }
-
-                    db[storeName].put({ key: key, val: val });
-
-
-                    /*for (var i = 1; i < core.inPorts.length; i += 2) {
-                        
-                    };
-                    
-                    core.outPorts.find('error').value = err;
-
-                    noodle.node.execute(node);*/
                 }
             },
             resetFuncs: [
@@ -578,6 +611,8 @@ var nodeTypes = {
                     nodeEl.getElementsByClassName('btn')[0].onclick = function (e) {
                         node.data.write(noodle, node, nodeEl);
                     };
+
+                    node.data.readItems.node = node;
                 }
             ],
             htmlContent: '<button class="btn">Save</button>'

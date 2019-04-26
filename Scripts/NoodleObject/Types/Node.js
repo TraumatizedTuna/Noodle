@@ -208,23 +208,7 @@ noodle.node = new class extends noodle.object.constructor {
             node.func(node);
             var outPorts = node.outPorts;
 
-            var f = function (noodle, port) {
-                if (port.type === 'port') {
-                    //TODO: Only execute nodes of ports with new values
-                    for (var j = 0; j < port.wires.length; j++) {
-                        var wire = port.wires[j];
-                        wire.port1.value = port.value;
-                        nodeNoodle.node.execute(wire.node1); //TODO: Don't execute same node again in case of multiple connections to same node
-                    }
-                    nodeNoodle.port.renderVal(port);
-                }
-                else {
-                    for (var i in port)
-                        f(noodle, port[i])
-                }
-            }
-
-            f(noodle, node.outPorts);
+            nodeNoodle.port.propagate({ noodle: nodeNoodle, port: outPorts });
         }
     }
 

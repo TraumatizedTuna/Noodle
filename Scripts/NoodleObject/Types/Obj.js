@@ -799,7 +799,12 @@ Object.defineProperties(Object.prototype, {
                 console.warn('This should never happen.');
             }
             for (var i in args.meta) {
-                this.meta[i] = args.meta[i];
+                this.constructor.defineProperty(this.meta, i, {
+                    enumerable: false,
+                    writable: true,
+                    configurable: true,
+                    value: args.meta[i]
+                });
             }
         }
     },

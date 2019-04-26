@@ -5,6 +5,7 @@ noodle.port = new class extends noodle.object.constructor {
         var port = new noodle.Port({ noodle: noodle, node: node, props: { name: name, portType: portType, isIn: isIn, wires: wires, value: value, shortable: shortable } });
         Object.defineProperty(port, 'type', { enumerable: false, writable: true, configurable: true, value: 'port' });
         port.noodleExp = noodleExp || noodle.expr.defaultNoodle(noodle, port);
+        port.noodle = noodle;
 
         return port;
     }
@@ -97,6 +98,26 @@ noodle.port = new class extends noodle.object.constructor {
         else {*/
         valEl.innerHTML = port.value;
         //}
+    }
+
+
+    propagate(args) {
+        var { noodle: noodle, port: port } = args;
+        if (port.type === 'port') {
+            //TODO: Only execute nodes of ports with new values
+            for (var j = 0; j < port.wires.length; j++) {
+                var wire = port.wires[j];
+                wire.port1.value = port.value;
+                noodle.port.renderVal(wire.port1);
+                noodle.node.execute(wire.node1); //TODO: Don't execute same node again in case of multiple connections to same node
+            }
+            noodle.port.renderVal(port);
+        }
+        //If port is really a bunch of ports
+        else {
+            for (var i in port)
+                noodle.port.propagate({ noodle: noodle, port: port[i] });
+        }
     }
 
 
