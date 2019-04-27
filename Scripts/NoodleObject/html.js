@@ -3,8 +3,8 @@ noodle.html = {
         var { noodle: noodle, code: code } = args;
         var hidEl = noodle.html.hiddenEl;
         //TODO: Temporary getter and setter
-        if (noodle.html.hiddenEl === undefined) {
-            document.body.insertAdjacentHTML('beforeend', '<div visibility="hidden"></div>');
+        if (hidEl === undefined) {
+            document.body.insertAdjacentHTML('beforeend', '<div id="hidden"></div>');
             hidEl = noodle.html.hiddenEl = document.body.lastChild;
         }
         hidEl.insertAdjacentHTML('beforeend', code);

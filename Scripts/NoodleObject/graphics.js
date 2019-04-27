@@ -84,7 +84,7 @@ noodle.graphics = {
                 var node = nodeEl.obj;
 
                 noodle.node.disconnect(noodle, node); //TODO: Noodle from noodle expression
-                noodle.ids.forget(noodle.ids.freeList, parseInt(node.id.substr(1), 10), true); //This needs to be before the next line, right?
+                noodle.ids.forget(noodle.ids.freeList, parseInt(node.meta.id, 10), true); //This needs to be before the next line, right?
                 noodle.node.forEachPort(node, noodle.port.forget);
                 container.forest.splice(container.forest.indexOf(node), 1);
 

@@ -46,7 +46,7 @@ noodle.node = new class extends noodle.object.constructor {
             useNoodle: false,
             rendered: false,
             noodle: noodle,
-            meta: { container: container }
+            objMeta: { container: container }
         });
 
         for (var i in core) {
@@ -125,6 +125,9 @@ noodle.node = new class extends noodle.object.constructor {
     render(node, container) { //TODO: Noodle
         var nodeNoodle = node.noodle || noodle.expr.eval(noodle, node.noodleExp);
         node.meta.container = container;
+
+        container.html.appendChild(node.html);
+
         //TODO: Put all the stuff back into success to allow async
         //Html text{
         //Set color of node
@@ -221,7 +224,7 @@ noodle.node = new class extends noodle.object.constructor {
                 for (var i in port) {
                     f(port[i], core, func);
                 }
-        }
+        };
 
         for (var i in core.inPorts)
             f(core.inPorts[i], core, func);
@@ -328,7 +331,7 @@ noodle.Node = class extends Object {
         super();
         var { noodle: noodle, objMeta: meta, container: container, core: core, pos: pos } = args;
         meta = meta || {};
-        meta.container = meta.container || new Container({ noodle: noodle });
+        meta.container = meta.container || container || new Container({ noodle: noodle });
 
         this.renderedFuncs = [];
         for (var i in core) {

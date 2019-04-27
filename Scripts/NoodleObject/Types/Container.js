@@ -5,9 +5,11 @@ class Container extends Object {
         super();
         this.noodle = args.noodle || noodle;
 
-        this.html = args.html;
-        if (args.node) {
-            this.node = args.node;
+        if (args.html !== undefined) {
+            this.html = args.html;
+            if (args.node) {
+                this.node = args.node;
+            }
         }
 
         if (args.forest === undefined) {
@@ -23,20 +25,8 @@ class Container extends Object {
         var { noodle: noodle, parEl: parEl } = args;
 
         if (parEl) {
-            this.isFullscreen = parEl === Document;
-            if (this.html) {
-                parEl.appendChild(this.html);
-            }
-            else {
-                parEl.insertAdjacentHTML('beforeend', '<div class="container mainContainer" id=' + this.meta.id + '><svg id="wireBoard' + this.meta.id + '" width="100%"></svg><div class="btnFullscreen"></div></div>');
-                this.html = parEl.childNodes.item(this.meta.id);
-                this.html.wireBoard = this.html.childNodes.item('wireBoard' + this.meta.id);
-                this.html.btnFs = this.html.getElementsByClassName('btnFullscreen')[0];
-                this.html.btnFs.onclick = function () {
-                    return this.parentElement.obj.toggleFullscreen();
-                };//Will this in the event be the container or the button?
-                this.updateButtons();
-            }
+            //this.isFullscreen = this.html === noodle.html.fullscreenEl; //TODO: Should isFullscreen have a getter and a setter instead?
+            parEl.insertAdjacentElement('beforeend', this.html);
         }
         if (this.html) {
             this.html.style.visibility = 'visible';
@@ -45,12 +35,14 @@ class Container extends Object {
     }
 
     toggleFullscreen() {
+        var parCont = this.node.meta.container;
         if (this.isFullscreen) {
-            this.node.html.appendChild(this.html);
+            //noodle.html.unsetFullscreen({noodle:noodle,element:this.html});
+            this.node.html.appendChild('beforeend', this.html);
+            parCont.html.fullscreenEl = undefined;
         }
         else {
-            var parCont = this.node.meta.container;
-            parCont.html.appendChild(this.html);
+            parCont.setInnerFullscreen(this.html);
         }
         this.isFullscreen = !this.isFullscreen;
         this.updateButtons();
@@ -66,12 +58,35 @@ class Container extends Object {
         }
     }
 
+    setInnerFullscreen(el) {
+        var oldFsEl = this.html.fullscreenEl;
+        if (oldFsEl) {
+            oldFsEl.meta.oldParentElement.appendChild(oldFsEl); //Put old fullscreen element back in its old container. TODO: What about order? Gaaah
+        }
+        this.html.fullscreenEl = el;
+        el.meta.oldParentElement = el.parentElement;
+        this.html.fullscreen.appendChild(el);
+    }
+
     get node() {
         this.node = nodeTypes.Container({ noodle: noodle, container: this });
         return this.node;
     }
     set node(node) {
-        Container.defineProperty(this, 'node', { value: node });
+        return Container.defineProperty(this, 'node', { writable: true, configurable: true, value: node });
     }
 
+    get html() {
+        this.html = noodle.html.new({ noodle: noodle, code: '<div class="container mainContainer" id=' + this.meta.id + '><div class="btnFullscreen"></div><div class="fullscreen"></div></div>' });
+        this.html.btnFs = this.html.getElementsByClassName('btnFullscreen')[0];
+        this.html.btnFs.onclick = function () {
+            return this.parentElement.obj.toggleFullscreen();
+        };//Will this in the event be the container or the button?
+        this.html.fullscreen = this.html.getElementsByClassName('fullscreen')[0];
+        this.updateButtons();
+        return this.html;
+    }
+    set html(html) {
+        return Container.defineProperty(this, 'html', { writable: true, configurable: true, value: html });
+    }
 }

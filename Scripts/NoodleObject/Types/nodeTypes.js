@@ -380,10 +380,10 @@ var nodeTypes = {
             name: 'Container',
             color: 'rgba(64,64,64,0.4)',
             inPorts: {
-                in: noodle.port.new(noodle, 'in', 'text', true)
+                in: noodle.port.new(noodle, 'forest', 'object', true)
             },
             outPorts: [
-                noodle.port.new(noodle, 'out', 'text', false)
+                noodle.port.new(noodle, 'forest', 'object', false)
             ],
             func: function (node) {
 
