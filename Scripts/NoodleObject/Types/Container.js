@@ -26,7 +26,7 @@ class Container extends Object {
 
         if (parEl) {
             //this.isFullscreen = this.html === noodle.html.fullscreenEl; //TODO: Should isFullscreen have a getter and a setter instead?
-            parEl.insertAdjacentElement('beforeend', this.html);
+            parEl.appendChild(this.html);
         }
         if (this.html) {
             this.html.style.visibility = 'visible';
@@ -77,7 +77,9 @@ class Container extends Object {
     }
 
     get html() {
-        this.html = noodle.html.new({ noodle: noodle, code: '<div class="container mainContainer" id=' + this.meta.id + '><div class="btnFullscreen"></div><div class="fullscreen"></div></div>' });
+        this.html = noodle.html.new({ noodle: noodle, code: '<div class="container mainContainer" id=' + this.meta.id + '><svg class="wireBoard"></svg><div class="btnFullscreen"></div><div class="fullscreen"></div></div>' });
+
+        this.html.wireBoard = this.html.getElementsByClassName('wireBoard')[0];
         this.html.btnFs = this.html.getElementsByClassName('btnFullscreen')[0];
         this.html.btnFs.onclick = function () {
             return this.parentElement.obj.toggleFullscreen();

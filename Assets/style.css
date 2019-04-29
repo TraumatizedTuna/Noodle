@@ -52,6 +52,15 @@ body {
     overflow: visible;
 }
 
+.wireBoard {
+    position: absolute;
+    top: -1;
+    left: 0;
+    /*height: 1000px;
+    width: 1000px;*/
+    overflow: visible;
+}
+
 .node {
     background-color: hsl(208, 100%, 80%);
     opacity: 0.9;
