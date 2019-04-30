@@ -38,7 +38,7 @@ class Container extends Object {
         var parCont = this.node.meta.container;
         if (this.isFullscreen) {
             //noodle.html.unsetFullscreen({noodle:noodle,element:this.html});
-            this.node.html.appendChild('beforeend', this.html);
+            this.node.html.appendChild(this.html);
             parCont.html.fullscreenEl = undefined;
         }
         else {

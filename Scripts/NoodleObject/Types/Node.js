@@ -273,11 +273,13 @@ noodle.node = new class extends noodle.object.constructor {
     //Makes sure that a new wire will be pulled on mousemove and connected or deleted on mouseup
     setSockEv(node) {
         $('.socket').unbind().mousedown(function (e) { //TODO: Only set this event for children of node.html
-            var nodeNoodle = node.noodle;//noodle.expr.eval(noodle, node.noodleExp);
 
             noodle.global.active.socketEl = e.target;
             var port = noodle.global.active.socketEl.parentElement.obj;
             var portNoodle = noodle.expr.eval(noodle, port.noodleExp); //Should we use nodeNoodle rather than noodle here?
+
+            var node = port.meta.parNode;
+            var nodeNoodle = node.noodle;//noodle.expr.eval(noodle, node.noodleExp);
 
             var pullWire = noodle.global.active.pullWire = portNoodle.wire.new(portNoodle);
             pullWire.wireBoard = node.meta.container.html.wireBoard;

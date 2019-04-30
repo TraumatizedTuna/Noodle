@@ -22,7 +22,7 @@ noodle.wire = {
         Object.defineProperty(wire, 'type', { enumerable: false, writable: true, configurable: true, value: 'wire' });
         wire.noodleExp = noodle.expr.defaultNoodle(noodle, wire);
         //noodle.object.deepStandardize(noodle, wire); //This line shouldn't do any difference but I guess I should check why it crashes
-        container.wires.push(wire);
+        //container.wires.push(wire); //Remove this line if wires work properly without it
         var wireId = noodle.ids.firstFree(noodle.ids.freeList.wire);
         wire.id = 'w' + wireId;
         noodle.ids.add(wire);
@@ -51,7 +51,7 @@ noodle.wire = {
         wire.wireBoard = wire.node0.meta.container.html.wireBoard;
         //}
 
-        wireNoodle.wire.update(wire);
+        wireNoodle.wire.update(wire, noodle);
         if (wire.port0.rendered)
             //noodle.getNoodle(noodle, wire.node0).
             wire.node0.noodle.node.execute(wire.node0);
@@ -76,17 +76,24 @@ noodle.wire = {
             wire.html.style = 'visibility: visible;'; //In case wire is hidden
 
             var outPos = wire.noodle.html.getElPos(outPort.html.getElementsByClassName("socket")[0], 1);
-
             var inPos = wire.noodle.html.getElPos(inPort.html.getElementsByClassName("socket")[0], 1);
+
 
             wire.noodle.wire.wireBetween(outPos, inPos, wire);
         }
         else
-            wire.html.style = 'visibility: hidden;'
+            wire.html.style = 'visibility: hidden;';
     },
 
     //Updates wire svg curve so it goes between positions p0 and p1
     wireBetween(p0, p1, wire) {
+        var contPos = noodle.html.getElPos(wire.wireBoard, 1);
+        //TODO: There must be a better way to do this
+        p0.x -= contPos.x;
+        p0.y -= contPos.y;
+        p1.x -= contPos.x;
+        p1.y -= contPos.y;
+
         var r = $('.socket').width() / 2 + parseInt($('.socket').css('borderWidth'), 10); //8; //TODO: Make this work for other socket sizes
         wire.html.attributes.d.value = wire.noodle.graphics.svg.autoBez(p0.x + r, p0.y + r, p1.x + r, p1.y + r, wire.noodle.wire.hanLen, wire.noodle.wire.slack);
 
@@ -95,7 +102,7 @@ noodle.wire = {
     //Does its best to convince you that wire never existed
     cut(wire) { //Generalize so wires and nodes are removed by same function?
         if (!wire) {
-            console.warn('Tried to cut undefined or otherwise illegal wire.');
+            console.warn('Tried to cut undefined or otherwise invalid wire.');
             return;
         }
         console.log("cut");

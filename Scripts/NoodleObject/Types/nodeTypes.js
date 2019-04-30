@@ -704,7 +704,36 @@ var nodeTypes = {
         } */
     },
 
-
+    debugInfo: function (args) {
+        var { noodle: noodle, container: container, label: label, pos: pos } = args;
+        var core = {
+            name: 'Debug Info',
+            color: 'White',
+            inPorts: new KeyedArray({
+            }),
+            outPorts: new KeyedArray({
+            }),
+            //Not sure I like the async :(
+            func(node) {
+            },
+            data: {
+            },
+            resetFuncs: [
+                function (node, nodeEl) {
+                    var infoEl = nodeEl.getElementsByClassName('debugInfo')[0];
+                    $(document).mousemove(function (e) {
+                        infoEl.innerHTML = 'Mouse position: ' + e.pageX + ', ' + e.pageY;
+                    });
+                }
+            ],
+            htmlContent: '<div class="debugInfo"></div>'
+        };
+        return new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
+        /* var node = noodle.node.new(noodle, container, core, label, pos);
+        for (var i in node) {
+            this[i] = node[i];
+        } */
+    },
 };
 nodeTypes.Test = function (args) {
     var { noodle: noodle, container: container, label: label, pos: pos } = args;
