@@ -152,7 +152,7 @@ noodle.node = new class extends noodle.object.constructor {
     }
 
     renderInterior(noodle, node, nodeNoodle = noodle) {
-        node.html.insertAdjacentHTML('beforeend', '<div class="portContainer">\n            <div class="inPorts" ></div >\n            <div class="outPorts"></div>\n</div ><div class="nodeContent"></div><br><a style="background-color: rgba(255, 255, 255, 0.5)"> id: ' + node.id + '</a>');
+        node.html.insertAdjacentHTML('beforeend', '<div class="portContainer">\n            <div class="inPorts" ></div >\n            <div class="outPorts"></div>\n</div><div class="nodeContent" id="nc' + node.meta.id + '"></div> <br><a style="background-color: rgba(255, 255, 255, 0.5)"> id: ' + node.id + '</a>');
 
         //Render ports
         nodeNoodle.node.renderPorts(node);
@@ -176,8 +176,8 @@ noodle.node = new class extends noodle.object.constructor {
         //}
 
         //Add content to node{
-        var nodeEl = nodeNoodle.html.getEl(node);
-        node.contentEl = nodeEl.getElementsByClassName('nodeContent')[0]
+        var nodeEl = node.html;
+        node.contentEl = document.getElementById('nc' + node.meta.id); //nodeEl.childNodes.item('nc' + node.meta.id);
         if (node.htmlContent !== undefined) {
             node.contentEl.innerHTML = node.htmlContent;
         }

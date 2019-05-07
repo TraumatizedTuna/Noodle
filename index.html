@@ -140,7 +140,8 @@
         var nodeBoard = document.getElementById("nodeCanvas");
         var wireBoard = document.getElementById("wireBoard0"); //TODO: wireBoard should be auto generated
         var container = new Container({
-            noodle: noodle
+            noodle: noodle,
+            isFullscreen: true
         });
         container.render({ parEl: fullscreenEl });
         var mainCont = container.html;

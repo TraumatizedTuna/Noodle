@@ -410,6 +410,7 @@ var nodeTypes = {
         };
         var node = new noodle.Node({ noodle: noodle, container: container, core: core, pos: pos, label: label });
         innerContainer.node = node;
+
         return node;
         /* var node = noodle.node.new(noodle, container, core, label, pos);
         for (var i in node) {

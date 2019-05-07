@@ -19,18 +19,21 @@ class Container extends Object {
             this.forest = args.forest;
         }
 
+        this.isFullscreen = args.isFullscreen || false;
     }
 
     render(args = {}) {
         var { noodle: noodle, parEl: parEl } = args;
-
+        noodle = noodle || this.noodle;
         if (parEl) {
             //this.isFullscreen = this.html === noodle.html.fullscreenEl; //TODO: Should isFullscreen have a getter and a setter instead?
             parEl.appendChild(this.html);
+            this.isRendered = true;
         }
         if (this.html) {
             this.html.style.visibility = 'visible';
             this.html.obj = this;
+            this.isRendered = true;
         }
     }
 
@@ -39,7 +42,13 @@ class Container extends Object {
         if (this.isFullscreen) {
             //noodle.html.unsetFullscreen({noodle:noodle,element:this.html});
             this.node.html.appendChild(this.html);
-            parCont.html.fullscreenEl = undefined;
+
+            if (!parCont.isRendered) {
+                parCont.render({ parEl: fullscreenEl });
+                if (!this.node.rendered) {
+                    noodle.node.render(this.node, parCont);
+                }
+            }
         }
         else {
             parCont.setInnerFullscreen(this.html);
@@ -69,10 +78,14 @@ class Container extends Object {
     }
 
     get node() {
-        this.node = nodeTypes.Container({ noodle: noodle, container: this });
+        var noodle = this.noodle;
+        this.node = nodeTypes.Container({
+            noodle: noodle, container: new Container({ noodle: noodle, isFullscreen: true }), innerContainer: this
+        });
         return this.node;
     }
     set node(node) {
+        this.hasNode = true;
         return Container.defineProperty(this, 'node', { writable: true, configurable: true, value: node });
     }
 
