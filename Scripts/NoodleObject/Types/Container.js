@@ -49,6 +49,13 @@ class Container extends Object {
                     noodle.node.render(this.node, parCont);
                 }
             }
+
+            this.html.style.width = "512px";
+            //this.html.style.height = "400px";
+
+
+            /*this.html.nodes.style.visibility = 'visible';
+            this.html.wireBoard.style.visibility = 'visible';*/
         }
         else {
             parCont.setInnerFullscreen(this.html);
@@ -75,6 +82,12 @@ class Container extends Object {
         this.html.fullscreenEl = el;
         el.meta.oldParentElement = el.parentElement;
         this.html.fullscreen.appendChild(el);
+
+        el.style.zIndex = noodle.global.maxZInd++;
+        el.style.position = 'absolute'; //TODO: How to get back old position?
+        el.style.width = '100%';
+        /*this.html.nodes.style.visibility = 'hidden';
+        this.html.wireBoard.style.visibility = 'hidden';*/
     }
 
     get node() {
@@ -90,8 +103,9 @@ class Container extends Object {
     }
 
     get html() {
-        this.html = noodle.html.new({ noodle: noodle, code: '<div class="container mainContainer" id=' + this.meta.id + '><svg class="wireBoard"></svg><div class="btnFullscreen"></div><div class="fullscreen"></div></div>' });
+        this.html = noodle.html.new({ noodle: noodle, code: '<div class="container mainContainer" id=' + this.meta.id + '><svg class="wireBoard"></svg><div class="nodes"></div><div class="btnFullscreen"></div><div class="fullscreen"></div></div>' });
 
+        this.html.nodes = this.html.getElementsByClassName('nodes')[0];
         this.html.wireBoard = this.html.getElementsByClassName('wireBoard')[0];
         this.html.btnFs = this.html.getElementsByClassName('btnFullscreen')[0];
         this.html.btnFs.onclick = function () {

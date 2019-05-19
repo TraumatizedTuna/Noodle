@@ -58,7 +58,7 @@ noodle.html = {
 
     //Returns html element e such that e.id == obj.id
     getEl(obj) {
-        if (obj.html == null)
+        if (obj.html == null) //TODO: ===?
             obj.html = document.getElementById(obj.id);
         return obj.html;
     },

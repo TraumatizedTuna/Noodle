@@ -1,14 +1,14 @@
 {
   "ExpandedNodes": [
     "",
+    "\\ace-src-min",
     "\\Assets",
-    "\\Browser",
     "\\Html",
     "\\Html\\Nodes",
     "\\Scripts",
     "\\Scripts\\NoodleObject",
     "\\Scripts\\NoodleObject\\Types"
   ],
-  "SelectedNode": "\\Scripts\\NoodleObject\\Types\\Node.js",
+  "SelectedNode": "\\Scripts\\NoodleObject\\Types\\Container.js",
   "PreviewInSolutionExplorer": false
 }

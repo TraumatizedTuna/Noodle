@@ -126,7 +126,7 @@ noodle.node = new class extends noodle.object.constructor {
         var nodeNoodle = node.noodle || noodle.expr.eval(noodle, node.noodleExp);
         node.meta.container = container;
 
-        container.html.appendChild(node.html);
+        container.html.nodes.appendChild(node.html);
 
         //TODO: Put all the stuff back into success to allow async
         //Html text{
