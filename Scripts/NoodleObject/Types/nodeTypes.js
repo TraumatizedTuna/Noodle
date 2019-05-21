@@ -1,7 +1,8 @@
 var nodeTypes = {
     //Add(...){...} doesn't work since it's a constructor
     Code: function (args) {
-        var { noodle: noodle, container: container, label: label, pos: pos } = args;
+        var { noodle: noodle, container: container, label: label, pos: pos, data: data } = args;
+        data = data || {};
         var core = {
             name: 'Code',
             color: '#1E1438',
@@ -43,9 +44,9 @@ var nodeTypes = {
                 outPort.value = editor.getValue();
             },
             data: {
-                code: '',
+                code: data.code || '',
                 updateOutPort(node) {
-                    node.outPorts[0].value = node.data.text;
+                    node.outPorts[0].value = node.data.code;
                 }
             },
             resetFuncs: [
@@ -79,8 +80,9 @@ var nodeTypes = {
                         catch (e) {
                             console.error(e.stack);
                         }
-                    }
-                    );
+                    });
+
+                    editor.setValue(node.data.code);
                 }
             ],
             htmlContent: '<div class="editor" style="width: 500px; height: 250px"></div>'
@@ -380,13 +382,25 @@ var nodeTypes = {
             name: 'Container',
             color: 'rgba(64,64,64,0.4)',
             inPorts: {
-                in: noodle.port.new(noodle, 'forest', 'object', true)
+                forestIn: noodle.port.new(noodle, 'forest', 'object', true),
+                _noodle: noodle.port.new(noodle, 'noodle', 'object', true)
             },
-            outPorts: [
-                noodle.port.new(noodle, 'forest', 'object', false)
-            ],
+            outPorts: {
+                forestOut: noodle.port.new(noodle, 'forest', 'object', false)
+            },
             func: function (node) {
+                var inPorts = node.inPorts;
+                var outPorts = node.outPorts;
+                var innerContainer = node.data.container;
+                
 
+                var noodle = innerContainer.noodle = inPorts._noodle.value || innerContainer.noodle;
+
+                var forest = outPorts.forestOut.value = innerContainer.forest = inPorts.forestIn.value || innerContainer.forest;
+
+                for (var n of forest) {
+                    noodle.node.render(n, innerContainer);
+                }
             },
             data: {
                 container: innerContainer
@@ -514,31 +528,6 @@ var nodeTypes = {
 
                 var err = null;
 
-                //Dexie
-                /*try {
-                    const dbNames = await Dexie.getDatabaseNames();
-                    var dbs = [];
-                    for (var name of dbNames) {
-                        dbs.push(new Dexie(name));
-                    }
-
-                    allDbsPort.value = dbs;
-                    allNamesPort.value = dbNames;
-
-                    var db = new Dexie(dbName);
-                    var store = db.table(storeName);
-                    var val = store.get(key);
-                    valuePort.value = val;
-
-                    errorPort.val = null;
-                } catch (e) {
-                    errorPort.value = e;
-                    console.error(e);
-                }
-                
-
-                */
-
 
                 //YDN
                 var db = new ydn.db.Storage(dbName, node.data.schema);
@@ -577,11 +566,14 @@ var nodeTypes = {
                     var storeName = 'store0';//core.inPorts.find('store name').value;
                     var key = core.inPorts.find('key').value;
                     var val = core.inPorts.find('value').value;
-
                     var storeDesc = {};
+                    var err = null;
+
+
+                    var str = noodle.any._toDataStr({ noodle: noodle, val: val }).str;
                     storeDesc[storeName] = 'key';
 
-                    var err = null;
+
 
 
                     /**
@@ -590,7 +582,7 @@ var nodeTypes = {
                      */
                     var db = new ydn.db.Storage(dbName, node.data.schema);
                     db.onReady(function () {
-                        db.put(storeName, { val: val, key: key });
+                        db.put(storeName, { val: str, key: key });
                     });
 
                 },
@@ -601,7 +593,7 @@ var nodeTypes = {
                     var valPort = node.outPorts.find('value');
                     for (var i of items) {
                         if (i.key === key) {
-                            valPort.value = i.val;
+                            valPort.value = noodle.any._fromDataStr({ noodle: noodle, str: i.val }).val;
                             node.noodle.port.propagate({ noodle: node.noodle, port: valPort });
                         }
                     }

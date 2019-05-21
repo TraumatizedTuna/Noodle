@@ -193,18 +193,23 @@
             startTime = new Date().getTime();
             container.forest = [];
             //noodle.node.add(noodle, coreObj.Value, '', {x: 0, y: 0}),
-            noodle.node.add(noodle, container, nodeTypes.IDB, '', { x: 340, y: 60 });
-            noodle.node.add(noodle, container, nodeTypes.Text, '', { x: 5, y: 50 });
-            noodle.node.add(noodle, container, nodeTypes.Text, '', { x: 5, y: 185 });
-            noodle.node.add(noodle, container, nodeTypes.Text, '', { x: 5, y: 320 });
-            noodle.node.add(noodle, container, nodeTypes.Code, '', { x: 400, y: 500 });
+            noodle.node.add(noodle, container, nodeTypes.IDB, '', { x: 640, y: 64 });
+            noodle.node.add(noodle, container, nodeTypes.Code, '', { x: 32, y: 4 }, { code: 'noodle' });
+            noodle.node.add(noodle, container, nodeTypes.Code, '', { x: 32, y: 170 }, { code: 'forest' });
+            var contNode = noodle.node.add(noodle, container, nodeTypes.Container, '', { x: 32, y: 340 });
+
+            
+
             noodle.object.deepStandardize({ noodle: noodle, val: container });
 
             calcTime = new Date().getTime() - startTime;
             console.log('Render time: ' + calcTime);
             noodle.port.connect(container.forest[1].outPorts[0], container.forest[0].inPorts.find('DB name'));
-            noodle.port.connect(container.forest[2].outPorts[0], container.forest[0].inPorts.find('store name'));
-            noodle.port.connect(container.forest[3].outPorts[0], container.forest[0].inPorts.find('key'));
+            noodle.port.connect(container.forest[1].outPorts[0], container.forest[0].inPorts.find('store name'));
+            noodle.port.connect(container.forest[2].outPorts[0], container.forest[0].inPorts.find('key'));
+            noodle.port.connect(contNode.outPorts.forest, container.forest[0].inPorts.find('value'));
+
+            noodle.node.add(noodle, contNode.data.container, nodeTypes.Code, '', { x: 32, y: 128 }, { code: 'test value' });
         }
 
 

@@ -25,12 +25,14 @@ noodle.node = new class extends noodle.object.constructor {
     //TODO: Add container parameter whenever add is called
     //Adds new node, sets it up properly and renders it
 
-    add(noodle, container, constr, label, pos, noodleExp) {
-        var node = constr({ noodle: noodle, container: container, label: label, pos: pos });
+    add(noodle, container, constr, label, pos, data) {
+        var node = constr({ noodle: noodle, container: container, label: label, pos: pos, data: data });
         container.forest.push(node);
         var nodeNoodle = node.noodle || noodle.expr.eval(noodle, node.noodleExp);
         nodeNoodle.node.render(node, container);
         nodeNoodle.graphics.transformable.setActive(nodeNoodle, node.html); //Should this be inside render?
+
+        noodle.object.deepStandardize({ noodle: noodle, val: node, parNode: node });
 
         return node;
     }
@@ -316,6 +318,56 @@ noodle.node = new class extends noodle.object.constructor {
             };
         });
     }
+
+    _toSerial(args) {
+        args.idMap = args.idMap || {};
+        args.anonIdMap = args.anonIdMap || {};
+        args.anonFreeIds = args.anonFreeIds || [0];
+
+        var { noodle: noodle, val: val, idMap: idMap, anonIdMap: anonIdMap, anonFreeIds: anonFreeIds } = args;
+
+        var serialized;
+
+        var id = val.meta.id;
+
+        //If val isn't in idMap, add it
+        if (idMap[id] === undefined) {
+            //TODO: Non-enumerable stuff
+            serialized = {
+                serType: Node, obj: {}, val: val, getters: {}, setters: {}, id: id
+            };
+            idMap[id] = serialized;
+            for (var i in val) {
+                if (i !== undefined && !noodle.node.serialAvoid[i]) { //TODO? Is this ugly?
+                    var getDescr = val.constructor.getOwnPropertyDescriptor;
+                    var descr = getDescr(val, i) || getDescr(val.__proto__, i);
+                    //If val has getters or setters, add them to serialized
+                    if (descr && (descr.get || descr.set)) {
+                        if (descr.get) {
+                            serialized.getters[i] = noodle.function._toSerial({ noodle: noodle, val: descr.get, idMap: idMap });
+                        }
+                        if (descr.set) {
+                            serialized.setters[i] = noodle.function._toSerial({ noodle: noodle, val: descr.set, idMap: idMap });
+                        }
+                    }
+                    else {
+                        var child = val[i];
+                        serialized.obj[i] = noodle.any._toSerial({ noodle: noodle, val: child, idMap: idMap }).serialized;
+                        if (serialized.obj[i] === undefined) {
+                            throw new Error('toSerial failed');
+                        }
+                    }
+                }
+            }
+        }
+        //If val is already in idMap, just add its id
+        else {
+            serialized = { serType: 'id', obj: id, val: val, id: id };
+        }
+
+        return { serialized: serialized, idMap: args.idMap, anonIdMap: anonIdMap };
+    }
+
     //}
 
     get container() {
@@ -323,8 +375,15 @@ noodle.node = new class extends noodle.object.constructor {
         return this.container;
     }
 }();
+
+
 noodle.node.async = false;
 noodle.node.objsById = {};
+
+noodle.node.serialAvoid = {
+    html: true,
+    parNode: true
+};
 
 
 noodle.Node = class extends Object {

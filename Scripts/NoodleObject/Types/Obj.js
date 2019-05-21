@@ -626,6 +626,7 @@ noodle.object = new class extends noodle.any.constructor {
                 if (i !== undefined) { //TODO? Is this ugly?
                     var getDescr = (val.constructor || Object).getOwnPropertyDescriptor || Object.getOwnPropertyDescriptor;
                     var descr = getDescr(val, i) || getDescr(val.__proto__, i);
+                    //If val has getters or setters, add them to serialized
                     if (descr && (descr.get || descr.set)) {
                         if (descr.get) {
                             serialized.getters[i] = noodle.function._toSerial({ noodle: noodle, val: descr.get, idMap: idMap });
@@ -812,32 +813,36 @@ Object.defineProperties(Object.prototype, {
         enumerable: false,
         configurable: true,
         get() {
-            this.meta = {};
-            return this.meta;
+            return this.meta = {};
         },
         set(meta) {
-            this.constructor.defineProperty(this, 'meta', { enumerable: false, writable: true, configurable: true, value: meta });
-            Object.defineProperty(this.meta, 'id', {
-                enumerable: false,
-                configurable: true,
-                get() {
-                    this.id = noodle.ids.firstFree();
-                    return this.id;
-                },
-                //Eeeeh, the following comment seems to be false. I'm confused. But I'm glad it seems to be false
-                //this is still the object whose meta we're setting up. Confused? Where you might have expected this.id we'll have to use this.meta.id since this isn't the meta (unless we're talking meta meta)
-                set(id) {
-                    for (var i in this) {
-                        alert("Something's wrong. If you're lucky it's just a meta property that's violating my standards.\nPlease send a mail to effektgubben@gmail.com.\nIf you want to be really helpful you could press F12, hit OK, enter 'this' in the console, expand the result and send me a screenshot.");
-                        debugger;
-                        break;
+            try {
+                (this.constructor.defineProperty || Object.defineProperty)(this, 'meta', { enumerable: false, writable: true, configurable: true, value: meta });
+                Object.defineProperty(this.meta, 'id', {
+                    enumerable: false,
+                    configurable: true,
+                    get() {
+                        this.id = noodle.ids.firstFree();
+                        return this.id;
+                    },
+                    //Eeeeh, the following comment seems to be false. I'm confused. But I'm glad it seems to be false
+                    //this is still the object whose meta we're setting up. Confused? Where you might have expected this.id we'll have to use this.meta.id since this isn't the meta (unless we're talking meta meta)
+                    set(id) {
+                        for (var i in this) {
+                            alert("Something's wrong. If you're lucky it's just a meta property that's violating my standards.\nPlease send a mail to effektgubben@gmail.com.\nIf you want to be really helpful you could press F12, hit OK, enter 'this' in the console, expand the result and send me a screenshot.");
+                            debugger;
+                            break;
+                        }
+
+
+                        Object.defineProperty(this, 'id', { enumerable: true, writable: true, configurable: true, value: id });
+                        return this.id;
                     }
-
-
-                    Object.defineProperty(this, 'id', { enumerable: true, writable: true, configurable: true, value: id });
-                    return this.id;
-                }
-            });
+                });
+            }
+            catch (e) {
+                console.warn('Could not set meta for object ' + this + '\n' + e);
+            }
         }
     },
     toSerial: {
